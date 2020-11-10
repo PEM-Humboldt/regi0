@@ -1,0 +1,7 @@
+name: gv-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - geopandas
+  - rasterio
