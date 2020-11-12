@@ -1,2 +1,4 @@
 geopandas
+pandas
 rasterio
+xlrd

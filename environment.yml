@@ -4,4 +4,6 @@ channels:
   - defaults
 dependencies:
   - geopandas
+  - pandas
   - rasterio
+  - xlrd
