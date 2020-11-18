@@ -1,21 +1,20 @@
 import argparse
 import configparser
+import datetime
+import logging
+import logging.config
 import os
 
-import geopandas
-import pandas as pd
-
-from argvalidation import validate_config_file
-from geovalidation import drop_empty_coords
-from log import logger
+from geovalidation import read_input
 
 
-def main(input: str, config: configparser.ConfigParser, crs: str = "epsg:4326") -> None:
+def main(fn: str, logger, config, crs: str = "epsg:4326") -> None:
     """
 
     Parameters
     ----------
-    input
+    fn
+    logger
     config
     crs
 
@@ -23,29 +22,29 @@ def main(input: str, config: configparser.ConfigParser, crs: str = "epsg:4326") 
     -------
 
     """
-    longitude_col = config.get("colnames", "longitude")
-    latitude_col = config.get("colnames", "latitude")
+    lon_col = config.get("colnames", "longitude")
+    lat_col = config.get("colnames", "latitude")
+    elev_col = config.get("colnames", "elevation")
 
-
+    records = read_input(fn, lon_col, lat_col, elev_col, crs=crs, drop_empty_coords=True)
 
 
 if __name__ == "__main__":
 
-    desc = configparser.ConfigParser()
-    desc.read("config/descriptions.ini")
+    log_folder = "logs"
+    if not os.path.exists(log_folder):
+        os.makedirs(log_folder)
+    start_date = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+    log_fn = os.path.join(log_folder, start_date + ".log")
+    logging.config.fileConfig("config/loggers.ini", defaults={"logfilename": log_fn})
+    logger = logging.getLogger("root")
 
-    msg = configparser.ConfigParser()
-    msg.read("config/messages.ini")
+    config = configparser.ConfigParser()
+    config.read("config/settings.ini")
 
-    parser = argparse.ArgumentParser(description=desc.get("tool", "general"))
-    parser.add_argument("input", type=str, help=desc.get("args", "input"))
-    parser.add_argument("-crs", type=str, help=desc.get("args", "crs"))
-    parser.add_argument(
-        "-c", type=str, default="config/settings.ini", help=desc.get("args", "c")
-    )
+    parser = argparse.ArgumentParser(description=config.get("texts", "tool"))
+    parser.add_argument("table", type=str, help=config.get("texts", "table"))
+    parser.add_argument("-crs", type=str, help=config.get("texts", "crs"))
     args = parser.parse_args()
 
-    logger.info(msg.get("info", "argval"))
-    config = validate_config_file(args.c)
-
-    # main(args.input, config, crs=args.crs)
+    main(args.input, logger, config, crs=args.crs)
