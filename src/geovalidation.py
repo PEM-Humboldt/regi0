@@ -1,13 +1,16 @@
 import os
+from typing import Union
 
 import fiona
 import geopandas as gpd
+import numpy as np
 import pandas as pd
+from rasterstats import point_query
 
-from _utils import _get_most_recent_year
+from _utils import _get_most_recent_year, _create_id_grid
 
 
-def check_admin(
+def compare_admin_boundaries(
     gdf: gpd.GeoDataFrame,
     admin_path: str,
     date_col: str,
@@ -15,10 +18,10 @@ def check_admin(
     match_col: str,
     flag_name: str,
     suggested_name: str,
-    default_admin_layer: str = "first",
+    default_validation_year: str = "last",
     add_source: bool = False,
     source_name: str = None,
-    drop: bool = False
+    drop: bool = False,
 ) -> gpd.GeoDataFrame:
     """
 
@@ -31,7 +34,7 @@ def check_admin(
     match_col:
     flag_name:
     suggested_name:
-    default_admin_layer:
+    default_validation_year:
     add_source:
     source_name
     drop:
@@ -51,12 +54,19 @@ def check_admin(
         gdf.loc[has_date, date_col], years, round_unmatched=True
     )
 
+    if default_validation_year == "first":
+        gdf.loc[~has_date, validation_year_col] = min(years)
+    elif default_validation_year == "last":
+        gdf.loc[~has_date, validation_year_col] = max(years)
+    else:
+        raise ValueError("default_validation_year must be either 'first' or 'last'")
+
     gdf[flag_name] = None
     gdf[suggested_name] = None
     if add_source:
         gdf[source_name] = None
 
-    for year in gdf.loc[has_date, validation_year_col].unique():
+    for year in gdf[validation_year_col].unique():
 
         admin = gpd.read_file(admin_path, layer=str(year))
         admin = admin[[match_col, "geometry"]]
@@ -68,7 +78,6 @@ def check_admin(
 
         is_valid = year_gdf[admin_col] == year_gdf[match_col]
         year_gdf[flag_name] = is_valid
-
         year_gdf.loc[~is_valid, suggested_name] = year_gdf.loc[~is_valid, match_col]
 
         if add_source:
@@ -84,6 +93,50 @@ def check_admin(
     if drop:
         is_valid = gdf[admin_col] == gdf[match_col]
         gdf = gdf[is_valid]
+
+    return gdf
+
+
+def find_spatial_duplicates(
+    gdf: gpd.GeoDataFrame,
+    species_col: str,
+    flag_name: str,
+    resolution: float,
+    bounds: Union[list, tuple] = None,
+    crs: str = "epsg:4326",
+    drop: bool = False,
+    keep: str = "first"
+):
+    """
+
+    Parameters
+    ----------
+    gdf
+    species_col
+    flag_name
+    resolution
+    bounds
+    crs
+    drop
+    keep
+
+    Returns
+    -------
+
+    """
+    if not bounds:
+        bounds = gdf.geometry.total_bounds
+
+    grid = _create_id_grid(*bounds, resolution, crs)
+    ids = point_query(gdf, grid.read(1), affine=grid.transform, interpolate="nearest")
+    gdf["__grid_id"] = ids
+
+    subset = [species_col, "__grid_id"]
+    gdf[flag_name] = gdf.duplicated(subset, keep=False) & gdf["__grid_id"].notna()
+
+    if drop:
+        to_keep = ~gdf.duplicated(subset, keep=keep) | gdf["__grid_id"].isna()
+        gdf = gdf[to_keep]
 
     return gdf
 
@@ -114,7 +167,6 @@ def read_input(
     Returns
     -------
     GeoDataFrame with the records.
-
     """
     dtypes = {lon_col: float, lat_col: float, elev_col: float}
 
@@ -128,7 +180,6 @@ def read_input(
 
     if drop_empty_coords:
         records = records.dropna(how="any", subset=[lon_col, lat_col])
-        records = records.reset_index(drop=True)
 
     geometry = gpd.points_from_xy(records[lon_col], records[lat_col])
     records = gpd.GeoDataFrame(records, geometry=geometry)
