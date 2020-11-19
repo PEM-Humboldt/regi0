@@ -1,4 +1,47 @@
+import numpy as np
 import pandas as pd
+import rasterio
+
+
+def _create_id_grid(
+    xmin: float,
+    ymin: float,
+    xmax: float,
+    ymax: float,
+    resolution: float,
+    crs: str = "epsg:4326",
+) -> rasterio.io.DatasetWriter:
+    """
+
+    Parameters
+    ----------
+    bounds
+    resolution
+    crs
+
+    Returns
+    -------
+
+    """
+    nrows = int((ymax - ymin) // resolution)
+    ncols = int((xmax - xmin) // resolution)
+
+    arr = np.arange(nrows * ncols, dtype=np.uint32).reshape(nrows, ncols)
+
+    memfile = rasterio.MemoryFile()
+    transform = rasterio.transform.from_bounds(xmin, ymin, xmax, ymax, ncols, nrows)
+    grid = memfile.open(
+        driver="MEM",
+        height=ncols,
+        width=nrows,
+        count=1,
+        crs=crs,
+        transform=transform,
+        dtype=rasterio.uint32,
+    )
+    grid.write(arr, 1)
+
+    return grid
 
 
 def _get_most_recent_year(
@@ -33,3 +76,12 @@ def _get_most_recent_year(
     result = result.sort_index()
 
     return result.astype(int)
+
+
+def test(a, b, c, d, resolution, name="Marcelo"):
+
+    print(a, b, c, d, resolution, name)
+
+
+vals = [1, 2, 3, 4]
+test(*vals, 0.5)
