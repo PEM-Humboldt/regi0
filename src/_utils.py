@@ -26,13 +26,14 @@ def _create_id_grid(
     -------
 
     """
-    height = int((ymax - ymin) // resolution)
-    width = int((xmax - xmin) // resolution)
+    height = np.ceil((ymax - ymin) / resolution).astype(np.int)
+    width = np.ceil((xmax - xmin) / resolution).astype(np.int)
 
     arr = np.arange(height * width, dtype=np.uint32).reshape(height, width)
 
     memfile = rasterio.MemoryFile()
-    transform = rasterio.transform.from_bounds(xmin, ymin, xmax, ymax, width, height)
+    transform = rasterio.transform.from_origin(xmin, ymax, resolution, resolution)
+
     grid = memfile.open(
         driver="MEM",
         height=height,
