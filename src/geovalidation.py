@@ -3,11 +3,77 @@ from typing import Union
 
 import fiona
 import geopandas as gpd
-import numpy as np
 import pandas as pd
 from rasterstats import point_query
 
-from _utils import _get_most_recent_year, _create_id_grid
+from _utils import _get_nearest_year, _create_id_grid
+
+
+def check_match(
+    gdf: gpd.GeoDataFrame,
+    other: gpd.GeoDataFrame,
+    left_col: str,
+    right_col: str,
+    flag_name: str,
+    suggested_name: str,
+    drop: bool = False,
+) -> gpd.GeoDataFrame:
+    """
+
+    Parameters
+    ----------
+    gdf
+    other
+    left_col
+    right_col
+    flag_name
+    suggested_name
+    drop
+
+    Returns
+    -------
+
+    """
+    gdf = gpd.sjoin(gdf, other[[right_col, "geometry"]], how="left", op="intersects")
+
+    is_valid = gdf[left_col] == gdf[right_col]
+    gdf[flag_name] = is_valid
+    gdf.loc[~is_valid, suggested_name] = gdf.loc[~is_valid, right_col]
+
+    gdf = gdf.drop(columns=[right_col])
+
+    if drop:
+        gdf = gdf[is_valid]
+
+    return gdf
+
+
+def check_intersection(
+    gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, flag_name: str, drop: bool = False
+) -> gpd.GeoDataFrame:
+    """
+
+    Parameters
+    ----------
+    gdf
+    other
+    flag_name
+    drop
+
+    Returns
+    -------
+
+    """
+    other["__dummy"] = 1
+    gdf = gpd.sjoin(gdf, other[["__dummy", "geometry"]], how="left", op="intersects")
+    gdf[flag_name] = gdf["__dummy"].notna()
+
+    gdf = gdf.drop(columns=["__dummy"])
+
+    if drop:
+        gdf = gdf[gdf[flag_name]]
+
+    return gdf
 
 
 def compare_admin_boundaries(
@@ -50,7 +116,7 @@ def compare_admin_boundaries(
 
     gdf[validation_year_col] = None
     has_date = gdf[date_col].notna()
-    gdf.loc[has_date, validation_year_col] = _get_most_recent_year(
+    gdf.loc[has_date, validation_year_col] = _get_nearest_year(
         gdf.loc[has_date, date_col], years, round_unmatched=True
     )
 
@@ -105,8 +171,8 @@ def find_spatial_duplicates(
     bounds: Union[list, tuple] = None,
     crs: str = "epsg:4326",
     drop: bool = False,
-    keep: str = "first"
-):
+    keep: str = "first",
+) -> gpd.GeoDataFrame:
     """
 
     Parameters
@@ -130,9 +196,10 @@ def find_spatial_duplicates(
     grid = _create_id_grid(*bounds, resolution, crs)
     ids = point_query(gdf, grid.read(1), affine=grid.transform, interpolate="nearest")
     gdf["__grid_id"] = ids
+    has_grid_id = gdf["__grid_id"].notna()
 
     subset = [species_col, "__grid_id"]
-    gdf[flag_name] = gdf.duplicated(subset, keep=False) & gdf["__grid_id"].notna()
+    gdf.loc[has_grid_id, flag_name] = gdf[has_grid_id].duplicated(subset, keep=False)
 
     if drop:
         to_keep = ~gdf.duplicated(subset, keep=keep) | gdf["__grid_id"].isna()
@@ -141,13 +208,13 @@ def find_spatial_duplicates(
     return gdf
 
 
-def read_input(
+def table_to_gdf(
     fn: str,
     lon_col: str,
     lat_col: str,
     elev_col: str,
     drop_empty_coords=False,
-    crs: str = "epsg:4326"
+    crs: str = "epsg:4326",
 ) -> gpd.GeoDataFrame:
     """
 
