@@ -15,7 +15,10 @@ def _create_id_grid(
 
     Parameters
     ----------
-    bounds
+    xmin
+    ymin
+    xmax
+    ymax
     resolution
     crs
 
@@ -23,17 +26,17 @@ def _create_id_grid(
     -------
 
     """
-    nrows = int((ymax - ymin) // resolution)
-    ncols = int((xmax - xmin) // resolution)
+    height = int((ymax - ymin) // resolution)
+    width = int((xmax - xmin) // resolution)
 
-    arr = np.arange(nrows * ncols, dtype=np.uint32).reshape(nrows, ncols)
+    arr = np.arange(height * width, dtype=np.uint32).reshape(height, width)
 
     memfile = rasterio.MemoryFile()
-    transform = rasterio.transform.from_bounds(xmin, ymin, xmax, ymax, ncols, nrows)
+    transform = rasterio.transform.from_bounds(xmin, ymin, xmax, ymax, width, height)
     grid = memfile.open(
         driver="MEM",
-        height=ncols,
-        width=nrows,
+        height=height,
+        width=width,
         count=1,
         crs=crs,
         transform=transform,
