@@ -76,12 +76,3 @@ def _get_most_recent_year(
     result = result.sort_index()
 
     return result.astype(int)
-
-
-def test(a, b, c, d, resolution, name="Marcelo"):
-
-    print(a, b, c, d, resolution, name)
-
-
-vals = [1, 2, 3, 4]
-test(*vals, 0.5)
