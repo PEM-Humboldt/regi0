@@ -5,6 +5,7 @@ channels:
 dependencies:
   - fiona
   - geopandas
+  - numpy
   - pandas
   - rasterio
   - xlrd
