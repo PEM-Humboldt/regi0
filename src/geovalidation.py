@@ -1,3 +1,4 @@
+import glob
 import os
 from typing import Union
 
@@ -6,7 +7,7 @@ import geopandas as gpd
 import pandas as pd
 from rasterstats import point_query
 
-from _utils import _get_nearest_year, _create_id_grid
+from _utils import _get_nearest_year, _extract_year, _create_id_grid
 
 
 def check_match(
@@ -76,15 +77,17 @@ def check_intersection(
     return gdf
 
 
-def compare_admin_boundaries(
+def check_historical(
     gdf: gpd.GeoDataFrame,
-    admin_path: str,
+    others_path: str,
     date_col: str,
-    admin_col: str,
-    match_col: str,
     flag_name: str,
-    suggested_name: str,
-    default_validation_year: str = "last",
+    direction: str = "nearest",
+    default_year: str = "last",
+    op: str = "intersection",
+    left_col: str = None,
+    right_col: str = None,
+    suggested_name: str = None,
     add_source: bool = False,
     source_name: str = None,
     drop: bool = False,
@@ -93,72 +96,69 @@ def compare_admin_boundaries(
 
     Parameters
     ----------
-    gdf:
-    admin_path:
-    date_col:
-    admin_col:
-    match_col:
-    flag_name:
-    suggested_name:
-    default_validation_year:
-    add_source:
+    gdf
+    others_path
+    date_col
+    flag_name
+    direction
+    default_year
+    op
+    left_col
+    right_col
+    suggested_name
+    add_source
     source_name
-    drop:
+    drop
 
     Returns
     -------
 
     """
-    layers = sorted(fiona.listlayers(admin_path))
-    years = list(map(int, layers))
-
-    validation_year_col = "__validation_year"
-
-    gdf[validation_year_col] = None
-    has_date = gdf[date_col].notna()
-    gdf.loc[has_date, validation_year_col] = _get_nearest_year(
-        gdf.loc[has_date, date_col], years, round_unmatched=True
-    )
-
-    if default_validation_year == "first":
-        gdf.loc[~has_date, validation_year_col] = min(years)
-    elif default_validation_year == "last":
-        gdf.loc[~has_date, validation_year_col] = max(years)
+    if os.path.isdir(others_path):
+        layers = glob.glob(os.path.join(others_path, "*.shp"))
+        if not layers:
+            raise Exception("`others_path` must contain shapefiles.")
+        input_type = "shp"
     else:
-        raise ValueError("default_validation_year must be either 'first' or 'last'")
+        if others_path.endswith(".gpkg"):
+            layers = fiona.listlayers(others_path)
+            input_type = "gpkg"
+        else:
+            raise ValueError("`others_path` must be a GeoPackage.")
 
-    gdf[flag_name] = None
-    gdf[suggested_name] = None
-    if add_source:
-        gdf[source_name] = None
+    years = list(map(_extract_year, layers))
+    gdf["__year"] = _get_nearest_year(gdf[date_col], years, direction=direction)
+    if default_year == "last":
+        gdf["__year"] = gdf["__year"].fillna(max(years))
+    elif default_year == "first":
+        gdf["__year"] = gdf["__year"].fillna(min(years))
+    else:
+        raise ValueError("`default_year` must be either 'first' or 'last'")
 
-    for year in gdf[validation_year_col].unique():
+    for year in gdf["__year"].unique():
 
-        admin = gpd.read_file(admin_path, layer=str(year))
-        admin = admin[[match_col, "geometry"]]
+        layer = layers[years.index(year)]
+        if input_type == "shp":
+            other = gpd.read_file(layer)
+            source = os.path.splitext(os.path.basename(layer))[0]
+        elif input_type == "gpkg":
+            other = gpd.read_file(others_path, layer=layer)
+            source = layer
 
-        has_current_year = gdf[validation_year_col] == year
-        year_gdf = gdf.loc[has_current_year]
-
-        year_gdf = gpd.sjoin(year_gdf, admin, how="left", op="intersects")
-
-        is_valid = year_gdf[admin_col] == year_gdf[match_col]
-        year_gdf[flag_name] = is_valid
-        year_gdf.loc[~is_valid, suggested_name] = year_gdf.loc[~is_valid, match_col]
-
+        year_gdf = gdf[gdf["__year"] == year]
+        if op == "intersection":
+            year_gdf = check_intersection(year_gdf, other, flag_name, drop)
+        elif op == "match":
+            year_gdf = check_match(
+                year_gdf, other, left_col, right_col, flag_name, suggested_name, drop
+            )
+        else:
+            raise ValueError("`op` must be either 'intersection' or 'match'.")
         if add_source:
-            basename = os.path.splitext(os.path.basename(admin_path))[0]
-            year_gdf[source_name] = f"{os.path.basename(basename)}_{year}"
+            year_gdf[source_name] = source
+        gdf.loc[year_gdf.index, year_gdf.columns] = year_gdf
 
-        year_gdf = year_gdf.drop([match_col], axis=1)
-
-        gdf.loc[has_current_year] = year_gdf
-
-    gdf = gdf.drop([validation_year_col], axis=1)
-
-    if drop:
-        is_valid = gdf[admin_col] == gdf[match_col]
-        gdf = gdf[is_valid]
+    gdf = gdf.drop(columns=["__year"])
 
     return gdf
 
