@@ -1,3 +1,5 @@
+import re
+
 import numpy as np
 import pandas as pd
 import rasterio
@@ -46,18 +48,42 @@ def _create_id_grid(
     return grid
 
 
+def _extract_year(string: str) -> int:
+    """
+
+    Parameters
+    ----------
+    string
+
+    Returns
+    -------
+
+    Notes
+    -----
+    Regex expression was taken from: https://stackoverflow.com/a/49853325/7144368.
+    """
+    expr = r"(?:19|20)\d{2}"
+    matches = re.findall(expr, string)
+    if matches:
+        year = matches[0]
+    else:
+        raise Exception("The string does not have any valid year.")
+
+    return int(year)
+
+
 def _get_nearest_year(
     dates: pd.Series,
-    unique_years: list,
+    reference_years: list,
     direction: str = "nearest",
-    round_unmatched=False
+    round_unmatched=True
 ) -> pd.Series:
     """
 
     Parameters
     ----------
     dates
-    unique_years
+    reference_years
     direction
     round_unmatched
 
@@ -69,20 +95,24 @@ def _get_nearest_year(
     This function is based on the answer given on:
     https://stackoverflow.com/a/64881346/7144368
     """
+    reference_years = sorted(reference_years)
 
-    years = pd.to_datetime(dates).dt.year
+    has_date = dates.notna()
+    years = pd.to_datetime(dates[has_date]).dt.year
     years = years.sort_values()
 
-    dummy_df = pd.DataFrame({years.name: unique_years, "__year": unique_years})
-    result = pd.merge_asof(years, dummy_df, on=years.name, direction=direction)
+    dummy_df = pd.DataFrame({years.name: reference_years, "__year": reference_years})
+    result = pd.merge_asof(years, dummy_df, on=years.name, direction=direction)["__year"]
 
     if round_unmatched:
         if direction == "backward":
-            result[result.isna()] = min(unique_years)
+            result[result.isna()] = min(reference_years)
         elif direction == "forward":
-            result[result.isna()] = max(unique_years)
+            result[result.isna()] = max(reference_years)
 
     result.index = years.index
+    nans = pd.Series(np.nan, index=dates[~has_date].index)
+    result = result.append(nans)
     result = result.sort_index()
 
-    return result["__year"].astype(int)
+    return result
