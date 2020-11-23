@@ -8,4 +8,5 @@ dependencies:
   - numpy
   - pandas
   - rasterio
+  - rasterstats
   - xlrd

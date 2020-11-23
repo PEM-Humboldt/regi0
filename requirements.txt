@@ -3,4 +3,5 @@ geopandas
 numpy
 pandas
 rasterio
+rasterstats
 xlrd
