@@ -4,4 +4,5 @@ numpy
 pandas
 rasterio
 rasterstats
+scipy
 xlrd
