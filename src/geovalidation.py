@@ -7,7 +7,7 @@ import geopandas as gpd
 import pandas as pd
 from rasterstats import point_query
 
-from _utils import _get_nearest_year, _extract_year, _create_id_grid
+from _utils import _get_nearest_year, _extract_year, _create_id_grid, _is_outlier
 
 
 def check_match(
@@ -163,6 +163,42 @@ def check_historical(
     return gdf
 
 
+def find_outliers(
+    gdf: gpd.GeoDataFrame,
+    species_col: str,
+    value_col: str,
+    flag_name: str,
+    method: str = "std",
+    threshold: float = 3.0,
+    drop: bool = False
+) -> gpd.GeoDataFrame:
+    """
+
+    Parameters
+    ----------
+    gdf
+    species_col
+    value_col
+    flag_name
+    method
+    threshold
+    drop
+
+    Returns
+    -------
+
+    """
+    for species in gdf[species_col].unique():
+        mask = gdf[species_col] == species
+        values = gdf.loc[mask, value_col]
+        gdf.loc[mask, flag_name] = _is_outlier(values, method, threshold)
+
+    if drop:
+        gdf = gdf[~gdf[flag_name]]
+
+    return gdf
+
+
 def find_spatial_duplicates(
     gdf: gpd.GeoDataFrame,
     species_col: str,
@@ -212,7 +248,6 @@ def table_to_gdf(
     fn: str,
     lon_col: str,
     lat_col: str,
-    elev_col: str,
     drop_empty_coords=False,
     crs: str = "epsg:4326",
 ) -> gpd.GeoDataFrame:
@@ -224,7 +259,6 @@ def table_to_gdf(
                         absolute path.
     lon_col:            Name of the longitude column.
     lat_col:            Name of the latitude column.
-    elev_col:           Name of the elevation column.
     drop_empty_coords:  Whether to drop rows with no values in longitude
                         or latitude.
     crs:                Coordinate reference system with the
@@ -235,15 +269,14 @@ def table_to_gdf(
     -------
     GeoDataFrame with the records.
     """
-    dtypes = {lon_col: float, lat_col: float, elev_col: float}
-
+    dtypes = {lon_col: float, lat_col: float}
     input_ext = os.path.splitext(fn)[1]
     if input_ext == ".csv":
         records = pd.read_csv(fn, dtype=dtypes)
     elif input_ext == ".xlsx":
         records = pd.read_excel(fn, dtype=dtypes)
     else:
-        raise NotImplementedError("Input file extension is not supported.")
+        raise ValueError("Input file extension is not supported.")
 
     if drop_empty_coords:
         records = records.dropna(how="any", subset=[lon_col, lat_col])

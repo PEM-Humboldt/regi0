@@ -3,6 +3,7 @@ import re
 import numpy as np
 import pandas as pd
 import rasterio
+from scipy import stats
 
 
 def _create_id_grid(
@@ -76,7 +77,7 @@ def _get_nearest_year(
     dates: pd.Series,
     reference_years: list,
     direction: str = "nearest",
-    round_unmatched=True
+    round_unmatched=True,
 ) -> pd.Series:
     """
 
@@ -116,3 +117,42 @@ def _get_nearest_year(
     result = result.sort_index()
 
     return result
+
+
+def _is_outlier(
+    values: np.ndarray, method: str = "std", threshold: float = 3.0
+) -> np.ndarray:
+    """
+
+    Parameters
+    ----------
+    values
+    method
+    threshold
+
+    Returns
+    -------
+
+    """
+    if method == "std":
+        std = np.nanstd(values)
+        mean = np.nanmean(values)
+        lower_limit = mean - (threshold * std)
+        upper_limit = mean + (threshold * std)
+
+    elif method == "iqr":
+        iqr = stats.iqr(values, nan_policy="omit")
+        q1 = np.nanpercentile(values, 25)
+        q3 = np.nanpercentile(values, 75)
+        lower_limit = q1 - (1.5 * iqr)
+        upper_limit = q3 + (1.5 * iqr)
+
+    elif method == "zscore":
+        values = stats.zscore(values, nan_policy="omit")
+        lower_limit = -threshold
+        upper_limit = threshold
+
+    else:
+        raise ValueError("`method` must be one of 'std', 'iqr', 'zscore'.")
+
+    return (values < lower_limit) | (values > upper_limit)
