@@ -20,20 +20,22 @@ def check_match(
     drop: bool = False,
 ) -> gpd.GeoDataFrame:
     """
+    Checks if column values from gdf match with other column values after
+    a spatial join.
 
     Parameters
     ----------
-    gdf
-    other
-    left_col
-    right_col
-    flag_name
-    suggested_name
-    drop
+    gdf:            GeoDataFrame with the records.
+    other:          GeoDataframe with features of interest.
+    left_col:       Column name in gdf with the values to match.
+    right_col:      Column name in other with the values to match.
+    flag_name:      Column name for the flag (whether values match).
+    suggested_name: Column name for the suggestion if values do not match.
+    drop:           Whether to drop records that do not match.
 
     Returns
     -------
-
+    Original GeoDataFrame (gdf) with two extra columns.
     """
     gdf = gpd.sjoin(gdf, other[[right_col, "geometry"]], how="left", op="intersects")
 
@@ -53,18 +55,31 @@ def check_intersection(
     gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, flag_name: str, drop: bool = False
 ) -> gpd.GeoDataFrame:
     """
+    Checks whether records in gdf intersect with features in other.
 
     Parameters
     ----------
-    gdf
-    other
-    flag_name
-    drop
+    gdf:       GeoDataFrame with the records.
+    other:     GeoDataframe with features of interest.
+    flag_name: Column name for the flag (whether records intersect the
+               features).
+    drop:      Whether to drop records that do not intersect the features.
 
     Returns
     -------
+    Original GeoDataFrame (gdf) with an extra column.
 
     """
+    # Ideally, one could check if the records intersect any of the
+    # features with the following line:
+    # gdf.intersects(other.geometry.unary_union)
+    # While this works, depending on the complexity of the geometries of
+    # other and the number of records, the execution can be considerably
+    # slow. A workaround is to create a new column with a constant value
+    # (e.g. 1) in other and do a spatial join. Records that have a value
+    # for that column intersect any of the features. On the contrary,
+    # records that do not intersect any of the features will not have a
+    # value.
     other["__dummy"] = 1
     gdf = gpd.sjoin(gdf, other[["__dummy", "geometry"]], how="left", op="intersects")
     gdf[flag_name] = gdf["__dummy"].notna()
@@ -93,26 +108,50 @@ def check_historical(
     drop: bool = False,
 ) -> gpd.GeoDataFrame:
     """
+    Checks whether records in gdf intersect with features in other or if
+    column values from gdf match with other column values after a spatial
+    join for historical data. Supposing one has two or more layers for
+    different years in time, this function will match each record with
+    of those layers depending on the date of collection. Then, for each
+    layer, it will compare the respective records by executing one of the
+    check_intersect or check_match functions.
 
     Parameters
     ----------
-    gdf
-    others_path
-    date_col
-    flag_name
-    direction
-    default_year
-    op
-    left_col
-    right_col
-    suggested_name
-    add_source
-    source_name
-    drop
+    gdf:            GeoDataframe with records.
+    others_path:    Folder with shapefiles or GeoPackage file with
+                    historical data. Shapefile names of GeoPackage layer
+                    names must have a four-digit year anywhere in order to
+                    extract it and match it with the records collection
+                    date.
+    date_col:       Column name with the collection date.
+    flag_name:      Column name for the flag (whether records intersect the
+                    features or whether values match depending on op).
+    direction:      Whether to search for prior, subsequent, or closest
+                    years. Can be "backward", "nearest" or "forward".
+    default_year:   Default year to take for records that do not have
+                    a collection date or whose collection data did not
+                    match with any year. Can be "last" for the most recent
+                    year in the historical data or "fist" for the oldest
+                    year in the historicla data.
+    op:             Operation to execute. Can be "intersection" to execute
+                    check_intersection or "match" to execute check_match.
+    left_col:       Column name in gdf with the values to match.
+    right_col:      Column name in other with the values to match. Will
+                    only be used if op is "match".
+    flag_name:      Column name for the flag (whether values match). Will
+                    only be used if op is "match".
+    suggested_name: Column name for the suggestion if values do not match.
+                    Will only be used if op is "match".
+    add_source:     Whether to add a column with the source layer of
+                    comparison for each record.
+    source_name:    Column for the source name.
+    drop:           Whether to drop records that do not intersect or
+                    match.
 
     Returns
     -------
-
+    Original GeoDataFrame (gdf) with extra columns.
     """
     if os.path.isdir(others_path):
         layers = glob.glob(os.path.join(others_path, "*.shp"))
@@ -173,20 +212,27 @@ def find_outliers(
     drop: bool = False
 ) -> gpd.GeoDataFrame:
     """
+    Finds outlier records based on values of a specific column.
 
     Parameters
     ----------
-    gdf
-    species_col
-    value_col
-    flag_name
-    method
-    threshold
-    drop
+    gdf:         GeoDataframe with records.
+    species_col: Column name with the species name for each record.
+    value_col:   Column name with values to find outliers from.
+    flag_name:   Column name for the flag (whether records are outliers).
+    method:      Method to find outliers. Can be "std" for Standard
+                 Deviation, "iqr" for Interquartile Range or "zscore" for
+                 Z Score. For more details on the implementations, take
+                 a look at the code of the _is_outlier function.
+    threshold:   For the "std" method is the value to multiply the
+                 standard deviation with. For the "zscore" method, it is
+                 the lower limit (negative) and the upper limit (positive)
+                 to compare Z Scores to.
+    drop:        Whether to drop outlier records.
 
     Returns
     -------
-
+    Original GeoDataFrame (gdf) with an extra column.
     """
     for species in gdf[species_col].unique():
         mask = gdf[species_col] == species
@@ -205,31 +251,39 @@ def find_spatial_duplicates(
     flag_name: str,
     resolution: float,
     bounds: Union[list, tuple] = None,
-    crs: str = "epsg:4326",
     drop: bool = False,
     keep: str = "first",
 ) -> gpd.GeoDataFrame:
     """
+    Find records of the same species that are in the same cell of a
+    specific grid.
 
     Parameters
     ----------
-    gdf
-    species_col
-    flag_name
-    resolution
-    bounds
-    crs
-    drop
-    keep
+    gdf:         GeoDataframe with records.
+    species_col: Column name with the species name for each record.
+    flag_name:   Column name for the flag (whether records are spatial
+                 duplicates).
+    resolution:  Grid resolution.
+    bounds:      Grid bounds (xmin, ym, xmax, ymax). If no bounds are
+                 passed, the bounds from gdf will be taken.
+    drop:        Whether to drop records that are spatial duplicates.
+    keep:        What records that are spatial duplicates to keep if drop
+                 is True. Can be "first", "last" or False to keep none of
+                 the spatial duplicates.
 
     Returns
     -------
+    Original GeoDataFrame (gdf) with an extra column.
 
+    Notes
+    -----
+    bounds and resolution should match gdf coordinate reference system.
     """
     if not bounds:
         bounds = gdf.geometry.total_bounds
 
-    grid = _create_id_grid(*bounds, resolution, crs)
+    grid = _create_id_grid(*bounds, resolution, gdf.crs.srs)
     ids = point_query(gdf, grid.read(1), affine=grid.transform, interpolate="nearest")
     gdf["__grid_id"] = ids
     has_grid_id = gdf["__grid_id"].notna()
@@ -252,6 +306,7 @@ def table_to_gdf(
     crs: str = "epsg:4326",
 ) -> gpd.GeoDataFrame:
     """
+    Converts tabular data (CSV or XLSX) to a GeoDataFrame.
 
     Parameters
     ----------
