@@ -298,7 +298,7 @@ def find_spatial_duplicates(
     return gdf
 
 
-def table_to_gdf(
+def read_records(
     fn: str,
     lon_col: str,
     lat_col: str,
