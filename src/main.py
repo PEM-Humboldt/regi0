@@ -81,7 +81,7 @@ def main(
             config.get("flagnames", "urban"),
             direction="nearest",
             default_year="last",
-            op="match",
+            op="intersection",
             add_source=True,
             source_name=config.get("sourcenames", "urban"),
             drop=drop
@@ -115,9 +115,9 @@ def main(
         logger.info("Saving result...")
         records.to_csv(dst, index=False)
 
-    except Exception as e:
-        logger.error(Exception)
-        raise SystemExit()
+    except:
+        logger.exception("Something went wrong.")
+        raise
 
 
 if __name__ == "__main__":
@@ -136,7 +136,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=config.get("texts", "tool"))
     parser.add_argument("src", type=str, help=config.get("texts", "src"))
     parser.add_argument("dst", type=str, help=config.get("texts", "dst"))
-    parser.add_argument("-crs", type=str, help=config.get("texts", "crs"))
+    parser.add_argument(
+        "-crs", type=str, default="epsg:4326", help=config.get("texts", "crs")
+    )
     parser.add_argument("--drop", help=config.get("texts", "drop"), action="store_true")
     args = parser.parse_args()
 
