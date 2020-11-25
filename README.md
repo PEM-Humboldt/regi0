@@ -3,6 +3,18 @@ Este repositorio contiene funciones comunes para la validación geográfica de r
 
 > Bello, C., O. Ramos., A.C. Moreno-Ramírez., J. Velázquez-Tibatá., M.C. Londoño-Murcia. 2012. Protocolo para  ejecutar el script de R para laverificación geográfica de registros biológicos en Colombia, Venezuela,Panamá, Ecuador, Brasil y  Perú.Laboratorio de  Biogeografía y Bio-acustica (LABB).Instituto de Investigación de Recursos Biológicos Alexander von Humboldt. Bogotá D.C., Colombia. 23 p. 
 
+¿Por qué crear una nueva herramienta de validación geográfica si ya existe otra? Esta herramienta ofrece:
+
+* Código modular, limpio, documentado y organizado.
+* Interfaz de consola para que el usuario pueda correr la herramienta desde la terminal sin necesidad de modificar el código fuente ni abrir un IDE.
+* Implementación de pruebas unitarias.
+* Funciones generales para reutilizar en otros programas y en otras situaciones que no estén dentro del flujo de trabajo normal.
+* Configuración externa e intuitiva de la herramienta para parametrizar varios casos de uso y diferentes archivos de entrada.
+* Implementación de un logger para registrar actividad y errores al ejecutar la herramienta.
+* Comparación contra datos históricos por fecha de colección de los registros y no por fuerza bruta.
+
+<hr>
+
 El flujo de trabajo consiste en:
 
 1. Leer una tabla con registros biológicos y eliminar datos que no tengan coordenadas geográficas.
@@ -127,6 +139,18 @@ python src/main.py ~/Downloads/mamiferos.csv  ~/resultado.csv -crs epsg:3116 --d
 ```
 
 Al ejecutar este comando, se creará un archivo de resultados con el nombre `resultado.csv`. Además de las columnas resultantes de la validación, el archivo tendrá solo aquellos registros que no hayan obtenido ningún flag posittivo durante el proceso.
+
+Cada ejecución de la herramienta genera un archivo log único dentro de la carpeta `logs` donde se registrará información sobre la ejecución y errores. El contenido de un archivo de estos puede ser por ejemplo:
+
+```
+"2020-11-24 21:11:34" - INFO - Reading records...
+"2020-11-24 21:11:34" - INFO - Validating administrative boundaries...
+"2020-11-24 21:11:42" - INFO - Identifying records in urban areas
+"2020-11-24 21:11:44" - INFO - Extracting elevation values...
+"2020-11-24 21:11:45" - INFO - Validating consistency in elevation values...
+"2020-11-24 21:11:45" - INFO - Identifying spatial duplicates...
+"2020-11-24 21:11:45" - INFO - Saving result...
+```
 
 ### Configuración
 Aparte de los parámetros que la interfaz de consola recibe, es posible configurar otras opciones de la herramienta. Para esto está el archivo `config/settings.ini`. Este consiste en 9 secciones con múltiples parejas de `llave = valor`. Para configurar la herramienta solo debe modificar el valor dependiendo de sus necesidades. No debe modificar las llaves ni agregar nuevas parejas. A continuación se encuentra una descripción de las 9 secciones:
