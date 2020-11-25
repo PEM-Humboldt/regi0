@@ -297,6 +297,8 @@ def find_spatial_duplicates(
         to_keep = ~gdf.duplicated(subset, keep=keep) | gdf["__grid_id"].isna()
         gdf = gdf[to_keep]
 
+    gdf = gdf.drop(columns=["__grid_id"])
+
     return gdf
 
 
