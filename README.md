@@ -174,8 +174,7 @@ Por defecto la configuración asume que las capas geográficas están ubicadas d
 │       ├── admin0.gpkg
 │       ├── admin1.gpkg
 │       ├── admin2.gpkg
-│       ├── urban.gpkg
-│       └── geofences.shx
+│       └── urban.gpkg
 │   └── tif
 │       └── dem_col.tif
 ├── environment.yml
