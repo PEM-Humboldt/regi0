@@ -43,7 +43,8 @@ def check_match(
     gdf[flag_name] = is_valid
     gdf.loc[~is_valid, suggested_name] = gdf.loc[~is_valid, right_col]
 
-    gdf = gdf.drop(columns=[right_col])
+    # GeoPandas adds an index_right automatically when doing a left spatial join.
+    gdf = gdf.drop(columns=["index_right", right_col])
 
     if drop:
         gdf = gdf[is_valid]
@@ -84,7 +85,8 @@ def check_intersection(
     gdf = gpd.sjoin(gdf, other[["__dummy", "geometry"]], how="left", op="intersects")
     gdf[flag_name] = gdf["__dummy"].notna()
 
-    gdf = gdf.drop(columns=["__dummy"])
+    # GeoPandas adds an index_right automatically when doing a left spatial join.
+    gdf = gdf.drop(columns=["index_right", "__dummy"])
 
     if drop:
         gdf = gdf[gdf[flag_name]]
@@ -337,7 +339,6 @@ def read_records(
         records = records.dropna(how="any", subset=[lon_col, lat_col])
 
     geometry = gpd.points_from_xy(records[lon_col], records[lat_col])
-    records = gpd.GeoDataFrame(records, geometry=geometry)
-    records.crs = crs
+    records = gpd.GeoDataFrame(records, geometry=geometry, crs=crs)
 
     return records
