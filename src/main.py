@@ -113,7 +113,7 @@ def main(
         )
 
         logger.info("Saving result...")
-        records.to_csv(dst, index=False)
+        records.drop(columns="geometry").to_csv(dst, index=False)
 
     except:
         logger.exception("Something went wrong.")
