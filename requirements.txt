@@ -1,8 +1,0 @@
-fiona
-geopandas
-numpy
-pandas
-rasterio
-rasterstats
-scipy
-xlrd

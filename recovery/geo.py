@@ -7,7 +7,7 @@ import geopandas as gpd
 import pandas as pd
 from rasterstats import point_query
 
-from _utils import _get_nearest_year, _extract_year, _create_id_grid, _is_outlier
+from recovery.utils import get_nearest_year, extract_year, create_id_grid, is_outlier
 
 
 def check_match(
@@ -167,8 +167,8 @@ def check_historical(
         else:
             raise ValueError("`others_path` must be a GeoPackage.")
 
-    years = list(map(_extract_year, layers))
-    gdf["__year"] = _get_nearest_year(gdf[date_col], years, direction=direction)
+    years = list(map(extract_year, layers))
+    gdf["__year"] = get_nearest_year(gdf[date_col], years, direction=direction)
     if default_year == "last":
         gdf["__year"] = gdf["__year"].fillna(max(years))
     elif default_year == "first":
@@ -225,7 +225,7 @@ def find_outliers(
     method:      Method to find outliers. Can be "std" for Standard
                  Deviation, "iqr" for Interquartile Range or "zscore" for
                  Z Score. For more details on the implementations, take
-                 a look at the code of the _is_outlier function.
+                 a look at the code of the is_outlier function.
     threshold:   For the "std" method is the value to multiply the
                  standard deviation with. For the "zscore" method, it is
                  the lower limit (negative) and the upper limit (positive)
@@ -239,7 +239,7 @@ def find_outliers(
     for species in gdf[species_col].unique():
         mask = gdf[species_col] == species
         values = gdf.loc[mask, value_col]
-        gdf.loc[mask, flag_name] = _is_outlier(values, method, threshold)
+        gdf.loc[mask, flag_name] = is_outlier(values, method, threshold)
 
     if drop:
         gdf = gdf[~gdf[flag_name]]
@@ -285,7 +285,7 @@ def find_spatial_duplicates(
     if not bounds:
         bounds = gdf.geometry.total_bounds
 
-    grid = _create_id_grid(*bounds, resolution, gdf.crs.srs)
+    grid = create_id_grid(*bounds, resolution, gdf.crs.srs)
     ids = point_query(gdf, grid.read(1), affine=grid.transform, interpolate="nearest")
     gdf["__grid_id"] = ids
     has_grid_id = gdf["__grid_id"].notna()
@@ -344,3 +344,4 @@ def read_records(
     records = gpd.GeoDataFrame(records, geometry=geometry, crs=crs)
 
     return records
+

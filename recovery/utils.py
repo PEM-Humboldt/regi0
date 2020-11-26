@@ -6,7 +6,7 @@ import rasterio
 from scipy import stats
 
 
-def _create_id_grid(
+def create_id_grid(
     xmin: float,
     ymin: float,
     xmax: float,
@@ -59,7 +59,7 @@ def _create_id_grid(
     return grid
 
 
-def _extract_year(string: str) -> int:
+def extract_year(string: str) -> int:
     """
     Extracts a four-digit valid year (1900-2099) from a string. If there
     are multiple four-digit valid years on the string, the first
@@ -80,13 +80,13 @@ def _extract_year(string: str) -> int:
 
     Examples
     --------
-    >>> _extract_year("admin2_2014.shp")
+    >>> extract_year("admin2_2014.shp")
     2014
-    >>> _extract_year("v0001popc2017")
+    >>> extract_year("v0001popc2017")
     2017
-    >>> _extract_year("human_footprint_1970_1990.tif")
+    >>> extract_year("human_footprint_1970_1990.tif")
     1970
-    >>> _extract_year("ne_10m_admin_o_countries.shp")
+    >>> extract_year("ne_10m_admin_o_countries.shp")
     Exception: The string does not have any valid year.
     """
     expr = r"(?:19|20)\d{2}"
@@ -99,7 +99,7 @@ def _extract_year(string: str) -> int:
     return int(year)
 
 
-def _get_nearest_year(
+def get_nearest_year(
     dates: pd.Series,
     reference_years: list,
     direction: str = "backward",
@@ -143,21 +143,21 @@ def _get_nearest_year(
     4    17/04/2009
     Name: date, dtype: object
     >>> reference_years = [1963, 1980, 2010, 2014]
-    >>> _get_nearest_year(dates, reference_years)
+    >>> get_nearest_year(dates, reference_years)
     0    1963.0
     1       NaN
     2    2010.0
     3    1980.0
     4    1980.0
     dtype: float64
-    >>> _get_nearest_year(dates, reference_years, round_unmatched=False)
+    >>> get_nearest_year(dates, reference_years, round_unmatched=False)
     0       NaN
     1       NaN
     2    2010.0
     3    1980.0
     4    1980.0
     dtype: float64
-    >>> _get_nearest_year(dates, reference_years, direction="nearest")
+    >>> get_nearest_year(dates, reference_years, direction="nearest")
     0    1963.0
     1       NaN
     2    2010.0
@@ -190,7 +190,7 @@ def _get_nearest_year(
     return result
 
 
-def _is_outlier(
+def is_outlier(
     values: np.ndarray, method: str = "std", threshold: float = 3.0
 ) -> np.ndarray:
     """
@@ -213,11 +213,11 @@ def _is_outlier(
     Examples
     --------
     >>> values = np.array([52, 56, 53, 57, 51, 59, 1, 99])
-    >>> _is_outlier(values)
+    >>> is_outlier(values)
     array([False, False, False, False, False, False,  True, False])
-    >>> _is_outlier(values, method="iqr")
+    >>> is_outlier(values, method="iqr")
     array([False, False, False, False, False, False,  True,  True])
-    >>> _is_outlier(values, method="zscore")
+    >>> is_outlier(values, method="zscore")
     array([False, False, False, False, False, False,  True, False])
     """
     if method == "std":

@@ -127,14 +127,14 @@ if __name__ == "__main__":
         os.makedirs(log_folder)
     start_date = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     log_fn = os.path.join(log_folder, start_date + ".log")
-    logging.config.fileConfig("config/logger.ini", defaults={"logfilename": log_fn})
+    logging.config.fileConfig("../../config/logger.ini", defaults={"logfilename": log_fn})
     logger = logging.getLogger("root")
 
     config = configparser.ConfigParser()
     config.read("config/settings.ini")
 
     parser = argparse.ArgumentParser(description=config.get("texts", "tool"))
-    parser.add_argument("src", type=str, help=config.get("texts", "src"))
+    parser.add_argument("recovery", type=str, help=config.get("texts", "recovery"))
     parser.add_argument("dst", type=str, help=config.get("texts", "dst"))
     parser.add_argument(
         "-crs", type=str, default="epsg:4326", help=config.get("texts", "crs")
