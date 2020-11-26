@@ -127,7 +127,7 @@ if __name__ == "__main__":
         os.makedirs(log_folder)
     start_date = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
     log_fn = os.path.join(log_folder, start_date + ".log")
-    logging.config.fileConfig("../../config/logger.ini", defaults={"logfilename": log_fn})
+    logging.config.fileConfig("config/logger.ini", defaults={"logfilename": log_fn})
     logger = logging.getLogger("root")
 
     config = configparser.ConfigParser()
