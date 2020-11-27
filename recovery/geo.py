@@ -16,7 +16,8 @@ def check_historical(
     date_col: str,
     flag_name: str,
     direction: str = "nearest",
-    default_year: str = "last",
+    round_unmatched: bool = False,
+    default_year: str = None,
     op: str = "intersection",
     left_col: str = None,
     right_col: str = None,
@@ -36,36 +37,40 @@ def check_historical(
 
     Parameters
     ----------
-    gdf:            GeoDataframe with records.
-    others_path:    Folder with shapefiles or GeoPackage file with
-                    historical data. Shapefile names of GeoPackage layer
-                    names must have a four-digit year anywhere in order to
-                    extract it and match it with the records collection
-                    date.
-    date_col:       Column name with the collection date.
-    flag_name:      Column name for the flag (whether records intersect the
-                    features or whether values match depending on op).
-    direction:      Whether to search for prior, subsequent, or closest
-                    years. Can be "backward", "nearest" or "forward".
-    default_year:   Default year to take for records that do not have
-                    a collection date or whose collection data did not
-                    match with any year. Can be "last" for the most recent
-                    year in the historical data or "fist" for the oldest
-                    year in the historicla data.
-    op:             Operation to execute. Can be "intersection" to execute
-                    check_intersection or "match" to execute check_match.
-    left_col:       Column name in gdf with the values to match.
-    right_col:      Column name in other with the values to match. Will
-                    only be used if op is "match".
-    flag_name:      Column name for the flag (whether values match). Will
-                    only be used if op is "match".
-    suggested_name: Column name for the suggestion if values do not match.
-                    Will only be used if op is "match".
-    add_source:     Whether to add a column with the source layer of
-                    comparison for each record.
-    source_name:    Column for the source name.
-    drop:           Whether to drop records that do not intersect or
-                    match.
+    gdf:             GeoDataframe with records.
+    others_path:     Folder with shapefiles or GeoPackage file with
+                     historical data. Shapefile names of GeoPackage layer
+                     names must have a four-digit year anywhere in order to
+                     extract it and match it with the records collection
+                     date.
+    date_col:        Column name with the collection date.
+    flag_name:       Column name for the flag (whether records intersect the
+                     features or whether values match depending on op).
+    direction:       Whether to search for prior, subsequent, or closest
+                     years. Can be "backward", "nearest" or "forward".
+    round_unmatched: Whether to round unmatched rows to the nearest year
+                     using a different direction than the one specified.
+    default_year:    Default year to take for records that do not have
+                     a collection date or whose collection data did not
+                     match with any year. Can be "last" for the most recent
+                     year in the historical data, "fist" for the oldest
+                     year in the historical data or None to skip a default
+                     year assignation. Keep in mind that records without
+                     a collection date won't be validated.
+    op:              Operation to execute. Can be "intersection" to execute
+                     check_intersection or "match" to execute check_match.
+    left_col:        Column name in gdf with the values to match.
+    right_col:       Column name in other with the values to match. Will
+                     only be used if op is "match".
+    flag_name:       Column name for the flag (whether values match). Will
+                     only be used if op is "match".
+    suggested_name:  Column name for the suggestion if values do not match.
+                     Will only be used if op is "match".
+    add_source:      Whether to add a column with the source layer of
+                     comparison for each record.
+    source_name:     Column for the source name.
+    drop:            Whether to drop records that do not intersect or
+                     match.
 
     Returns
     -------
@@ -84,15 +89,19 @@ def check_historical(
             raise ValueError("`others_path` must be a GeoPackage.")
 
     years = list(map(extract_year, layers))
-    gdf["__year"] = get_nearest_year(gdf[date_col], years, direction=direction)
+    gdf["__year"] = get_nearest_year(
+        gdf[date_col], years, direction=direction, round_unmatched=round_unmatched
+    )
     if default_year == "last":
         gdf["__year"] = gdf["__year"].fillna(max(years))
     elif default_year == "first":
         gdf["__year"] = gdf["__year"].fillna(min(years))
+    elif default_year is None:
+        pass
     else:
-        raise ValueError("`default_year` must be either 'first' or 'last'")
+        raise ValueError("`default_year` must be either 'first', 'last' or None.")
 
-    for year in gdf["__year"].unique():
+    for year in gdf["__year"].dropna().unique():
 
         layer = layers[years.index(year)]
         if input_type == "shp":
@@ -114,6 +123,8 @@ def check_historical(
         if add_source:
             year_gdf[source_name] = source
         gdf.loc[year_gdf.index, year_gdf.columns] = year_gdf
+
+    gdf[gdf["__year"].isna()] = pd.NA
 
     gdf = gdf.drop(columns=["__year"])
 
