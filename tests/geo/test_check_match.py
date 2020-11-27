@@ -9,14 +9,14 @@ from recovery.geo import check_match
 DATA_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data")
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def other():
     return gpd.read_file(
         os.path.join(DATA_FOLDER, "gpkg", "admin0.gpkg"), layer="admin0_2018"
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def result(records, other):
     return check_match(
         records, other, "country", "ISO_A2", "correctCountry", "suggestedCountry"

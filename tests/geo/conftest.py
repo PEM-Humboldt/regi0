@@ -8,7 +8,7 @@ from recovery.geo import read_records
 DATA_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data")
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def records():
     return read_records(
         os.path.join(DATA_FOLDER, "csv", "birds.csv"),
@@ -19,7 +19,7 @@ def records():
     )
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def expected(records):
     df = pd.read_csv(os.path.join(DATA_FOLDER, "csv", "expected.csv"))
     return df.loc[records.index]

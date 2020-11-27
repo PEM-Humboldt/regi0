@@ -4,11 +4,11 @@ from recovery.geo import find_spatial_duplicates
 
 
 def test_records_bounds_high_res(records, expected):
-    records = find_spatial_duplicates(
+    result = find_spatial_duplicates(
         records, "species", "isSpatialDuplicate", 0.008333333767967150002, ignore=False
     )
     pd.testing.assert_series_equal(
-        records["isSpatialDuplicate"],
+        result["isSpatialDuplicate"],
         expected["isSpatialDuplicate1"],
         check_dtype=False,
         check_names=False
@@ -16,7 +16,7 @@ def test_records_bounds_high_res(records, expected):
 
 
 def test_colombia_bounds_low_res(records, expected):
-    records = find_spatial_duplicates(
+    result = find_spatial_duplicates(
         records,
         "species",
         "isSpatialDuplicate",
@@ -25,7 +25,7 @@ def test_colombia_bounds_low_res(records, expected):
         ignore=False,
     )
     pd.testing.assert_series_equal(
-        records["isSpatialDuplicate"],
+        result["isSpatialDuplicate"],
         expected["isSpatialDuplicate2"],
         check_dtype=False,
         check_names=False
@@ -33,11 +33,11 @@ def test_colombia_bounds_low_res(records, expected):
 
 
 def test_ignore_first(records, expected):
-    records = find_spatial_duplicates(
+    result = find_spatial_duplicates(
         records, "species", "isSpatialDuplicate", 0.008333333767967150002, ignore="first"
     )
     pd.testing.assert_series_equal(
-        records["isSpatialDuplicate"],
+        result["isSpatialDuplicate"],
         expected["isSpatialDuplicate3"],
         check_dtype=False,
         check_names=False
@@ -45,11 +45,11 @@ def test_ignore_first(records, expected):
 
 
 def test_ignore_last(records, expected):
-    records = find_spatial_duplicates(
+    result = find_spatial_duplicates(
         records, "species", "isSpatialDuplicate", 0.008333333767967150002, ignore="last"
     )
     pd.testing.assert_series_equal(
-        records["isSpatialDuplicate"],
+        result["isSpatialDuplicate"],
         expected["isSpatialDuplicate4"],
         check_dtype=False,
         check_names=False
