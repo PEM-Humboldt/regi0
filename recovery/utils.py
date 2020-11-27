@@ -191,7 +191,7 @@ def get_nearest_year(
 
 
 def is_outlier(
-    values: np.ndarray, method: str = "std", threshold: float = 3.0
+    values: np.ndarray, method: str = "iqr", threshold: float = 2.0
 ) -> np.ndarray:
     """
     Classifies outliers in an array of values.
@@ -220,18 +220,18 @@ def is_outlier(
     >>> is_outlier(values, method="zscore")
     array([False, False, False, False, False, False,  True, False])
     """
-    if method == "std":
-        std = np.nanstd(values)
-        mean = np.nanmean(values)
-        lower_limit = mean - (threshold * std)
-        upper_limit = mean + (threshold * std)
-
-    elif method == "iqr":
+    if method == "iqr":
         iqr = stats.iqr(values, nan_policy="omit")
         q1 = np.nanpercentile(values, 25)
         q3 = np.nanpercentile(values, 75)
         lower_limit = q1 - (1.5 * iqr)
         upper_limit = q3 + (1.5 * iqr)
+
+    elif method == "std":
+        std = np.nanstd(values)
+        mean = np.nanmean(values)
+        lower_limit = mean - (threshold * std)
+        upper_limit = mean + (threshold * std)
 
     elif method == "zscore":
         values = stats.zscore(values, nan_policy="omit")
