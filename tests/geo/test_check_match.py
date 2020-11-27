@@ -22,10 +22,12 @@ def result(records, other):
 
 
 def test_flag(result, expected):
-    pd.testing.assert_series_equal(result["correctCountry"], expected["correctCountry"])
+    pd.testing.assert_series_equal(
+        result["correctCountry"], expected["correctCountry"], check_dtype=False
+    )
 
 
-def test_suggestions(result, expected):
+def test_suggestion(result, expected):
     pd.testing.assert_series_equal(
         result["suggestedCountry"], expected["suggestedCountry"]
     )

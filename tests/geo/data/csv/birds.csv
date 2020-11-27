@@ -1,5 +1,5 @@
 species,country,adm1,lat,lon,elevation,earliestDateCollected
-Amazilia castaneiventris,CO,BOYACA,6.3001,-72.7167,1125,2008-01-29T00:00:00
+Amazilia castaneiventris,CO,,6.3001,-72.7167,1125,2008-01-29T00:00:00
 Amazilia castaneiventris,CO,BOYACA,6.3001,-72.7167,1125,2008-01-29T00:00:00
 Amazilia castaneiventris,CO,BOYACA,6.3001,-72.7167,1125,2008-01-29T00:00:00
 Amazilia castaneiventris,CO,BOYACA,6.3001,-72.7167,1125,2008-01-29T00:00:00
@@ -22,4 +22,5 @@ Amazilia castaneiventris,CO,,6.32556,,,
 Amazilia castaneiventris,CO,,,-73.3934,,
 Amazilia castaneiventris,VE,,5.41129,-66.28659,,
 Amazilia castaneiventris,VE,,6.29494,-73.0411,1530,
-Amazilia castaneiventris,VE,,7.95991,-71.94725,,
+Amazilia castaneiventris,VE,TACHIRA,7.95991,-71.94725,,
+Amazilia castaneiventris,VE,BOLIVAR,5.96708,-66.4001,,
