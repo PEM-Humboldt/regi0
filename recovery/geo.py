@@ -195,6 +195,10 @@ def check_match(
     gdf[flag_name] = is_valid
     gdf.loc[~is_valid, suggested_name] = gdf.loc[~is_valid, right_col]
 
+    # Flag for records that did not get a match is left empty because one cannot
+    # be sure the flag is positive or negative.
+    gdf.loc[gdf[right_col].isna(), flag_name] = pd.NA
+
     # GeoPandas adds an index_right automatically when doing a left spatial join.
     gdf = gdf.drop(columns=["index_right", right_col])
 
@@ -242,6 +246,12 @@ def find_outliers(
         values = gdf.loc[mask, value_col]
         gdf.loc[mask, flag_name] = is_outlier(values, method, threshold)
 
+        # Flag for records that do not have a value is left empty. This is
+        # done here instead of returning the respective nan values in the
+        # is_outlier function because numpy cannot combine Boolean and
+        # nan values in a single array.
+        gdf.loc[mask & gdf[value_col].isna(), flag_name] = pd.NA
+
     if drop:
         gdf = gdf[~gdf[flag_name]]
 
@@ -254,8 +264,8 @@ def find_spatial_duplicates(
     flag_name: str,
     resolution: float,
     bounds: Union[list, tuple] = None,
-    drop: bool = False,
-    keep: str = "first",
+    ignore: Union[bool, str] = False,
+    drop: bool = False
 ) -> gpd.GeoDataFrame:
     """
     Find records of the same species that are in the same cell of a
@@ -270,10 +280,10 @@ def find_spatial_duplicates(
     resolution:  Grid resolution.
     bounds:      Grid bounds (xmin, ym, xmax, ymax). If no bounds are
                  passed, the bounds from gdf will be taken.
+    ignore:      What records that are spatial duplicates to ignore.
+                 Can be "first", "last" or False not ignore any
+                 record.
     drop:        Whether to drop records that are spatial duplicates.
-    keep:        What records that are spatial duplicates to keep if drop
-                 is True. Can be "first", "last" or False to keep none of
-                 the spatial duplicates.
 
     Returns
     -------
@@ -291,14 +301,16 @@ def find_spatial_duplicates(
         gdf, grid.read(1), affine=grid.transform, interpolate="nearest", nodata=-9999
     )
     gdf["__grid_id"] = ids
-    has_grid_id = gdf["__grid_id"].notna()
 
     subset = [species_col, "__grid_id"]
-    gdf.loc[has_grid_id, flag_name] = gdf[has_grid_id].duplicated(subset, keep=False)
+    gdf[flag_name] = gdf.duplicated(subset, keep=ignore)
+
+    # Flag for records that do not have a grid ID is left empty.
+    no_grid_id = gdf["__grid_id"].isna()
+    gdf.loc[no_grid_id, flag_name] = pd.NA
 
     if drop:
-        to_keep = ~gdf.duplicated(subset, keep=keep) | gdf["__grid_id"].isna()
-        gdf = gdf[to_keep]
+        gdf = gdf[~gdf[flag_name]]
 
     gdf = gdf.drop(columns=["__grid_id"])
 
