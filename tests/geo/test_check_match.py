@@ -11,7 +11,9 @@ DATA_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data")
 
 @pytest.fixture
 def other():
-    return gpd.read_file(os.path.join(DATA_FOLDER, "admin0.gpkg"), layer="admin0_2018")
+    return gpd.read_file(
+        os.path.join(DATA_FOLDER, "gpkg", "admin0.gpkg"), layer="admin0_2018"
+    )
 
 
 @pytest.fixture
