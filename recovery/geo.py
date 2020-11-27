@@ -10,90 +10,6 @@ from rasterstats import point_query
 from recovery.utils import get_nearest_year, extract_year, create_id_grid, is_outlier
 
 
-def check_match(
-    gdf: gpd.GeoDataFrame,
-    other: gpd.GeoDataFrame,
-    left_col: str,
-    right_col: str,
-    flag_name: str,
-    suggested_name: str,
-    drop: bool = False,
-) -> gpd.GeoDataFrame:
-    """
-    Checks if column values from gdf match with other column values after
-    a spatial join.
-
-    Parameters
-    ----------
-    gdf:            GeoDataFrame with the records.
-    other:          GeoDataframe with features of interest.
-    left_col:       Column name in gdf with the values to match.
-    right_col:      Column name in other with the values to match.
-    flag_name:      Column name for the flag (whether values match).
-    suggested_name: Column name for the suggestion if values do not match.
-    drop:           Whether to drop records that do not match.
-
-    Returns
-    -------
-    Original GeoDataFrame (gdf) with two extra columns.
-    """
-    gdf = gpd.sjoin(gdf, other[[right_col, "geometry"]], how="left", op="intersects")
-
-    is_valid = gdf[left_col] == gdf[right_col]
-    gdf[flag_name] = is_valid
-    gdf.loc[~is_valid, suggested_name] = gdf.loc[~is_valid, right_col]
-
-    # GeoPandas adds an index_right automatically when doing a left spatial join.
-    gdf = gdf.drop(columns=["index_right", right_col])
-
-    if drop:
-        gdf = gdf[is_valid]
-
-    return gdf
-
-
-def check_intersection(
-    gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, flag_name: str, drop: bool = False
-) -> gpd.GeoDataFrame:
-    """
-    Checks whether records in gdf intersect with features in other.
-
-    Parameters
-    ----------
-    gdf:       GeoDataFrame with the records.
-    other:     GeoDataframe with features of interest.
-    flag_name: Column name for the flag (whether records intersect the
-               features).
-    drop:      Whether to drop records that do not intersect the features.
-
-    Returns
-    -------
-    Original GeoDataFrame (gdf) with an extra column.
-
-    """
-    # Ideally, one could check if the records intersect any of the
-    # features with the following line:
-    # gdf.intersects(other.geometry.unary_union)
-    # While this works, depending on the complexity of the geometries of
-    # other and the number of records, the execution can be considerably
-    # slow. A workaround is to create a new column with a constant value
-    # (e.g. 1) in other and do a spatial join. Records that have a value
-    # for that column intersect any of the features. On the contrary,
-    # records that do not intersect any of the features will not have a
-    # value.
-    other["__dummy"] = 1
-    gdf = gpd.sjoin(gdf, other[["__dummy", "geometry"]], how="left", op="intersects")
-    gdf[flag_name] = gdf["__dummy"].notna()
-
-    # GeoPandas adds an index_right automatically when doing a left spatial join.
-    gdf = gdf.drop(columns=["index_right", "__dummy"])
-
-    if drop:
-        gdf = gdf[gdf[flag_name]]
-
-    return gdf
-
-
 def check_historical(
     gdf: gpd.GeoDataFrame,
     others_path: str,
@@ -204,14 +120,98 @@ def check_historical(
     return gdf
 
 
+def check_intersection(
+    gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, flag_name: str, drop: bool = False
+) -> gpd.GeoDataFrame:
+    """
+    Checks whether records in gdf intersect with features in other.
+
+    Parameters
+    ----------
+    gdf:       GeoDataFrame with the records.
+    other:     GeoDataframe with features of interest.
+    flag_name: Column name for the flag (whether records intersect the
+               features).
+    drop:      Whether to drop records that do not intersect the features.
+
+    Returns
+    -------
+    Original GeoDataFrame (gdf) with an extra column.
+
+    """
+    # Ideally, one could check if the records intersect any of the
+    # features with the following line:
+    # gdf.intersects(other.geometry.unary_union)
+    # While this works, depending on the complexity of the geometries of
+    # other and the number of records, the execution can be considerably
+    # slow. A workaround is to create a new column with a constant value
+    # (e.g. 1) in other and do a spatial join. Records that have a value
+    # for that column intersect any of the features. On the contrary,
+    # records that do not intersect any of the features will not have a
+    # value.
+    other["__dummy"] = 1
+    gdf = gpd.sjoin(gdf, other[["__dummy", "geometry"]], how="left", op="intersects")
+    gdf[flag_name] = gdf["__dummy"].notna()
+
+    # GeoPandas adds an index_right automatically when doing a left spatial join.
+    gdf = gdf.drop(columns=["index_right", "__dummy"])
+
+    if drop:
+        gdf = gdf[gdf[flag_name]]
+
+    return gdf
+
+
+def check_match(
+    gdf: gpd.GeoDataFrame,
+    other: gpd.GeoDataFrame,
+    left_col: str,
+    right_col: str,
+    flag_name: str,
+    suggested_name: str,
+    drop: bool = False,
+) -> gpd.GeoDataFrame:
+    """
+    Checks if column values from gdf match with other column values after
+    a spatial join.
+
+    Parameters
+    ----------
+    gdf:            GeoDataFrame with the records.
+    other:          GeoDataframe with features of interest.
+    left_col:       Column name in gdf with the values to match.
+    right_col:      Column name in other with the values to match.
+    flag_name:      Column name for the flag (whether values match).
+    suggested_name: Column name for the suggestion if values do not match.
+    drop:           Whether to drop records that do not match.
+
+    Returns
+    -------
+    Original GeoDataFrame (gdf) with two extra columns.
+    """
+    gdf = gpd.sjoin(gdf, other[[right_col, "geometry"]], how="left", op="intersects")
+
+    is_valid = gdf[left_col] == gdf[right_col]
+    gdf[flag_name] = is_valid
+    gdf.loc[~is_valid, suggested_name] = gdf.loc[~is_valid, right_col]
+
+    # GeoPandas adds an index_right automatically when doing a left spatial join.
+    gdf = gdf.drop(columns=["index_right", right_col])
+
+    if drop:
+        gdf = gdf[is_valid]
+
+    return gdf
+
+
 def find_outliers(
     gdf: gpd.GeoDataFrame,
     species_col: str,
     value_col: str,
     flag_name: str,
     method: str = "std",
-    threshold: float = 3.0,
-    drop: bool = False
+    threshold: float = 2.0,
+    drop: bool = False,
 ) -> gpd.GeoDataFrame:
     """
     Finds outlier records based on values of a specific column.
@@ -236,6 +236,7 @@ def find_outliers(
     -------
     Original GeoDataFrame (gdf) with an extra column.
     """
+    gdf = gdf.copy()
     for species in gdf[species_col].unique():
         mask = gdf[species_col] == species
         values = gdf.loc[mask, value_col]
@@ -286,7 +287,9 @@ def find_spatial_duplicates(
         bounds = gdf.geometry.total_bounds
 
     grid = create_id_grid(*bounds, resolution, gdf.crs.srs)
-    ids = point_query(gdf, grid.read(1), affine=grid.transform, interpolate="nearest")
+    ids = point_query(
+        gdf, grid.read(1), affine=grid.transform, interpolate="nearest", nodata=-9999
+    )
     gdf["__grid_id"] = ids
     has_grid_id = gdf["__grid_id"].notna()
 
@@ -344,4 +347,3 @@ def read_records(
     records = gpd.GeoDataFrame(records, geometry=geometry, crs=crs)
 
     return records
-
