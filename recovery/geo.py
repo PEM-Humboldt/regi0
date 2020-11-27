@@ -76,6 +76,8 @@ def check_historical(
     -------
     Original GeoDataFrame (gdf) with extra columns.
     """
+    gdf = gdf.copy()
+
     if os.path.isdir(others_path):
         layers = glob.glob(os.path.join(others_path, "*.shp"))
         if not layers:
@@ -160,6 +162,8 @@ def check_intersection(
     # for that column intersect any of the features. On the contrary,
     # records that do not intersect any of the features will not have a
     # value.
+    gdf = gdf.copy()
+
     other["__dummy"] = 1
     gdf = gpd.sjoin(gdf, other[["__dummy", "geometry"]], how="left", op="intersects")
     gdf[flag_name] = gdf["__dummy"].notna()
@@ -200,6 +204,8 @@ def check_match(
     -------
     Original GeoDataFrame (gdf) with two extra columns.
     """
+    gdf = gdf.copy()
+
     gdf = gpd.sjoin(gdf, other[[right_col, "geometry"]], how="left", op="intersects")
 
     is_valid = gdf[left_col] == gdf[right_col]
@@ -304,6 +310,8 @@ def find_spatial_duplicates(
     -----
     bounds and resolution should match gdf coordinate reference system.
     """
+    gdf = gdf.copy()
+
     if not bounds:
         bounds = gdf.geometry.total_bounds
 
