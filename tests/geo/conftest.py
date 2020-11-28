@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import pytest
 
-from recovery.geo import read_records
+from recovery.geographic import read_records
 
 DATA_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data")
 
