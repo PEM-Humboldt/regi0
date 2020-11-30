@@ -126,7 +126,7 @@ def check_historical(
             year_gdf[source_name] = source
         gdf.loc[year_gdf.index, year_gdf.columns] = year_gdf
 
-    gdf[gdf["__year"].isna()] = pd.NA
+    gdf.loc[gdf["__year"].isna(), flag_name] = pd.NA
 
     gdf = gdf.drop(columns=["__year"])
 
@@ -298,7 +298,7 @@ def find_spatial_duplicates(
     bounds:      Grid bounds (xmin, ym, xmax, ymax). If no bounds are
                  passed, the bounds from gdf will be taken.
     ignore:      What records that are spatial duplicates to ignore.
-                 Can be "first", "last" or False not ignore any
+                 Can be "first", "last" or False to not ignore any
                  record.
     drop:        Whether to drop records that are spatial duplicates.
 
