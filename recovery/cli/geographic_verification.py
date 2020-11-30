@@ -1,6 +1,7 @@
 import configparser
 import logging
 import logging.config
+import warnings
 
 import click
 from rasterstats import point_query
@@ -12,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 config = configparser.ConfigParser()
 config.read("config/settings.ini")
+
+warnings.filterwarnings("ignore")
 
 
 @click.command()
@@ -148,7 +151,7 @@ def main(
             config.get("flagnames", key),
             direction="backward",
             round_unmatched=True,
-            default_year="last",
+            default_year=default_year,
             op="match",
             left_col=admin_col,
             right_col=config.get("matchnames", key),
