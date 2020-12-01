@@ -1,3 +1,7 @@
+"""
+$ recovery setup
+"""
+
 import pathlib
 import os
 import shutil
