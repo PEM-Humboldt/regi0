@@ -18,8 +18,8 @@ warnings.filterwarnings("ignore")
 
 
 @click.command()
-@click.argument("src", type=str)
-@click.argument("dst", type=str)
+@click.argument("src", type=click.Path(exists=True))
+@click.argument("dst", type=click.Path(exists=False))
 @click.option(
     "--lon_col",
     type=str,
@@ -117,7 +117,7 @@ warnings.filterwarnings("ignore")
     help="Silence information logging.",
     show_default=True
 )
-def main(
+def geo(
     src,
     dst,
     lon_col,
