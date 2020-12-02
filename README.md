@@ -1,6 +1,8 @@
 # recovery
 Recovery es un paquete con funciones útiles para la verificación geográfica y taxonómica de registros biológicos.
 
+Con el fin de facilitar la verificación de registros, recovery tiene adicionalemente una interfaz de consola de comandos (CLI) que permite ejecutar flujos de trabajo completos de verificación desde una terminal. Esta interfaz está documentada en [recovery/cli/README.md](recovery/cli/README.md).
+
 ## Instalación
 
 ### Prerrequisitos
@@ -27,8 +29,6 @@ python -c "import recovery"
 
 Si la instalación fue exitosa, el comando correrá sin ningún problema.
 
-# recovery-cli
-Con el fin de facilitar la verificación de registros, recovery tiene una interfaz de consola de comandos (CLI) que permite ejecutar flujos de trabajo completos de verificación desde una terminal. Esta interfaz está documentada en [recovery/cli/README.md](recovery/cli/README.md).
 
 ## Cómo contribuir
 
