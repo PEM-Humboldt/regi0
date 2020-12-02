@@ -1,3 +1,7 @@
+"""
+Create logger object so CLI commands can access it.
+"""
+
 import logging
 import logging.config
 import os

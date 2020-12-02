@@ -1,3 +1,7 @@
+"""
+Create config object so CLI commands can access it.
+"""
+
 import configparser
 import os
 

@@ -1,3 +1,7 @@
+"""
+Functions for geographic verifications.
+"""
+
 import glob
 import os
 from typing import Union

@@ -1,3 +1,7 @@
+"""
+Helper functions.
+"""
+
 import re
 
 import numpy as np
