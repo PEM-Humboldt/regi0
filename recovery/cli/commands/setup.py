@@ -10,7 +10,9 @@ import appdirs
 import click
 
 
-@click.command()
+@click.command(
+    short_help="Setups the configuration files required to run the other CLI commands."
+)
 def setup():
 
     root = pathlib.Path(__file__).parent.parent.parent.parent

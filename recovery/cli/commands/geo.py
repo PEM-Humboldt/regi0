@@ -1,4 +1,6 @@
-"""$ recovery geo"""
+"""
+$ recovery geo
+"""
 
 import click
 import recovery.geographic
@@ -10,7 +12,9 @@ from ..util.config import CONFIG
 from ..util.logger import LOGGER
 
 
-@click.command()
+@click.command(
+    short_help="Performs a complete geographic verification on a set of records."
+)
 @click.argument("src", type=click.Path(exists=True))
 @click.argument("dst", type=click.Path(exists=False))
 @geo_opts.lon_col
