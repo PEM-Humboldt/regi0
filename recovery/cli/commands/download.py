@@ -1,4 +1,6 @@
-"""$ recovery download"""
+"""
+$ recovery download
+"""
 
 import os
 

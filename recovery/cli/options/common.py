@@ -1,5 +1,5 @@
 """
-Common options using across two or more recovery CLI interfaces.
+Common options used across two or more recovery CLI interfaces.
 """
 
 import click
