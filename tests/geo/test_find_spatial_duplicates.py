@@ -1,5 +1,4 @@
 import pandas as pd
-
 from recovery.geographic import find_spatial_duplicates
 
 

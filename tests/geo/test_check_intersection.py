@@ -3,7 +3,6 @@ import os
 import geopandas as gpd
 import pandas as pd
 import pytest
-
 from recovery.geographic import check_intersection
 
 DATA_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data")
