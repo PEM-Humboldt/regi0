@@ -7,6 +7,7 @@ import re
 import numpy as np
 import pandas as pd
 import rasterio
+import requests
 from scipy import stats
 
 
@@ -192,6 +193,85 @@ def get_nearest_year(
     result = result.sort_index()
 
     return result
+
+
+def gnr_resolve(
+    names: list,
+    data_source_ids: list = None,
+    resolve_once: bool = False,
+    best_match_only: bool = False,
+    preferred_data_sources: list = None,
+    with_context: bool = False,
+    with_vernaculars: bool = False,
+    with_canonical_ranks: bool = False
+) -> list:
+    """
+    Receives a list of names and resolves each against the entire resolver
+    database or against specific data sources using the Global Names
+    Resolver (GNR) API. Underlying resolving and scoring algorithms are
+    described at: http://resolver.globalnames.org/about
+
+    Parameters
+    ----------
+    names:                  List of species names to resolve.
+    data_source_ids:        List of specific data sources IDs to resolve
+                            against. A list of all the available data
+                            sources and their IDs can be found at:
+                            http://resolver.globalnames.org/data_sources.
+    resolve_once:           Find the first available match instead of
+                            matches across all data sources with all
+                            possible renderings of a name.
+    best_match_only:        Returns just one result with the highest
+                            score.
+    preferred_data_sources: Creates a new section in results --
+                            'preferred_results' in addition to 'results'.
+                            Preferred results contain only data received
+                            from requested data sources. When used
+                            together with 'best_match_only' returns only
+                            one highest scored result per a preferred data
+                            source. The resolution is still performed
+                            according to 'data_source_id' parameter.
+    with_context:           Reduce the likelihood of matches to taxonomic
+                            homonyms. When True, a common taxonomic
+                            context is calculated for all supplied names
+                            from matches in data sources that have
+                            classification tree paths. Names out of
+                            determined context are penalized during
+                            score calculation.
+    with_vernaculars:       Return 'vernacular' field to present common
+                            names provided by a data source for a
+                            particular match.
+    with_canonical_ranks:   Returns 'canonical_form' with infraspecific
+                            ranks, if they are present.
+
+    Returns
+    -------
+    List with the results for each name in names.
+
+    Notes
+    -----
+    More information on the GNR API can be found at:
+    http://resolver.globalnames.org/api
+    """
+    api_url = "http://resolver.globalnames.org/name_resolvers.json"
+    data = {
+        "data": "\n".join(names),
+        "data_source_ids": data_source_ids,
+        "resolve_once": resolve_once,
+        "best_match_only": best_match_only,
+        "preferred_data_sources": preferred_data_sources,
+        "with_context": with_context,
+        "with_vernaculars": with_vernaculars,
+        "with_canonical_ranks": with_canonical_ranks
+    }
+
+    try:
+        response = requests.post(api_url, data=data)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        raise Exception(f"Error calling Global Name Resolver API. {err}")
+
+    return response.json()["data"]
 
 
 def is_outlier(
