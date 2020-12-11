@@ -200,7 +200,6 @@ def gnr_resolve(
     data_source_ids: list = None,
     resolve_once: bool = False,
     best_match_only: bool = False,
-    preferred_data_sources: list = None,
     with_context: bool = False,
     with_vernaculars: bool = False,
     with_canonical_ranks: bool = False
@@ -223,14 +222,6 @@ def gnr_resolve(
                             possible renderings of a name.
     best_match_only:        Returns just one result with the highest
                             score.
-    preferred_data_sources: Creates a new section in results --
-                            'preferred_results' in addition to 'results'.
-                            Preferred results contain only data received
-                            from requested data sources. When used
-                            together with 'best_match_only' returns only
-                            one highest scored result per a preferred data
-                            source. The resolution is still performed
-                            according to 'data_source_id' parameter.
     with_context:           Reduce the likelihood of matches to taxonomic
                             homonyms. When True, a common taxonomic
                             context is calculated for all supplied names
@@ -254,24 +245,28 @@ def gnr_resolve(
     http://resolver.globalnames.org/api
     """
     api_url = "http://resolver.globalnames.org/name_resolvers.json"
-    data = {
+
+    # Apparently, GNR API does not accept Booleans so they need to be
+    # converted to lowercase strings first.
+    params = {
         "data": "\n".join(names),
         "data_source_ids": data_source_ids,
-        "resolve_once": resolve_once,
-        "best_match_only": best_match_only,
-        "preferred_data_sources": preferred_data_sources,
-        "with_context": with_context,
-        "with_vernaculars": with_vernaculars,
-        "with_canonical_ranks": with_canonical_ranks
+        "resolve_once": str(resolve_once).lower(),
+        "best_match_only": str(best_match_only).lower(),
+        "with_context": str(with_context).lower(),
+        "with_vernaculars": str(with_vernaculars).lower(),
+        "with_canonical_ranks": str(with_canonical_ranks).lower()
     }
 
     try:
-        response = requests.post(api_url, data=data)
+        response = requests.post(api_url, json=params)
         response.raise_for_status()
     except requests.exceptions.HTTPError as err:
         raise Exception(f"Error calling Global Name Resolver API. {err}")
 
-    return response.json()["data"]
+    data = response.json()["data"]
+
+    return pd.json_normalize(data, record_path="results", meta="supplied_name_string")
 
 
 def is_outlier(
