@@ -15,7 +15,7 @@ import click
 )
 def setup():
 
-    root = pathlib.Path(__file__).parent.parent.parent.parent
+    root = pathlib.Path(__file__).parent.parent
     template_config_folder = root.joinpath("config")
     target_conf_folder = appdirs.user_config_dir("recovery")
     if not os.path.exists(target_conf_folder):
