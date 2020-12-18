@@ -23,20 +23,19 @@ def download(dst, url, quiet):
     if not os.path.exists(CONFIG_PATH):
         raise Exception("Config file not found. Run `recovery setup` first.")
 
-    if not quiet:
-        LOGGER.info(f"Downloading data from {url}.")
-    file_name = gdown.download(url, dst, quiet=True)
+    output_path = gdown.download(url, dst, quiet=quiet)
 
     if not quiet:
-        LOGGER.info(f"Extracting data in {os.path.basename(file_name)}")
-    paths = gdown.extractall(file_name)
-    file_paths = filter(os.path.isfile, paths)
+        LOGGER.info(f"Extracting data in {os.path.basename(output_path)}")
+    extracted_paths = gdown.extractall(output_path)
 
     if not quiet:
         LOGGER.info(f"Updating config at {CONFIG_PATH}.")
-    for path in file_paths:
-        name = os.path.splitext(os.path.basename(path))[0]
-        if CONFIG.has_option("paths", name):
-            CONFIG.set("paths", name, path)
+    for path in extracted_paths:
+        if os.path.isfile(path):
+            path = os.path.abspath(path)
+            name = os.path.splitext(os.path.basename(path))[0]
+            if CONFIG.has_option("paths", name):
+                CONFIG.set("paths", name, path)
     with open(CONFIG_PATH, "w") as config_file:
         CONFIG.write(config_file)
