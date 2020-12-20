@@ -64,9 +64,11 @@ def check_species(
     # passing Sterculia sp. will yield only Sterculia as a canonical form.
     is_complete = df["canonical_form"].str.split().str.len() == 2
 
-    df[flag_name] = (df["supplied_name_string"] == df["canonical_form"]) & is_complete
+    names_match = (df["supplied_name_string"] == df["canonical_form"])
+    df[flag_name] = names_match & is_complete
     if add_suggested:
-        df.loc[~df[flag_name], suggested_name] = df.loc[~df[flag_name], "canonical_form"]
+        mask = (~names_match & is_complete)
+        df.loc[mask, suggested_name] = df.loc[mask, "canonical_form"]
     if add_source:
         df[source_name] = df["data_source_title"]
     if drop:
