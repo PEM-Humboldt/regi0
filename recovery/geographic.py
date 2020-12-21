@@ -21,7 +21,7 @@ def check_historical(
     flag_name: str,
     direction: str = "nearest",
     round_unmatched: bool = False,
-    default_year: str = None,
+    default_year: str = "none",
     op: str = "intersection",
     left_col: str = None,
     right_col: str = None,
@@ -58,7 +58,7 @@ def check_historical(
                      a collection date or whose collection data did not
                      match with any year. Can be "last" for the most recent
                      year in the historical data, "fist" for the oldest
-                     year in the historical data or None to skip a default
+                     year in the historical data or "none" to skip a default
                      year assignation. Keep in mind that records without
                      a collection date won't be validated.
     op:              Operation to execute. Can be "intersection" to execute
@@ -102,10 +102,10 @@ def check_historical(
         gdf["__year"] = gdf["__year"].fillna(max(years))
     elif default_year == "first":
         gdf["__year"] = gdf["__year"].fillna(min(years))
-    elif default_year is None:
+    elif default_year == "none":
         pass
     else:
-        raise ValueError("`default_year` must be either 'first', 'last' or None.")
+        raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
 
     for year in gdf["__year"].dropna().unique():
 
@@ -285,7 +285,7 @@ def find_spatial_duplicates(
     flag_name: str,
     resolution: float,
     bounds: Union[list, tuple] = None,
-    ignore: Union[bool, str] = False,
+    mark: str = "all",
     drop: bool = False
 ) -> gpd.GeoDataFrame:
     """
@@ -301,9 +301,9 @@ def find_spatial_duplicates(
     resolution:  Grid resolution.
     bounds:      Grid bounds (xmin, ym, xmax, ymax). If no bounds are
                  passed, the bounds from gdf will be taken.
-    ignore:      What records that are spatial duplicates to ignore.
-                 Can be "first", "last" or False to not ignore any
-                 record.
+    mark:        What duplicates to mark. Can be "head", to mark all
+                 bur the last, "tail" to mark all but the first, or
+                 "all".
     drop:        Whether to drop records that are spatial duplicates.
 
     Returns
@@ -326,7 +326,15 @@ def find_spatial_duplicates(
     gdf["__grid_id"] = ids
 
     subset = [species_col, "__grid_id"]
-    gdf[flag_name] = gdf.duplicated(subset, keep=ignore)
+    if mark == "all":
+        keep = False
+    elif mark == "head":
+        keep = "last"
+    elif mark == "tail":
+        keep = "first"
+    else:
+        raise ValueError("Mark must be one of 'head', 'tail' or 'all'.")
+    gdf[flag_name] = gdf.duplicated(subset, keep=keep)
 
     # Flag for records that do not have a grid ID is left empty.
     no_grid_id = gdf["__grid_id"].isna()
