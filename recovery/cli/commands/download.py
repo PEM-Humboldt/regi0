@@ -7,7 +7,6 @@ import os
 import click
 import gdown
 
-from ..options import common as common_opts
 from ..util.config import CONFIG, CONFIG_PATH
 from ..util.logger import LOGGER
 
@@ -15,10 +14,16 @@ from ..util.logger import LOGGER
 @click.command(
     short_help="Download necessary data to run the recovery geo command line utility."
 )
+@click.argument("url", type=str)
 @click.argument("dst", type=str, default=None, required=False)
-@click.argument("url", type=str, default=CONFIG.get("misc", "url"))
-@common_opts.quiet
-def download(dst, url, quiet):
+@click.option(
+    "--quiet",
+    default=False,
+    is_flag=True,
+    help="Silence information logging.",
+    show_default=True
+)
+def download(url, dst, quiet):
 
     if not os.path.exists(CONFIG_PATH):
         raise Exception("Config file not found. Run `recovery setup` first.")
