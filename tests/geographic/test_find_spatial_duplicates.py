@@ -4,7 +4,7 @@ from recovery.geographic import find_spatial_duplicates
 
 def test_records_bounds_high_res(records, expected):
     result = find_spatial_duplicates(
-        records, "species", "isSpatialDuplicate", 0.008333333767967150002, ignore=False
+        records, "species", "isSpatialDuplicate", 0.008333333767967150002
     )
     pd.testing.assert_series_equal(
         result["isSpatialDuplicate"],
@@ -20,8 +20,7 @@ def test_colombia_bounds_low_res(records, expected):
         "species",
         "isSpatialDuplicate",
         0.1333333402874744,
-        bounds=(-78.9909352282, -4.29818694419, -66.8763258531, 12.4373031682),
-        ignore=False,
+        bounds=(-78.9909352282, -4.29818694419, -66.8763258531, 12.4373031682)
     )
     pd.testing.assert_series_equal(
         result["isSpatialDuplicate"],
@@ -31,9 +30,9 @@ def test_colombia_bounds_low_res(records, expected):
     )
 
 
-def test_ignore_first(records, expected):
+def test_mark_tail(records, expected):
     result = find_spatial_duplicates(
-        records, "species", "isSpatialDuplicate", 0.008333333767967150002, ignore="first"
+        records, "species", "isSpatialDuplicate", 0.008333333767967150002, mark="tail"
     )
     pd.testing.assert_series_equal(
         result["isSpatialDuplicate"],
@@ -43,9 +42,9 @@ def test_ignore_first(records, expected):
     )
 
 
-def test_ignore_last(records, expected):
+def test_mark_head(records, expected):
     result = find_spatial_duplicates(
-        records, "species", "isSpatialDuplicate", 0.008333333767967150002, ignore="last"
+        records, "species", "isSpatialDuplicate", 0.008333333767967150002, mark="head"
     )
     pd.testing.assert_series_equal(
         result["isSpatialDuplicate"],
