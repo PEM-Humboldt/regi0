@@ -4,7 +4,7 @@ Options for $ recovery geo.
 
 import click
 
-from ..util.config import CONFIG
+from ..util.geoconfig import CONFIG
 
 crs = click.option(
     "--crs",
