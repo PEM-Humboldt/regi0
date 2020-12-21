@@ -7,7 +7,7 @@ import recovery.geographic
 from rasterstats import point_query
 
 from ..options import geo as opts
-from ..util.config import CONFIG
+from ..util.geoconfig import CONFIG
 from ..util.logger import LOGGER
 
 

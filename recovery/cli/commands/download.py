@@ -7,7 +7,7 @@ import os
 import click
 import gdown
 
-from ..util.config import CONFIG, CONFIG_PATH
+from ..util.geoconfig import CONFIG, CONFIG_PATH
 from ..util.logger import LOGGER
 
 
