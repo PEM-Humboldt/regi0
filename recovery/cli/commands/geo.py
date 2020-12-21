@@ -6,8 +6,7 @@ import click
 import recovery.geographic
 from rasterstats import point_query
 
-from ..options import common as common_opts
-from ..options import geo as geo_opts
+from ..options import geo as opts
 from ..util.config import CONFIG
 from ..util.logger import LOGGER
 
@@ -17,30 +16,46 @@ from ..util.logger import LOGGER
 )
 @click.argument("src", type=click.Path(exists=True))
 @click.argument("dst", type=click.Path(exists=False))
-@geo_opts.lon_col
-@geo_opts.lat_col
-@geo_opts.crs
-@geo_opts.admin0_col
-@geo_opts.admin1_col
-@geo_opts.admin2_col
-@geo_opts.date_col
-@geo_opts.species_col
-@geo_opts.default_year
-@geo_opts.gridres
-@geo_opts.ignore
-@geo_opts.drop
-@common_opts.quiet
+@opts.crs
+@opts.lon_col
+@opts.lat_col
+@opts.date_col
+@opts.admin0_col
+@opts.admin1_col
+@opts.admin2_col
+@opts.species_col
+@opts.admin0_path
+@opts.admin1_path
+@opts.admin2_path
+@opts.urban_path
+@opts.dem_path
+@opts.admin0_match
+@opts.admin1_match
+@opts.admin2_match
+@opts.default_year
+@opts.gridres
+@opts.ignore
+@opts.drop
+@opts.quiet
 def geo(
     src,
     dst,
+    crs,
     lon_col,
     lat_col,
-    crs,
+    date_col,
     admin0_col,
     admin1_col,
     admin2_col,
-    date_col,
     species_col,
+    admin0_path,
+    admin1_path,
+    admin2_path,
+    urban_path,
+    dem_path,
+    admin0_match,
+    admin1_match,
+    admin2_match,
     default_year,
     gridres,
     ignore,
@@ -56,23 +71,35 @@ def geo(
 
     if not quiet:
         LOGGER.info("Validating administrative boundaries.")
-    for key, admin_col in zip(
-        ["admin0", "admin1", "admin2"], [admin0_col, admin1_col, admin2_col]
+    admin_paths = [admin0_path, admin1_path, admin2_path]
+    admin_cols = [admin0_col, admin1_col, admin2_col]
+    admin_match_fields = [admin0_match, admin1_match, admin2_match]
+    keys = ["admin0", "admin1", "admin2"]
+    admin_flag_names = [CONFIG.get("flagnames", key) for key in keys]
+    admin_suggested_names = [CONFIG.get("suggestednames", key) for key in keys]
+    admin_source_names = [CONFIG.get("sourcenames", key) for key in keys]
+    for path, col_name, match_field, flag_name, suggested_name, source_name in zip(
+        admin_paths,
+        admin_cols,
+        admin_match_fields,
+        admin_flag_names,
+        admin_suggested_names,
+        admin_source_names
     ):
         records = recovery.geographic.check_historical(
             records,
-            CONFIG.get("paths", key),
+            path,
             date_col,
-            CONFIG.get("flagnames", key),
+            flag_name,
             direction="backward",
             round_unmatched=True,
             default_year=default_year,
             op="match",
-            left_col=admin_col,
-            right_col=CONFIG.get("matchnames", key),
-            suggested_name=CONFIG.get("suggestednames", key),
+            left_col=col_name,
+            right_col=match_field,
+            suggested_name=suggested_name,
             add_source=True,
-            source_name=CONFIG.get("sourcenames", key),
+            source_name=source_name,
             drop=drop,
         )
 
@@ -80,7 +107,7 @@ def geo(
         LOGGER.info("Identifying records in urban areas.")
     records = recovery.geographic.check_historical(
         records,
-        CONFIG.get("paths", "urban"),
+        urban_path,
         date_col,
         CONFIG.get("flagnames", "urban"),
         direction="nearest",
@@ -94,7 +121,7 @@ def geo(
     if not quiet:
         LOGGER.info("Extracting elevation values and identifying outliers.")
     records[CONFIG.get("valuenames", "elevation")] = point_query(
-            records.geometry, CONFIG.get("paths", "dem"), interpolate="nearest"
+            records.geometry, dem_path, interpolate="nearest"
     )
     records = recovery.geographic.find_outliers(
         records,
@@ -113,7 +140,7 @@ def geo(
         CONFIG.get("flagnames", "spatialduplicate"),
         resolution=gridres,
         drop=drop,
-        ignore=ignore
+        mark=ignore
     )
 
     if not quiet:
