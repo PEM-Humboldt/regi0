@@ -15,7 +15,7 @@ crs = click.option(
 )
 
 lon_col = click.option(
-    "--lon_col",
+    "--lon-col",
     type=str,
     default=CONFIG.get("colnames", "longitude"),
     help="Longitude column.",
@@ -23,7 +23,7 @@ lon_col = click.option(
 )
 
 lat_col = click.option(
-    "--lat_col",
+    "--lat-col",
     type=str,
     default=CONFIG.get("colnames", "latitude"),
     help="Latitude column.",
@@ -31,7 +31,7 @@ lat_col = click.option(
 )
 
 date_col = click.option(
-    "--date_col",
+    "--date-col",
     type=str,
     default=CONFIG.get("colnames", "date"),
     help="Collection date column.",
@@ -39,7 +39,7 @@ date_col = click.option(
 )
 
 admin0_col = click.option(
-    "--admin0_col",
+    "--admin0-col",
     type=str,
     default=CONFIG.get("colnames", "admin0"),
     help="Level 0 administrative division column (i.e. country).",
@@ -47,7 +47,7 @@ admin0_col = click.option(
 )
 
 admin1_col = click.option(
-    "--admin1_col",
+    "--admin1-col",
     type=str,
     default=CONFIG.get("colnames", "admin1"),
     help="Level 1 administrative division column (e.g. department or state).",
@@ -55,7 +55,7 @@ admin1_col = click.option(
 )
 
 admin2_col = click.option(
-    "--admin2_col",
+    "--admin2-col",
     type=str,
     default=CONFIG.get("colnames", "admin2"),
     help="Level 2 administrative division column (e.g. municipality or county).",
@@ -63,7 +63,7 @@ admin2_col = click.option(
 )
 
 species_col = click.option(
-    "--species_col",
+    "--species-col",
     type=str,
     default=CONFIG.get("colnames", "species"),
     help="Species name column.",
@@ -71,7 +71,7 @@ species_col = click.option(
 )
 
 admin0_path = click.option(
-    "--admin0_path",
+    "--admin0-path",
     type=click.Path(exists=True),
     default=CONFIG.get("paths", "admin0"),
     help="""
@@ -82,7 +82,7 @@ admin0_path = click.option(
 )
 
 admin1_path = click.option(
-    "--admin1_path",
+    "--admin1-path",
     type=click.Path(exists=True),
     default=CONFIG.get("paths", "admin1"),
     help="""
@@ -93,7 +93,7 @@ admin1_path = click.option(
 )
 
 admin2_path = click.option(
-    "--admin2_path",
+    "--admin2-path",
     type=click.Path(exists=True),
     default=CONFIG.get("paths", "admin2"),
     help="""
@@ -104,7 +104,7 @@ admin2_path = click.option(
 )
 
 urban_path = click.option(
-    "--urban_path",
+    "--urban-path",
     type=click.Path(exists=True),
     default=CONFIG.get("paths", "urban"),
     help="""
@@ -115,7 +115,7 @@ urban_path = click.option(
 )
 
 dem_path = click.option(
-    "--dem_path",
+    "--dem-path",
     type=click.Path(exists=True),
     default=CONFIG.get("paths", "dem"),
     help="Path to a raster file with a Digital Elevation Model (DEM).",
@@ -123,7 +123,7 @@ dem_path = click.option(
 )
 
 admin0_match = click.option(
-    "--admin0_match",
+    "--admin0-match",
     type=str,
     default=CONFIG.get("matchfields", "admin0"),
     help="Field name to match records using admin0_col.",
@@ -131,7 +131,7 @@ admin0_match = click.option(
 )
 
 admin1_match = click.option(
-    "--admin1_match",
+    "--admin1-match",
     type=str,
     default=CONFIG.get("matchfields", "admin1"),
     help="Field name to match records using admin1_col.",
@@ -139,7 +139,7 @@ admin1_match = click.option(
 )
 
 admin2_match = click.option(
-    "--admin2_match",
+    "--admin2-match",
     type=str,
     default=CONFIG.get("matchfields", "admin2"),
     help="Field name to match records using admin2_col.",
