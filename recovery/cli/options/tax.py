@@ -4,7 +4,7 @@ Options for $ recovery tax.
 
 import click
 
-from ..util.geoconfig import CONFIG
+from ..util.taxconfig import CONFIG
 
 species_col = click.option(
     "--species-col",
