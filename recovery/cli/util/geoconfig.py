@@ -1,5 +1,5 @@
 """
-Create config object so CLI commands can access it.
+Creates a ConfigParser object with parameters to run recovery geo.
 """
 
 import configparser
