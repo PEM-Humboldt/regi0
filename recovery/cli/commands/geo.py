@@ -34,7 +34,7 @@ from ..util.logger import LOGGER
 @opts.admin2_match
 @opts.default_year
 @opts.gridres
-@opts.ignore
+@opts.mark
 @opts.drop
 @opts.quiet
 def geo(
@@ -58,7 +58,7 @@ def geo(
     admin2_match,
     default_year,
     gridres,
-    ignore,
+    mark,
     drop,
     quiet
 ):
@@ -140,7 +140,7 @@ def geo(
         CONFIG.get("flagnames", "spatialduplicate"),
         resolution=gridres,
         drop=drop,
-        mark=ignore
+        mark=mark
     )
 
     if not quiet:

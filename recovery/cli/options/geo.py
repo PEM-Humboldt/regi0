@@ -170,7 +170,7 @@ gridres = click.option(
     show_default=True
 )
 
-ignore = click.option(
+mark = click.option(
     "--mark",
     type=str,
     default=CONFIG.get("duplicates", "mark"),
