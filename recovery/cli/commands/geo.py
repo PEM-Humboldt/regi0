@@ -64,7 +64,7 @@ def geo(
 ):
 
     if not quiet:
-        LOGGER.info("Reading records.")
+        LOGGER.info(f"Reading records from {src}.")
     records = recovery.geographic.read_records(
         src, lon_col, lat_col, crs=crs, drop_empty_coords=True
     )
@@ -144,5 +144,5 @@ def geo(
     )
 
     if not quiet:
-        LOGGER.info("Saving result.")
+        LOGGER.info(f"Saving results to {dst}.")
     records.drop(columns="geometry").to_csv(dst, index=False)
