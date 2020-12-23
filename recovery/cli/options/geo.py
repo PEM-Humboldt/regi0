@@ -63,7 +63,7 @@ admin2_col = click.option(
 )
 
 species_col = click.option(
-    "--species-col",
+    "--species_col",
     type=str,
     default=CONFIG.get("colnames", "species"),
     help="Species name column.",
