@@ -172,6 +172,3 @@ def get_risk_category(names: pd.Series, token: str) -> pd.Series:
             raise Exception(f"Error calling IUCN API. {err}")
         if response.json()["result"]:
             result[names == name] = response.json()["result"][0]["category"]
-
-
-# FIXME 
