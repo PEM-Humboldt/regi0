@@ -80,17 +80,18 @@ def check_species(
     return df
 
 
-def get_cites_appendix(names: pd.Series, token: str) -> pd.Series:
+def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
     """
+    Gets the corresponding cites listing for a set of scientific names.
 
     Parameters
     ----------
-    names
-    token
+    names: Scientific names to get cites listings from.
+    token: Species+ API token.
 
     Returns
     -------
-
+    Series with the corresponding cites listings.
     """
     api_url = "https://api.speciesplus.net/api/v1/taxon_concepts"
     headers = {"X-Authentication-Token": token}
@@ -98,9 +99,13 @@ def get_cites_appendix(names: pd.Series, token: str) -> pd.Series:
     result = pd.Series([None] * names.size, name="cites_listing", dtype="object")
 
     for name in names.unique():
-        r = requests.get(api_url, params={"name": name}, headers=headers)
-        if r.json()["taxon_concepts"]:
-            result[names == name] = r.json()["taxon_concepts"][0]["cites_listing"]
+        try:
+            response = requests.get(api_url, params={"name": name}, headers=headers)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise Exception(f"Error calling Species+ API. {err}")
+        if response.json()["taxon_concepts"]:
+            result[names == name] = response.json()["taxon_concepts"][0]["cites_listing"]
 
     return result
 
