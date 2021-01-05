@@ -85,13 +85,43 @@ def check_species(
     return df
 
 
+def get_authority(names: pd.Series, token: str) -> pd.Series:
+    """
+    Gets the authority for different scientific names using the IUCN API.
+
+    Parameters
+    ----------
+    names: Scientific names to get risk categories for.
+    token: IUCN API token.
+
+    Returns
+    -------
+    Series with the corresponding authorities.
+    """
+    api_url = "https://apiv3.iucnredlist.org/api/v3/species"
+
+    result = pd.Series([None] * names.size, name="authority", dtype="object")
+
+    for name in names.unique():
+        try:
+            species_url = f"{api_url}/{name}"
+            response = requests.get(species_url, params={"token": token})
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise Exception(f"Error calling IUCN API. {err}")
+        if response.json()["result"]:
+            result[names == name] = response.json()["result"][0]["authority"]
+
+    return result
+
+
 def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
     """
     Gets the corresponding cites listing for a set of scientific names.
 
     Parameters
     ----------
-    names: Scientific names to get cites listings from.
+    names: Scientific names to get cites listings for.
     token: Species+ API token.
 
     Returns
@@ -115,5 +145,33 @@ def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
     return result
 
 
-# TODO: scientificNameAuthorship: check if it is possible to get from GNR or Taxize.
-# TODO: taxonomicStatus: Check if it is possible to get from GNR or Taxize.
+def get_risk_category(names: pd.Series, token: str) -> pd.Series:
+    """
+    Gets the global risk category assigned to the species according to
+    the IUCN.
+
+    Parameters
+    ----------
+    names: Scientific names to get risk categories for.
+    token: IUCN API token.
+
+    Returns
+    -------
+    Series with the corresponding risk categories.
+    """
+    api_url = "https://apiv3.iucnredlist.org/api/v3/species"
+
+    result = pd.Series([None] * names.size, name="risk_category", dtype="object")
+
+    for name in names.unique():
+        try:
+            species_url = f"{api_url}/{name}"
+            response = requests.get(species_url, params={"token": token})
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise Exception(f"Error calling IUCN API. {err}")
+        if response.json()["result"]:
+            result[names == name] = response.json()["result"][0]["category"]
+
+
+# FIXME 
