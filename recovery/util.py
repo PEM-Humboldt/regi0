@@ -197,7 +197,7 @@ def get_nearest_year(
 
 def gnr_resolve(
     names: list,
-    data_source_ids: list = None,
+    data_source_ids: list = [],
     resolve_once: bool = False,
     best_match_only: bool = False,
     with_context: bool = False,
@@ -250,7 +250,7 @@ def gnr_resolve(
     # converted to lowercase strings first.
     params = {
         "data": "\n".join(names),
-        "data_source_ids": data_source_ids,
+        "data_source_ids": "|".join(data_source_ids),
         "resolve_once": str(resolve_once).lower(),
         "best_match_only": str(best_match_only).lower(),
         "with_context": str(with_context).lower(),
