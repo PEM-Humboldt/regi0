@@ -19,6 +19,12 @@ from ..util.logger import LOGGER
 @opts.species_col
 @opts.add_suggested
 @opts.add_source
+@opts.add_authority
+@opts.authority_col
+@opts.add_cites_listing
+@opts.cites_listing_col
+@opts.add_risk_category
+@opts.risk_category_col
 @opts.drop
 @opts.quiet
 def tax(
@@ -27,6 +33,12 @@ def tax(
     species_col,
     add_suggested,
     add_source,
+    add_authority,
+    authority_col,
+    add_cites_listing,
+    cites_listing_col,
+    add_risk_category,
+    risk_category_col,
     drop,
     quiet
 ):
@@ -46,6 +58,27 @@ def tax(
         source_name=CONFIG.get("sourcenames", "species"),
         drop=drop
     )
+
+    if add_authority:
+        if not quiet:
+            LOGGER.info("Retrieving scientific name authorship.")
+        df[authority_col] = recovery.taxonomic.get_authority(
+            df[species_col], CONFIG.get("tokens", "iucn")
+        )
+
+    if add_cites_listing:
+        if not quiet:
+            LOGGER.info("Retrieving cites listing.")
+        df[cites_listing_col] = recovery.taxonomic.get_cites_listing(
+            df[species_col], CONFIG.get("tokens", "speciesplus")
+        )
+
+    if add_risk_category:
+        if not quiet:
+            LOGGER.info("Retrieving global risk categories from IUCN.")
+        df[risk_category_col] = recovery.taxonomic.get_risk_category(
+            df[species_col], CONFIG.get("tokens", "iucn")
+        )
 
     if not quiet:
         LOGGER.info(f"Saving results to {dst}.")
