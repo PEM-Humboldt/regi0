@@ -3,6 +3,7 @@ Functions for taxonomic verifications.
 """
 
 import pandas as pd
+import requests
 from recovery.util import gnr_resolve
 
 
@@ -77,6 +78,31 @@ def check_species(
     df = df.drop(columns=column_subset)
 
     return df
+
+
+def get_cites_appendix(names: pd.Series, token: str) -> pd.Series:
+    """
+
+    Parameters
+    ----------
+    names
+    token
+
+    Returns
+    -------
+
+    """
+    api_url = "https://api.speciesplus.net/api/v1/taxon_concepts"
+    headers = {"X-Authentication-Token": token}
+
+    result = pd.Series([None] * names.size, name="cites_listing", dtype="object")
+
+    for name in names.unique():
+        r = requests.get(api_url, params={"name": name}, headers=headers)
+        if r.json()["taxon_concepts"]:
+            result[names == name] = r.json()["taxon_concepts"][0]["cites_listing"]
+
+    return result
 
 
 # TODO: scientificNameAuthorship: check if it is possible to get from GNR or Taxize.
