@@ -48,36 +48,51 @@ def tax(
 
     if not quiet:
         LOGGER.info("Validating scientific species.")
+    flag_name = CONFIG.get("flagnames", "species")
+    suggested_name = CONFIG.get("suggestednames", "species")
     df = recovery.taxonomic.check_species(
         df,
         species_col,
-        CONFIG.get("flagnames", "species"),
+        flag_name,
         add_suggested=add_suggested,
-        suggested_name=CONFIG.get("suggestednames", "species"),
+        suggested_name=suggested_name,
         add_source=add_source,
         source_name=CONFIG.get("sourcenames", "species"),
         drop=drop
     )
 
+    # For adding either the authorities, thee cites listings or the risk
+    # categories, it is necessary to pass accepted scientific names.
+    # Hence, if the user decides to add suggested names when running the
+    # name resolver, a new series is created with the combination of
+    # originally correct names and the new suggested ones for those cases
+    # where the resolver found a suggestion.
+    if add_suggested:
+        accepted_names = df.loc[df[flag_name], species_col]
+        suggested_names = df.loc[~df[flag_name], suggested_name]
+        names = pd.concat([accepted_names, suggested_names]).sort_index()
+    else:
+        names = df[species_col]
+
     if add_authority:
         if not quiet:
             LOGGER.info("Retrieving scientific name authorship.")
         df[authority_col] = recovery.taxonomic.get_authority(
-            df[species_col], CONFIG.get("tokens", "iucn")
+            names, CONFIG.get("tokens", "iucn")
         )
 
     if add_cites_listing:
         if not quiet:
             LOGGER.info("Retrieving cites listing.")
         df[cites_listing_col] = recovery.taxonomic.get_cites_listing(
-            df[species_col], CONFIG.get("tokens", "speciesplus")
+            names, CONFIG.get("tokens", "speciesplus")
         )
 
     if add_risk_category:
         if not quiet:
             LOGGER.info("Retrieving global risk categories from IUCN.")
         df[risk_category_col] = recovery.taxonomic.get_risk_category(
-            df[species_col], CONFIG.get("tokens", "iucn")
+            names, CONFIG.get("tokens", "iucn")
         )
 
     if not quiet:
