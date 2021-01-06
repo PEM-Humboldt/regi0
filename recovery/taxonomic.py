@@ -102,7 +102,7 @@ def get_authority(names: pd.Series, token: str) -> pd.Series:
 
     result = pd.Series([None] * names.size, name="authority", dtype="object")
 
-    for name in names.unique():
+    for name in names.dropna().unique():
         try:
             species_url = f"{api_url}/{name}"
             response = requests.get(species_url, params={"token": token})
@@ -133,7 +133,7 @@ def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
 
     result = pd.Series([None] * names.size, name="cites_listing", dtype="object")
 
-    for name in names.unique():
+    for name in names.dropna().unique():
         try:
             response = requests.get(api_url, params={"name": name}, headers=headers)
             response.raise_for_status()
@@ -163,7 +163,7 @@ def get_risk_category(names: pd.Series, token: str) -> pd.Series:
 
     result = pd.Series([None] * names.size, name="risk_category", dtype="object")
 
-    for name in names.unique():
+    for name in names.dropna().unique():
         try:
             species_url = f"{api_url}/{name}"
             response = requests.get(species_url, params={"token": token})
