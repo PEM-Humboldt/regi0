@@ -98,21 +98,7 @@ def get_authority(names: pd.Series, token: str) -> pd.Series:
     -------
     Series with the corresponding authorities.
     """
-    api_url = "https://apiv3.iucnredlist.org/api/v3/species"
-
-    result = pd.Series([None] * names.size, name="authority", dtype="object")
-
-    for name in names.dropna().unique():
-        try:
-            species_url = f"{api_url}/{name}"
-            response = requests.get(species_url, params={"token": token})
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as err:
-            raise Exception(f"Error calling IUCN API. {err}")
-        if response.json()["result"]:
-            result[names == name] = response.json()["result"][0]["authority"]
-
-    return result
+    return get_iucn_info(names, token, fields=["authority"])
 
 
 def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
@@ -145,6 +131,79 @@ def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
     return result
 
 
+def get_elevation_range(names: pd.Series, token: str) -> pd.Series:
+    """
+    Gets the elevation range for different species using the IUCN API.
+
+    Parameters
+    ----------
+    names: Scientific names to get risk categories for.
+    token: IUCN API token.
+
+    Returns
+    -------
+    Series with the corresponding authorities.
+    """
+    return get_iucn_info(names, token, fields=["elevation_lower", "elevation_upper"])
+
+
+def get_iucn_info(names: pd.Series, token: str, fields: list = None) -> pd.DataFrame:
+    """
+
+    Parameters
+    ----------
+    names
+    token
+    fields
+
+    Returns
+    -------
+
+    """
+    api_url = "https://apiv3.iucnredlist.org/api/v3/species"
+
+    iucn_info = pd.DataFrame()
+
+    for name in names.dropna().unique():
+        try:
+            species_url = f"{api_url}/{name}"
+            response = requests.get(species_url, params={"token": token})
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise Exception(f"Error calling IUCN API. {err}")
+        if "message" in response.json():
+            msg = response.json()["message"]
+            raise Exception(f"Something when wrong calling IUCN API. {msg}")
+
+        if response.json()["result"]:
+            result = response.json()["result"][0]
+            species_info = pd.Series(result)
+        else:
+            species_info = pd.Series([], dtype="object")
+        iucn_info = iucn_info.append(species_info, ignore_index=True)
+
+    if fields:
+        iucn_info = iucn_info[fields]
+
+    return iucn_info
+
+
+def get_iucn_species_id(names: pd.Series, token: str) -> pd.Series:
+    """
+    Gets the IUCN species ID for different species.
+
+    Parameters
+    ----------
+    names: Scientific names to get risk categories for.
+    token: IUCN API token.
+
+    Returns
+    -------
+    Series with the corresponding IUCN species ID.
+    """
+    return get_iucn_info(names, token, fields=["taxonid"])
+
+
 def get_risk_category(names: pd.Series, token: str) -> pd.Series:
     """
     Gets the global risk category assigned to the species according to
@@ -159,16 +218,4 @@ def get_risk_category(names: pd.Series, token: str) -> pd.Series:
     -------
     Series with the corresponding risk categories.
     """
-    api_url = "https://apiv3.iucnredlist.org/api/v3/species"
-
-    result = pd.Series([None] * names.size, name="risk_category", dtype="object")
-
-    for name in names.dropna().unique():
-        try:
-            species_url = f"{api_url}/{name}"
-            response = requests.get(species_url, params={"token": token})
-            response.raise_for_status()
-        except requests.exceptions.HTTPError as err:
-            raise Exception(f"Error calling IUCN API. {err}")
-        if response.json()["result"]:
-            result[names == name] = response.json()["result"][0]["category"]
+    return get_iucn_info(names, token, fields=["category"])
