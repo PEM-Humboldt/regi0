@@ -1,12 +1,12 @@
 """
-$ recovery tax
+$ calidatos tax
 """
 
 import click
 import pandas as pd
-import recovery.taxonomic
+import calidatos.taxonomic
 
-from ..options import tax as opts
+from ..options import taxonomic as opts
 from ..util.taxconfig import CONFIG
 from ..util.logger import LOGGER
 
@@ -27,7 +27,7 @@ from ..util.logger import LOGGER
 @opts.risk_category_col
 @opts.drop
 @opts.quiet
-def tax(
+def taxonomic(
     src,
     dst,
     species_col,
@@ -50,7 +50,7 @@ def tax(
         LOGGER.info("Validating scientific species.")
     flag_name = CONFIG.get("flagnames", "species")
     suggested_name = CONFIG.get("suggestednames", "species")
-    df = recovery.taxonomic.check_species(
+    df = calidatos.taxonomic.check_species(
         df,
         species_col,
         flag_name,
@@ -77,21 +77,21 @@ def tax(
     if add_authority:
         if not quiet:
             LOGGER.info("Retrieving scientific name authorship.")
-        df[authority_col] = recovery.taxonomic.get_authority(
+        df[authority_col] = calidatos.taxonomic.get_authority(
             names, CONFIG.get("tokens", "iucn")
         )
 
     if add_cites_listing:
         if not quiet:
             LOGGER.info("Retrieving cites listing.")
-        df[cites_listing_col] = recovery.taxonomic.get_cites_listing(
+        df[cites_listing_col] = calidatos.taxonomic.get_cites_listing(
             names, CONFIG.get("tokens", "speciesplus")
         )
 
     if add_risk_category:
         if not quiet:
             LOGGER.info("Retrieving global risk categories from IUCN.")
-        df[risk_category_col] = recovery.taxonomic.get_risk_category(
+        df[risk_category_col] = calidatos.taxonomic.get_risk_category(
             names, CONFIG.get("tokens", "iucn")
         )
 

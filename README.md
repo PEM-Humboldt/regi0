@@ -1,7 +1,7 @@
-# recovery
-Recovery es un paquete con funciones útiles para la verificación geográfica y taxonómica de registros biológicos.
+# calidatos
+Calidatos es un paquete con funciones útiles para la verificación geográfica y taxonómica de registros biológicos.
 
-Con el fin de facilitar la verificación de registros, recovery tiene adicionalemente una interfaz de consola de comandos (CLI) que permite ejecutar flujos de trabajo completos de verificación desde una terminal. Esta interfaz está documentada en [recovery/cli/README.md](recovery/cli/README.md).
+Con el fin de facilitar la verificación de registros, recovery tiene adicionalemente una interfaz de consola de comandos (CLI) que permite ejecutar flujos de trabajo completos de verificación desde una terminal. Esta interfaz está documentada en [calidatos/cli/README.md](calidatos/cli/README.md).
 
 ## Instalación
 
@@ -9,7 +9,7 @@ Con el fin de facilitar la verificación de registros, recovery tiene adicionale
 * [Python](https://www.python.org/downloads/) (v. 3.8+)
 
 
-Puede instalar recovery ejecutando el siguiente comando:
+Puede instalar calidatos ejecutando el siguiente comando:
 
 ```
 pip install git+https://github.com/PEM-Humboldt/recovery.git#egg=recovery
@@ -24,7 +24,7 @@ pip install --upgrade https://github.com/PEM-Humboldt/recovery/tarball/master
 Para asegurarse que recovery haya quedado instalado, ejecute:
 
 ```
-python -c "import recovery"
+python -c "import calidatos"
 ```
 
 Si la instalación fue exitosa, el comando correrá sin ningún problema.

@@ -1,12 +1,12 @@
 """
-$ recovery geo
+$ calidatos geo
 """
 
 import click
-import recovery.geographic
+import calidatos.geographic
 from rasterstats import point_query
 
-from ..options import geo as opts
+from ..options import geographic as opts
 from ..util.geoconfig import CONFIG
 from ..util.logger import LOGGER
 
@@ -37,7 +37,7 @@ from ..util.logger import LOGGER
 @opts.mark
 @opts.drop
 @opts.quiet
-def geo(
+def geographic(
     src,
     dst,
     crs,
@@ -65,7 +65,7 @@ def geo(
 
     if not quiet:
         LOGGER.info(f"Reading records from {src}.")
-    records = recovery.geographic.read_records(
+    records = calidatos.geographic.read_records(
         src, lon_col, lat_col, crs=crs, drop_empty_coords=True
     )
 
@@ -86,7 +86,7 @@ def geo(
         admin_suggested_names,
         admin_source_names
     ):
-        records = recovery.geographic.check_historical(
+        records = calidatos.geographic.check_historical(
             records,
             path,
             date_col,
@@ -105,7 +105,7 @@ def geo(
 
     if not quiet:
         LOGGER.info("Identifying records in urban areas.")
-    records = recovery.geographic.check_historical(
+    records = calidatos.geographic.check_historical(
         records,
         urban_path,
         date_col,
@@ -123,7 +123,7 @@ def geo(
     records[CONFIG.get("valuenames", "elevation")] = point_query(
             records.geometry, dem_path, interpolate="nearest"
     )
-    records = recovery.geographic.find_outliers(
+    records = calidatos.geographic.find_outliers(
         records,
         species_col,
         CONFIG.get("valuenames", "elevation"),
@@ -134,7 +134,7 @@ def geo(
 
     if not quiet:
         LOGGER.info("Identifying spatial duplicates.")
-    records = recovery.geographic.find_spatial_duplicates(
+    records = calidatos.geographic.find_spatial_duplicates(
         records,
         species_col,
         CONFIG.get("flagnames", "spatialduplicate"),

@@ -1,5 +1,5 @@
 """
-Options for $ recovery tax.
+Options for $ calidatos tax.
 """
 
 import click

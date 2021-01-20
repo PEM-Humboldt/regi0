@@ -1,5 +1,5 @@
 """
-$ recovery download
+$ calidatos download
 """
 
 import os
@@ -12,7 +12,7 @@ from ..util.logger import LOGGER
 
 
 @click.command(
-    short_help="Download necessary data to run the recovery geo command line utility."
+    short_help="Download necessary data to run the calidatos geo command line utility."
 )
 @click.argument("url", type=str)
 @click.argument("dst", type=str, default=None, required=False)
@@ -26,7 +26,7 @@ from ..util.logger import LOGGER
 def download(url, dst, quiet):
 
     if not os.path.exists(CONFIG_PATH):
-        raise Exception("Config file not found. Run `recovery setup` first.")
+        raise Exception("Config file not found. Run `calidatos setup` first.")
 
     output_path = gdown.download(url, dst, quiet=quiet)
 

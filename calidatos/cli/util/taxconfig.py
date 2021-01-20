@@ -1,5 +1,5 @@
 """
-Creates a ConfigParser object with parameters to run recovery tax.
+Creates a ConfigParser object with parameters to run calidatos tax.
 """
 
 import configparser
@@ -10,10 +10,10 @@ import appdirs
 
 CONFIG = configparser.ConfigParser()
 
-CONFIG_PATH = os.path.join(appdirs.user_config_dir("recovery"), "tax.ini")
+CONFIG_PATH = os.path.join(appdirs.user_config_dir("calidatos"), "taxonomic.ini")
 if os.path.exists(CONFIG_PATH):
     CONFIG.read(CONFIG_PATH)
 else:
     root = pathlib.Path(__file__).parent.parent
-    template_config_file = root.joinpath("config").joinpath("tax.ini")
+    template_config_file = root.joinpath("config").joinpath("taxonomic.ini")
     CONFIG.read(template_config_file)

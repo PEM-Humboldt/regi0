@@ -33,7 +33,7 @@ Usage: recovery setup [OPTIONS]
 Options:
   --help  Show this message and exit.
 ```
-Este comando no recibe ningún argumento ni opción y es el encargado de copiar las plantillas de los archivos de configuración ([logger.ini](config/logger.ini) y [settings.ini](config/settings.ini)) en la carpeta de configuración por defecto del sistema. Las rutas de estas carpetas son:
+Este comando no recibe ningún argumento ni opción y es el encargado de copiar las plantillas de los archivos de configuración ([logger.ini](config/logger.ini) y [settings.ini](config/geographic.ini)) en la carpeta de configuración por defecto del sistema. Las rutas de estas carpetas son:
 
 * MacOS:
 * Linux: `~/.config/recovery`
@@ -45,6 +45,8 @@ recovery setup
 ```
 
 ### download
+
+https://drive.google.com/uc?id=15TsDoq7u4hRotucE2LJyO-N5XCIteuCi
 ```
 $ recovery download --help
 Usage: recovery download [OPTIONS] [DST] [URL]
@@ -55,12 +57,12 @@ Options:
 
   --help   Show this message and exit.
 ```
-Este comando se encarga de descargar los datos necesarios para ejecutar la rutina de verificación geográfica. Adicionalmente, modifica la copia de la plantilla de configuración [settings.ini](config/settings.ini) con las nuevas rutas locales de los archivos descargados. Acepta dos argumentos:
+Este comando se encarga de descargar los datos necesarios para ejecutar la rutina de verificación geográfica. Adicionalmente, modifica la copia de la plantilla de configuración [settings.ini](config/geographic.ini) con las nuevas rutas locales de los archivos descargados. Acepta dos argumentos:
 
 * `DST`: ruta (absoluta o relativa de la carpeta dónde se van a descargar y extraer los datos).
 * `URL`: url del archivo comprimido almacenado en Google Drive con los datos necesarios.
 
-Por defecto (si no se pasa ningún argumento), la rutina descargará el archivo especificado en [settings.ini](config/settings.ini) y extraerá los datos en el directorio actual de trabajo desde donde se ejecute el comando.
+Por defecto (si no se pasa ningún argumento), la rutina descargará el archivo especificado en [settings.ini](config/geographic.ini) y extraerá los datos en el directorio actual de trabajo desde donde se ejecute el comando.
 
 Ejemplos:
 ```

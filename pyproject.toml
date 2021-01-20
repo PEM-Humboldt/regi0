@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "recovery"
+name = "calidatos"
 version = "0.1.0"
 description = "Geographic and taxonomic verification of biological records."
 license = "MIT"
 authors = ["Marcelo Villa-Piñeros <mvilla@humboldt.org.co>"]
-repository = "https://github.com/PEM-Humboldt/recovery"
+repository = "https://github.com/PEM-Humboldt/calidatos"
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -23,10 +23,12 @@ scipy = "^1.5.4"
 shapely = "^1.7.1"
 
 [tool.poetry.dev-dependencies]
+black = "^20.8b1"
+ipython = "^7.19.0"
 pytest = "^6.1.2"
 
 [tool.poetry.scripts]
-recovery = "recovery.cli.cli:main"
+calidatos = "calidatos.cli.cli:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

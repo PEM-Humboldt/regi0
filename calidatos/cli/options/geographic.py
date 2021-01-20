@@ -1,5 +1,5 @@
 """
-Options for $ recovery geo.
+Options for $ calidatos geo.
 """
 
 import click
