@@ -1,12 +1,17 @@
+"""
+Helper functions.
+"""
+
 import re
 
 import numpy as np
 import pandas as pd
 import rasterio
+import requests
 from scipy import stats
 
 
-def _create_id_grid(
+def create_id_grid(
     xmin: float,
     ymin: float,
     xmax: float,
@@ -59,7 +64,7 @@ def _create_id_grid(
     return grid
 
 
-def _extract_year(string: str) -> int:
+def extract_year(string: str) -> int:
     """
     Extracts a four-digit valid year (1900-2099) from a string. If there
     are multiple four-digit valid years on the string, the first
@@ -80,13 +85,13 @@ def _extract_year(string: str) -> int:
 
     Examples
     --------
-    >>> _extract_year("admin2_2014.shp")
+    >>> extract_year("admin2_2014.shp")
     2014
-    >>> _extract_year("v0001popc2017")
+    >>> extract_year("v0001popc2017")
     2017
-    >>> _extract_year("human_footprint_1970_1990.tif")
+    >>> extract_year("human_footprint_1970_1990.tif")
     1970
-    >>> _extract_year("ne_10m_admin_o_countries.shp")
+    >>> extract_year("ne_10m_admin_o_countries.shp")
     Exception: The string does not have any valid year.
     """
     expr = r"(?:19|20)\d{2}"
@@ -99,7 +104,7 @@ def _extract_year(string: str) -> int:
     return int(year)
 
 
-def _get_nearest_year(
+def get_nearest_year(
     dates: pd.Series,
     reference_years: list,
     direction: str = "backward",
@@ -143,21 +148,21 @@ def _get_nearest_year(
     4    17/04/2009
     Name: date, dtype: object
     >>> reference_years = [1963, 1980, 2010, 2014]
-    >>> _get_nearest_year(dates, reference_years)
+    >>> get_nearest_year(dates, reference_years)
     0    1963.0
     1       NaN
     2    2010.0
     3    1980.0
     4    1980.0
     dtype: float64
-    >>> _get_nearest_year(dates, reference_years, round_unmatched=False)
+    >>> get_nearest_year(dates, reference_years, round_unmatched=False)
     0       NaN
     1       NaN
     2    2010.0
     3    1980.0
     4    1980.0
     dtype: float64
-    >>> _get_nearest_year(dates, reference_years, direction="nearest")
+    >>> get_nearest_year(dates, reference_years, direction="nearest")
     0    1963.0
     1       NaN
     2    2010.0
@@ -190,8 +195,82 @@ def _get_nearest_year(
     return result
 
 
-def _is_outlier(
-    values: np.ndarray, method: str = "std", threshold: float = 3.0
+def gnr_resolve(
+    names: list,
+    data_source_ids: list = [],
+    resolve_once: bool = False,
+    best_match_only: bool = False,
+    with_context: bool = False,
+    with_vernaculars: bool = False,
+    with_canonical_ranks: bool = False
+) -> list:
+    """
+    Receives a list of names and resolves each against the entire resolver
+    database or against specific data sources using the Global Names
+    Resolver (GNR) API. Underlying resolving and scoring algorithms are
+    described at: http://resolver.globalnames.org/about
+
+    Parameters
+    ----------
+    names:                  List of species names to resolve.
+    data_source_ids:        List of specific data sources IDs to resolve
+                            against. A list of all the available data
+                            sources and their IDs can be found at:
+                            http://resolver.globalnames.org/data_sources.
+    resolve_once:           Find the first available match instead of
+                            matches across all data sources with all
+                            possible renderings of a name.
+    best_match_only:        Returns just one result with the highest
+                            score.
+    with_context:           Reduce the likelihood of matches to taxonomic
+                            homonyms. When True, a common taxonomic
+                            context is calculated for all supplied names
+                            from matches in data sources that have
+                            classification tree paths. Names out of
+                            determined context are penalized during
+                            score calculation.
+    with_vernaculars:       Return 'vernacular' field to present common
+                            names provided by a data source for a
+                            particular match.
+    with_canonical_ranks:   Returns 'canonical_form' with infraspecific
+                            ranks, if they are present.
+
+    Returns
+    -------
+    List with the results for each name in names.
+
+    Notes
+    -----
+    More information on the GNR API can be found at:
+    http://resolver.globalnames.org/api
+    """
+    api_url = "http://resolver.globalnames.org/name_resolvers.json"
+
+    # Apparently, GNR API does not accept Booleans so they need to be
+    # converted to lowercase strings first.
+    params = {
+        "data": "\n".join(names),
+        "data_source_ids": "|".join(data_source_ids),
+        "resolve_once": str(resolve_once).lower(),
+        "best_match_only": str(best_match_only).lower(),
+        "with_context": str(with_context).lower(),
+        "with_vernaculars": str(with_vernaculars).lower(),
+        "with_canonical_ranks": str(with_canonical_ranks).lower()
+    }
+
+    try:
+        response = requests.post(api_url, json=params)
+        response.raise_for_status()
+    except requests.exceptions.HTTPError as err:
+        raise Exception(f"Error calling Global Name Resolver API. {err}")
+
+    data = response.json()["data"]
+
+    return pd.json_normalize(data, record_path="results", meta="supplied_name_string")
+
+
+def is_outlier(
+    values: np.ndarray, method: str = "iqr", threshold: float = 2.0
 ) -> np.ndarray:
     """
     Classifies outliers in an array of values.
@@ -213,25 +292,25 @@ def _is_outlier(
     Examples
     --------
     >>> values = np.array([52, 56, 53, 57, 51, 59, 1, 99])
-    >>> _is_outlier(values)
+    >>> is_outlier(values)
     array([False, False, False, False, False, False,  True, False])
-    >>> _is_outlier(values, method="iqr")
+    >>> is_outlier(values, method="iqr")
     array([False, False, False, False, False, False,  True,  True])
-    >>> _is_outlier(values, method="zscore")
+    >>> is_outlier(values, method="zscore")
     array([False, False, False, False, False, False,  True, False])
     """
-    if method == "std":
-        std = np.nanstd(values)
-        mean = np.nanmean(values)
-        lower_limit = mean - (threshold * std)
-        upper_limit = mean + (threshold * std)
-
-    elif method == "iqr":
+    if method == "iqr":
         iqr = stats.iqr(values, nan_policy="omit")
         q1 = np.nanpercentile(values, 25)
         q3 = np.nanpercentile(values, 75)
         lower_limit = q1 - (1.5 * iqr)
         upper_limit = q3 + (1.5 * iqr)
+
+    elif method == "std":
+        std = np.nanstd(values)
+        mean = np.nanmean(values)
+        lower_limit = mean - (threshold * std)
+        upper_limit = mean + (threshold * std)
 
     elif method == "zscore":
         values = stats.zscore(values, nan_policy="omit")
