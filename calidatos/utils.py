@@ -1,7 +1,6 @@
 """
 Helper functions.
 """
-
 import re
 
 import numpy as np
@@ -197,7 +196,7 @@ def get_nearest_year(
 
 def gnr_resolve(
     names: list,
-    data_source_ids: list = [],
+    data_source_ids: list = None,
     resolve_once: bool = False,
     best_match_only: bool = False,
     with_context: bool = False,
@@ -244,6 +243,9 @@ def gnr_resolve(
     More information on the GNR API can be found at:
     http://resolver.globalnames.org/api
     """
+    if data_source_ids is None:
+        data_source_ids = []
+
     api_url = "http://resolver.globalnames.org/name_resolvers.json"
 
     # Apparently, GNR API does not accept Booleans so they need to be
