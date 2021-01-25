@@ -1,10 +1,10 @@
 """
 Functions for taxonomic verifications.
 """
-
+import numpy as np
 import pandas as pd
 import requests
-from calidatos.util import gnr_resolve
+from calidatos.utils import gnr_resolve
 
 
 def check_species(
@@ -129,6 +129,60 @@ def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
             result[names == name] = response.json()["taxon_concepts"][0]["cites_listing"]
 
     return result
+
+
+def get_classification(
+    names: pd.Series,
+    return_unique: bool = False,
+    add_names: bool = False,
+    add_source: bool = False,
+    **kwargs
+) -> pd.DataFrame:
+    """
+
+    Parameters
+    ----------
+    names
+    return_unique
+    add_names
+    add_source
+
+    Returns
+    -------
+
+    """
+    # Regardless of the value passed for `best_match_only` in kwargs,
+    # its value is forced to be True so that only one result per
+    # species is returned.
+    kwargs.update({"best_match_only": True})
+    unique_species = pd.Series(names.dropna().unique())
+    result = gnr_resolve(unique_species, **kwargs)
+
+    ranks = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
+    classification = pd.DataFrame(columns=ranks, index=unique_species.index)
+    rank_indices = result["classification_path_ranks"].str.split("|", expand=True)
+    path_indices = result["classification_path"].str.split("|", expand=True)
+
+    for rank in ranks:
+        mask = (rank_indices == rank).any(axis=1)
+        rank_idx = np.nonzero(rank_indices[mask].values == rank)
+        rank_paths = path_indices.values[rank_idx]
+        classification.loc[mask, rank] = rank_paths
+
+    if add_names:
+        classification["supplied_name"] = unique_species
+
+    if add_source:
+        classification["source"] = result["data_source_title"]
+
+    if not return_unique:
+        classification["name"] = unique_species
+        classification = pd.merge(
+            names, classification, left_on=names.name, right_on="name"
+        )
+        classification = classification.drop(columns=[names.name, "name"])
+
+    return classification
 
 
 def get_elevation_range(names: pd.Series, token: str) -> pd.Series:
