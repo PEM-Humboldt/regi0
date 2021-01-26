@@ -134,7 +134,7 @@ def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
 def get_classification(
     names: pd.Series,
     return_unique: bool = False,
-    add_names: bool = False,
+    add_supplied_names: bool = False,
     add_source: bool = False,
     **kwargs
 ) -> pd.DataFrame:
@@ -144,7 +144,7 @@ def get_classification(
     ----------
     names
     return_unique
-    add_names
+    add_supplied_names
     add_source
 
     Returns
@@ -169,13 +169,15 @@ def get_classification(
         rank_paths = path_indices.values[rank_idx]
         classification.loc[mask, rank] = rank_paths
 
-    if add_names:
+    if add_supplied_names:
         classification["supplied_name"] = unique_species
 
     if add_source:
         classification["source"] = result["data_source_title"]
 
     if not return_unique:
+        if not names.name:
+            names.name = "__supplied_name"
         classification["name"] = unique_species
         classification = pd.merge(
             names, classification, left_on=names.name, right_on="name"
