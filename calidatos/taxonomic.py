@@ -16,7 +16,7 @@ def check_species(
     add_source: bool = False,
     source_name: str = None,
     drop: bool = False,
-    **kwargs
+    **kwargs,
 ) -> pd.DataFrame:
     """
     Checks that the scientific names of records are valid using the
@@ -59,7 +59,7 @@ def check_species(
         result[column_subset],
         how="left",
         left_on=species_col,
-        right_on="supplied_name_string"
+        right_on="supplied_name_string",
     )
 
     # Check whether the canonical form retrieved from GNR is complete
@@ -70,10 +70,10 @@ def check_species(
     # passing Sterculia sp. will yield only Sterculia as a canonical form.
     is_complete = df["canonical_form"].str.split().str.len() == 2
 
-    names_match = (df["supplied_name_string"] == df["canonical_form"])
+    names_match = df["supplied_name_string"] == df["canonical_form"]
     df[flag_name] = names_match & is_complete
     if add_suggested:
-        mask = (~names_match & is_complete)
+        mask = ~names_match & is_complete
         df.loc[mask, suggested_name] = df.loc[mask, "canonical_form"]
     if add_source:
         df[source_name] = df["data_source_title"]
@@ -126,7 +126,9 @@ def get_cites_listing(names: pd.Series, token: str) -> pd.Series:
         except requests.exceptions.HTTPError as err:
             raise Exception(f"Error calling Species+ API. {err}")
         if response.json()["taxon_concepts"]:
-            result[names == name] = response.json()["taxon_concepts"][0]["cites_listing"]
+            result[names == name] = response.json()["taxon_concepts"][0][
+                "cites_listing"
+            ]
 
     return result
 
@@ -136,7 +138,7 @@ def get_classification(
     return_unique: bool = False,
     add_supplied_names: bool = False,
     add_source: bool = False,
-    **kwargs
+    **kwargs,
 ) -> pd.DataFrame:
     """
 
@@ -231,7 +233,7 @@ def get_iucn_info(names: pd.Series, token: str, fields: list = None) -> pd.DataF
             msg = response.json()["message"]
             raise Exception(f"Something when wrong calling IUCN API. {msg}")
 
-        if response.json()["result"]:
+        if response.json().get("result"):
             result = response.json()["result"][0]
             species_info = pd.Series(result)
         else:
@@ -275,3 +277,57 @@ def get_risk_category(names: pd.Series, token: str) -> pd.Series:
     Series with the corresponding risk categories.
     """
     return get_iucn_info(names, token, fields=["category"])
+
+
+def get_species_countries(
+    names: pd.Series,
+    token: str,
+    return_unique: bool = False,
+    field: str = "code",
+    delimiter: str = "|",
+) -> pd.Series:
+    """
+
+    Parameters
+    ----------
+    names
+    token
+    return_unique
+    field
+    delimiter
+
+    Returns
+    -------
+
+    """
+    api_url = "https://apiv3.iucnredlist.org/api/v3/species/countries/name"
+
+    if return_unique:
+        index = None
+    else:
+        index = names.index
+    result = pd.Series(index=index, dtype="object", name="countries")
+
+    for name in names.dropna().unique():
+        try:
+            species_url = f"{api_url}/{name}"
+            response = requests.get(species_url, params={"token": token})
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise Exception(f"Error calling IUCN API. {err}")
+        if "message" in response.json():
+            msg = response.json()["message"]
+            raise Exception(f"Something when wrong calling IUCN API. {msg}")
+
+        if return_unique:
+            names_index = len(result)
+        else:
+            names_index = names[names == name].index
+
+        if response.json().get("result"):
+            countries = map(lambda x: x.get(field), response.json()["result"])
+            result.loc[names_index] = delimiter.join(countries)
+        else:
+            result.loc[names_index] = None
+
+    return result
