@@ -1,10 +1,10 @@
 """
-$ calidatos tax
+$ bdcctools tax
 """
 
 import click
 import pandas as pd
-import calidatos.taxonomic
+import bdcctools.taxonomic
 
 from ..options import taxonomic as opts
 from ..util.taxconfig import CONFIG
@@ -50,7 +50,7 @@ def taxonomic(
         LOGGER.info("Validating scientific species.")
     flag_name = CONFIG.get("flagnames", "species")
     suggested_name = CONFIG.get("suggestednames", "species")
-    df = calidatos.taxonomic.check_species(
+    df = bdcctools.taxonomic.check_species(
         df,
         species_col,
         flag_name,
@@ -77,21 +77,21 @@ def taxonomic(
     if add_authority:
         if not quiet:
             LOGGER.info("Retrieving scientific name authorship.")
-        df[authority_col] = calidatos.taxonomic.get_authority(
+        df[authority_col] = bdcctools.taxonomic.get_authority(
             names, CONFIG.get("tokens", "iucn")
         )
 
     if add_cites_listing:
         if not quiet:
             LOGGER.info("Retrieving cites listing.")
-        df[cites_listing_col] = calidatos.taxonomic.get_cites_listing(
+        df[cites_listing_col] = bdcctools.taxonomic.get_cites_listing(
             names, CONFIG.get("tokens", "speciesplus")
         )
 
     if add_risk_category:
         if not quiet:
             LOGGER.info("Retrieving global risk categories from IUCN.")
-        df[risk_category_col] = calidatos.taxonomic.get_risk_category(
+        df[risk_category_col] = bdcctools.taxonomic.get_risk_category(
             names, CONFIG.get("tokens", "iucn")
         )
 

@@ -1,5 +1,5 @@
 """
-Options for $ calidatos geo.
+Options for $ bdcctools geo.
 """
 
 import click

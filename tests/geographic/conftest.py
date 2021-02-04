@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 import pytest
-from calidatos.geographic import read_records
+from bdcctools.geographic import read_records
 
 DATA_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data")
 

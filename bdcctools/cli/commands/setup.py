@@ -1,5 +1,5 @@
 """
-$ calidatos setup
+$ bdcctools setup
 """
 
 import pathlib
@@ -17,7 +17,7 @@ def setup():
 
     root = pathlib.Path(__file__).parent.parent
     template_config_folder = root.joinpath("config")
-    target_conf_folder = appdirs.user_config_dir("calidatos")
+    target_conf_folder = appdirs.user_config_dir("bdcctools")
     if not os.path.exists(target_conf_folder):
         os.makedirs(target_conf_folder)
 

@@ -1,5 +1,5 @@
 import pandas as pd
-from calidatos.geographic import find_spatial_duplicates
+from bdcctools.geographic import find_spatial_duplicates
 
 
 def test_records_bounds_high_res(records, expected):

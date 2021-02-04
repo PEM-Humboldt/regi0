@@ -1,6 +1,6 @@
 import pandas as pd
 import pytest
-from calidatos.taxonomic import check_species
+from bdcctools.taxonomic import check_species
 
 
 @pytest.fixture(scope="module")

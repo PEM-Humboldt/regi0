@@ -3,7 +3,7 @@ import os
 import geopandas as gpd
 import pandas as pd
 import pytest
-from calidatos.geographic import check_intersection
+from bdcctools.geographic import check_intersection
 
 DATA_FOLDER = os.path.join(os.path.abspath(os.path.dirname(__file__)), "data")
 

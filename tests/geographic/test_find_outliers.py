@@ -1,5 +1,5 @@
 import pandas as pd
-from calidatos.geographic import find_outliers
+from bdcctools.geographic import find_outliers
 
 
 def test_iqr(records, expected):

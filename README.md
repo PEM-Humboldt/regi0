@@ -1,30 +1,27 @@
-# calidatos
-Calidatos es un paquete con funciones útiles para la verificación geográfica y taxonómica de registros biológicos.
-
-Con el fin de facilitar la verificación de registros, recovery tiene adicionalemente una interfaz de consola de comandos (CLI) que permite ejecutar flujos de trabajo completos de verificación desde una terminal. Esta interfaz está documentada en [calidatos/cli/README.md](calidatos/cli/README.md).
+# bdcc-tools
+BDCC Tools: Biodiversity Data Cleaning and Curation Tools.
 
 ## Instalación
 
 ### Prerrequisitos
 * [Python](https://www.python.org/downloads/) (v. 3.8+)
 
-
-Puede instalar calidatos ejecutando el siguiente comando:
+Puede instalar `bdcctools` ejecutando el siguiente comando:
 
 ```
-pip install git+https://github.com/PEM-Humboldt/recovery.git#egg=recovery
+pip install git+https://github.com/PEM-Humboldt/bdcc-tools.git#egg=bdcctools
 ```
 
 Si no tiene `git`, ejecute:
 
 ```
-pip install --upgrade https://github.com/PEM-Humboldt/recovery/tarball/master
+pip install --upgrade https://github.com/PEM-Humboldt/bdcc-tools/tarball/master
 ```
 
 Para asegurarse que recovery haya quedado instalado, ejecute:
 
 ```
-python -c "import calidatos"
+python -c "import bdcctools"
 ```
 
 Si la instalación fue exitosa, el comando correrá sin ningún problema.
@@ -38,13 +35,13 @@ Para el desarrollo de recovery se utiliza `poetry`, un auxiliar de empaquetado y
 En primer lugar, es necesario clonar este repositorio localmente. Para esto, ejecute:
 
 ```
-git clone https://github.com/PEM-Humboldt/recovery.git
+git clone https://github.com/PEM-Humboldt/bdcctools.git
 ```
 
  Luego, ubíquese dentro de del directorio del proyecto:
  
  ```
-cd recovery
+cd bdcctools
 ```
 
 e instale todas las dependencias necesarias:

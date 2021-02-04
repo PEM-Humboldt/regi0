@@ -1,9 +1,9 @@
 """
-$ calidatos geo
+$ bdcctools geo
 """
 
 import click
-import calidatos.geographic
+import bdcctools.geographic
 from rasterstats import point_query
 
 from ..options import geographic as opts
@@ -65,7 +65,7 @@ def geographic(
 
     if not quiet:
         LOGGER.info(f"Reading records from {src}.")
-    records = calidatos.geographic.read_records(
+    records = bdcctools.geographic.read_records(
         src, lon_col, lat_col, crs=crs, drop_empty_coords=True
     )
 
@@ -86,7 +86,7 @@ def geographic(
         admin_suggested_names,
         admin_source_names
     ):
-        records = calidatos.geographic.check_historical(
+        records = bdcctools.geographic.check_historical(
             records,
             path,
             date_col,
@@ -105,7 +105,7 @@ def geographic(
 
     if not quiet:
         LOGGER.info("Identifying records in urban areas.")
-    records = calidatos.geographic.check_historical(
+    records = bdcctools.geographic.check_historical(
         records,
         urban_path,
         date_col,
@@ -123,7 +123,7 @@ def geographic(
     records[CONFIG.get("valuenames", "elevation")] = point_query(
             records.geometry, dem_path, interpolate="nearest"
     )
-    records = calidatos.geographic.find_outliers(
+    records = bdcctools.geographic.find_outliers(
         records,
         species_col,
         CONFIG.get("valuenames", "elevation"),
@@ -134,7 +134,7 @@ def geographic(
 
     if not quiet:
         LOGGER.info("Identifying spatial duplicates.")
-    records = calidatos.geographic.find_spatial_duplicates(
+    records = bdcctools.geographic.find_spatial_duplicates(
         records,
         species_col,
         CONFIG.get("flagnames", "spatialduplicate"),

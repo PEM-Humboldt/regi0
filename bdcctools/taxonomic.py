@@ -4,7 +4,7 @@ Functions for taxonomic verifications.
 import numpy as np
 import pandas as pd
 import requests
-from calidatos.utils import gnr_resolve
+from bdcctools.utils import gnr_resolve
 
 
 def check_species(

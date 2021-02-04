@@ -1,5 +1,5 @@
 """
-Options for $ calidatos tax.
+Options for $ bdcctools tax.
 """
 
 import click

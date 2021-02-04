@@ -1,5 +1,5 @@
 """
-Creates a ConfigParser object with parameters to run calidatos tax.
+Creates a ConfigParser object with parameters to run bdcctools tax.
 """
 
 import configparser
@@ -10,7 +10,7 @@ import appdirs
 
 CONFIG = configparser.ConfigParser()
 
-CONFIG_PATH = os.path.join(appdirs.user_config_dir("calidatos"), "taxonomic.ini")
+CONFIG_PATH = os.path.join(appdirs.user_config_dir("bdcctools"), "taxonomic.ini")
 if os.path.exists(CONFIG_PATH):
     CONFIG.read(CONFIG_PATH)
 else:
