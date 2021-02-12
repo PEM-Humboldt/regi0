@@ -1,5 +1,7 @@
 """
-Functions using the IUCN API.
+Wrappers for IUCN API calls.
+
+API documentation can be found at: https://apiv3.iucnredlist.org/api/v3/docs
 """
 from typing import Union
 from urllib.parse import urljoin
@@ -12,36 +14,18 @@ from ..utils import expand_result
 API_URL = "https://apiv3.iucnredlist.org/api/v3/"
 
 
-def _parse_response(response: requests.Response) -> dict:
-    """
-
-    Parameters
-    ----------
-    response
-
-    Returns
-    -------
-
-    """
-    if response.json().get("result"):
-        result = response.json()["result"][0]
-    else:
-        result = {}
-
-    return result
-
-
 def _request(url: str, token: str) -> requests.Response:
     """
+    Creates a request for the IUCN API and handles HTTP exceptions.
 
     Parameters
     ----------
-    url
-    token
+    url:   IUCN API endpoint.
+    token: IUCN API authentication token.
 
     Returns
     -------
-
+    Request response.
     """
     try:
         response = requests.get(url, params={"token": token})
@@ -50,7 +34,7 @@ def _request(url: str, token: str) -> requests.Response:
         raise Exception(f"Error calling IUCN API. {err}")
     if "message" in response.json():
         msg = response.json()["message"]
-        raise Exception(f"Something when wrong calling IUCN API. {msg}")
+        raise Exception(f"Error calling IUCN API. {msg}")
 
     return response
 
@@ -63,24 +47,29 @@ def get_species_info(
     expand: bool = True
 ) -> pd.DataFrame:
     """
+    Gets IUCN category and miscellaneous information for multiple species
+    using the IUCN API.
 
     Parameters
     ----------
-    names
-    token
-    add_supplied_names
-    add_source
-    expand
+    names:              Scientific name(s) to get results for.
+    token:              Species+/CITES checklist API authentication token.
+    add_supplied_names: Add supplied scientific names column to the
+                        resulting DataFrame.
+    add_source:         Add source column to the resulting DataFrame.
+    expand:             Expand DataFrame rows to match `names` size. If
+                        False, the number of rows will correspond to
+                        the number of unique names in `names`.
 
     Returns
     -------
-
+    Species info DataFrame.
     """
     if isinstance(names, (list, str)):
         names = pd.Series(names)
 
-    df = pd.DataFrame()
     endpoint = urljoin(API_URL, "species/")
+    df = pd.DataFrame()
 
     unique_names = pd.Series(names.dropna().unique())
     for name in unique_names:
@@ -98,6 +87,8 @@ def get_species_info(
     if expand:
         df = expand_result(names, df)
 
+    return df
+
 
 def get_country_occurrence(
     names: pd.Series,
@@ -107,24 +98,29 @@ def get_country_occurrence(
     expand: bool = True
 ) -> pd.DataFrame:
     """
+    Gets country occurrence and related information for multiple species
+    using the IUCN API.
 
     Parameters
     ----------
-    names
-    token
-    add_supplied_names
-    add_source
-    expand
+    names:              Scientific name(s) to get results for.
+    token:              Species+/CITES checklist API authentication token.
+    add_supplied_names: Add supplied scientific names column to the
+                        resulting DataFrame.
+    add_source:         Add source column to the resulting DataFrame.
+    expand:             Expand DataFrame rows to match `names` size. If
+                        False, the number of rows will correspond to
+                        the number of unique names in `names`.
 
     Returns
     -------
-
+    Country occurrence DataFrame.
     """
     if isinstance(names, (list, str)):
         names = pd.Series(names)
 
-    df = pd.DataFrame()
     endpoint = urljoin(API_URL, "species/countries/name/")
+    df = pd.DataFrame()
 
     unique_names = pd.Series(names.dropna().unique())
     for name in unique_names:
@@ -146,4 +142,3 @@ def get_country_occurrence(
         df = expand_result(names, df)
 
     return df
-
