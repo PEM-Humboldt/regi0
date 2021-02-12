@@ -1,5 +1,7 @@
 """
-Functions using the Global Names Resolver API.
+Wrappers for GNR API calls and derived functions.
+
+API documentation can be found at: http://resolver.globalnames.org/api
 """
 from typing import Union
 
@@ -63,7 +65,6 @@ def resolve(
     """
     if isinstance(names, str):
         names = [names]
-
     if data_source_ids is None:
         data_source_ids = []
 
@@ -98,17 +99,22 @@ def get_classification(
     **kwargs,
 ) -> pd.DataFrame:
     """
+    Gets the complete classification of multiple scientific names using
+    the Global Names Resolver.
 
     Parameters
     ----------
-    names
-    add_supplied_names
-    add_source
-    expand
+    names:              Scientific name(s) to get results for.
+    add_supplied_names: Add supplied scientific names column to the
+                        resulting DataFrame.
+    add_source:         Add source column to the resulting DataFrame.
+    expand:             Expand DataFrame rows to match `names` size. If
+                        False, the number of rows will correspond to
+                        the number of unique names in `names`.
 
     Returns
     -------
-
+    Classification DataFrame.
     """
     if isinstance(names, (list, str)):
         names = pd.Series(names)
@@ -129,10 +135,8 @@ def get_classification(
 
     if add_supplied_names:
         df["supplied_name"] = unique_names
-
     if add_source:
         df["source"] = result["data_source_title"]
-
     if kwargs.get("best_match_only"):
         if expand:
             df = expand_result(names, df)
