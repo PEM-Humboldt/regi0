@@ -39,57 +39,6 @@ def _request(url: str, token: str) -> requests.Response:
     return response
 
 
-def get_species_info(
-    names: Union[list, pd.Series, str],
-    token: str,
-    add_supplied_names: bool = False,
-    add_source: bool = False,
-    expand: bool = True
-) -> pd.DataFrame:
-    """
-    Gets IUCN category and miscellaneous information for multiple species
-    using the IUCN API.
-
-    Parameters
-    ----------
-    names:              Scientific name(s) to get results for.
-    token:              Species+/CITES checklist API authentication token.
-    add_supplied_names: Add supplied scientific names column to the
-                        resulting DataFrame.
-    add_source:         Add source column to the resulting DataFrame.
-    expand:             Expand DataFrame rows to match `names` size. If
-                        False, the number of rows will correspond to
-                        the number of unique names in `names`.
-
-    Returns
-    -------
-    Species info DataFrame.
-    """
-    if isinstance(names, (list, str)):
-        names = pd.Series(names)
-
-    endpoint = urljoin(API_URL, "species/")
-    df = pd.DataFrame()
-
-    unique_names = pd.Series(names.dropna().unique())
-    for name in unique_names:
-        response = _request(urljoin(endpoint, name), token)
-        if response.json().get("result"):
-            result = pd.Series(response.json()["result"][0])
-        else:
-            result = pd.Series([], dtype="object")
-        df = df.append(pd.Series(result), ignore_index=True)
-
-    if add_supplied_names:
-        df["supplied_name"] = unique_names
-    if add_source:
-        df["source"] = "IUCN"
-    if expand:
-        df = expand_result(names, df)
-
-    return df
-
-
 def get_country_occurrence(
     names: pd.Series,
     token: str,
@@ -122,7 +71,7 @@ def get_country_occurrence(
     endpoint = urljoin(API_URL, "species/countries/name/")
     df = pd.DataFrame()
 
-    unique_names = pd.Series(names.dropna().unique())
+    unique_names = names.dropna().unique()
     for name in unique_names:
         response = _request(urljoin(endpoint, name), token)
         if response.json().get("result"):
@@ -130,6 +79,57 @@ def get_country_occurrence(
             result = pd.Series({
                 field: values for field, values in zip(temp_df.columns, temp_df.T.values)
             })
+        else:
+            result = pd.Series([], dtype="object")
+        df = df.append(pd.Series(result), ignore_index=True)
+
+    if add_supplied_names:
+        df["supplied_name"] = unique_names
+    if add_source:
+        df["source"] = "IUCN"
+    if expand:
+        df = expand_result(names, df)
+
+    return df
+
+
+def get_species_info(
+    names: Union[list, pd.Series, str],
+    token: str,
+    add_supplied_names: bool = False,
+    add_source: bool = False,
+    expand: bool = True
+) -> pd.DataFrame:
+    """
+    Gets IUCN category and miscellaneous information for multiple species
+    using the IUCN API.
+
+    Parameters
+    ----------
+    names:              Scientific name(s) to get results for.
+    token:              Species+/CITES checklist API authentication token.
+    add_supplied_names: Add supplied scientific names column to the
+                        resulting DataFrame.
+    add_source:         Add source column to the resulting DataFrame.
+    expand:             Expand DataFrame rows to match `names` size. If
+                        False, the number of rows will correspond to
+                        the number of unique names in `names`.
+
+    Returns
+    -------
+    Species info DataFrame.
+    """
+    if isinstance(names, (list, str)):
+        names = pd.Series(names)
+
+    endpoint = urljoin(API_URL, "species/")
+    df = pd.DataFrame()
+
+    unique_names = names.dropna().unique()
+    for name in unique_names:
+        response = _request(urljoin(endpoint, name), token)
+        if response.json().get("result"):
+            result = pd.Series(response.json()["result"][0])
         else:
             result = pd.Series([], dtype="object")
         df = df.append(pd.Series(result), ignore_index=True)
