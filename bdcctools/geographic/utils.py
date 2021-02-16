@@ -1,5 +1,5 @@
 """
-Helper functions.
+Helper functions for the geographic module.
 """
 import re
 
@@ -66,7 +66,7 @@ def extract_year(string: str) -> int:
     """
     Extracts a four-digit valid year (1900-2099) from a string. If there
     are multiple four-digit valid years on the string, the first
-    ocurrence is returned.
+    occurrence is returned.
 
     Parameters
     ----------
@@ -80,17 +80,6 @@ def extract_year(string: str) -> int:
     -----
     Regex expression was taken from:
     https://stackoverflow.com/a/49853325/7144368
-
-    Examples
-    --------
-    >>> extract_year("admin2_2014.shp")
-    2014
-    >>> extract_year("v0001popc2017")
-    2017
-    >>> extract_year("human_footprint_1970_1990.tif")
-    1970
-    >>> extract_year("ne_10m_admin_o_countries.shp")
-    Exception: The string does not have any valid year.
     """
     expr = r"(?:19|20)\d{2}"
     matches = re.findall(expr, string)
@@ -131,43 +120,10 @@ def get_nearest_year(
     -----
     This function is based on the answer given on:
     https://stackoverflow.com/a/64881346/7144368
-
-    Examples
-    --------
-    >>> dates = pd.Series(
-    ...     ["17/08/1945", np.nan, "21/09/2011", "01/01/1984", "17/04/2009"],
-    ...     name="date"
-    ... )
-    >>> dates
-    0    17/08/1945
-    1           NaN
-    2    21/09/2011
-    3    01/01/1984
-    4    17/04/2009
-    Name: date, dtype: object
-    >>> reference_years = [1963, 1980, 2010, 2014]
-    >>> get_nearest_year(dates, reference_years)
-    0    1963.0
-    1       NaN
-    2    2010.0
-    3    1980.0
-    4    1980.0
-    dtype: float64
-    >>> get_nearest_year(dates, reference_years, round_unmatched=False)
-    0       NaN
-    1       NaN
-    2    2010.0
-    3    1980.0
-    4    1980.0
-    dtype: float64
-    >>> get_nearest_year(dates, reference_years, direction="nearest")
-    0    1963.0
-    1       NaN
-    2    2010.0
-    3    1980.0
-    4    2010.0
-    dtype: float64
     """
+    if not dates.name:
+        dates.name = "__date"
+
     reference_years = sorted(reference_years)
     has_date = dates.notna()
     years = pd.to_datetime(dates[has_date]).dt.year
@@ -212,16 +168,6 @@ def is_outlier(
     Returns
     -------
     Boolean NumPy array.
-
-    Examples
-    --------
-    >>> values = np.array([52, 56, 53, 57, 51, 59, 1, 99])
-    >>> is_outlier(values)
-    array([False, False, False, False, False, False,  True, False])
-    >>> is_outlier(values, method="iqr")
-    array([False, False, False, False, False, False,  True,  True])
-    >>> is_outlier(values, method="zscore")
-    array([False, False, False, False, False, False,  True, False])
     """
     if method == "iqr":
         iqr = stats.iqr(values, nan_policy="omit")
