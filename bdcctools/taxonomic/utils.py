@@ -16,6 +16,7 @@ def expand_result(names: pd.Series, df: pd.DataFrame):
     -------
 
     """
+    names = names.copy()
     df = df.copy()
 
     if not names.name:
