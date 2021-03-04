@@ -40,3 +40,10 @@ def test_direction_forward(dates, years):
     result = get_nearest_year(dates, years, direction="forward")
     expected = pd.Series([1963, np.nan, 2014, 2010, 2010])
     pd.testing.assert_series_equal(result, expected)
+
+
+def test_repeated_years(dates):
+    years = [1963, 1980, 2010, 1963, 1980, 2014, 2010, 2014]
+    result = get_nearest_year(dates, years)
+    expected = pd.Series([1963, np.nan, 2010, 1980, 1980])
+    pd.testing.assert_series_equal(result, expected)
