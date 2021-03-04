@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "bdcctools"
-version = "0.1.0"
+version = "0.2.0"
 description = "Biodiversity Data Cleaning and Curation Tools."
 license = "MIT"
 authors = ["Marcelo Villa-Piñeros <mvilla@humboldt.org.co>"]
