@@ -42,8 +42,8 @@ def create_id_grid(
     Coordinates and resolution should agree with the reference system
     passed in crs.
     """
-    height = np.ceil((ymax - ymin) / resolution).astype(np.int)
-    width = np.ceil((xmax - xmin) / resolution).astype(np.int)
+    height = np.ceil((ymax - ymin) / resolution).astype(int)
+    width = np.ceil((xmax - xmin) / resolution).astype(int)
     transform = rasterio.transform.from_origin(xmin, ymax, resolution, resolution)
     arr = np.arange(height * width, dtype=np.uint32).reshape(height, width)
 
