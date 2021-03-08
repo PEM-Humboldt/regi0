@@ -1,9 +1,13 @@
 """
 Functions for local taxonomic verifications.
 """
+import pathlib
 from typing import Union
 
 import pandas as pd
+
+
+from ..io import read_table
 
 
 def get_checklist_fields(
@@ -35,17 +39,70 @@ def get_checklist_fields(
     if isinstance(fields, str):
         fields = [fields]
 
-    df = pd.merge(
+    result = pd.merge(
         names, checklist, how="left", left_on="supplied_name", right_on=name_field
     )
-    df = df[fields + ["supplied_name"]]
+    present_fields = list(set(fields).intersection(checklist.columns))
+    absent_fields = list(set(fields).difference(checklist.columns))
+    result = result[present_fields + ["supplied_name"]]
+    result[absent_fields] = pd.NA
+    result = result[fields + ["supplied_name"]]
 
     if not expand:
-        df = df.drop_duplicates("supplied_name", ignore_index=True)
+        result = result.drop_duplicates("supplied_name", ignore_index=True)
     if not add_supplied_names:
-        df = df.drop(columns="supplied_name")
+        result = result.drop(columns="supplied_name")
 
-    return df
+    return result
+
+
+def get_checklist_fields_multiple(
+    names: Union[list, pd.Series, str],
+    filenames: list,
+    name_field: str,
+    fields: Union[list, str],
+    add_supplied_names: bool = False,
+    expand: bool = True,
+    keep_first: bool = True,
+    add_source: bool = False,
+    source_name: str = "source"
+) -> pd.DataFrame:
+    """
+
+    Parameters
+    ----------
+    names
+    filenames
+    name_field
+    fields
+    add_supplied_names
+    expand
+    keep_first
+    add_source
+    source_name
+
+    Returns
+    -------
+
+    """
+    result = None
+    for fn in filenames:
+        checklist = read_table(fn)
+        temp_result = get_checklist_fields(
+            names, checklist, name_field, fields, add_supplied_names, expand
+        )
+        mask = temp_result[fields].notna().any(axis=1)
+        if add_source:
+            stem = pathlib.Path(fn).stem
+            temp_result.loc[mask, source_name] = stem
+        if result is None:
+            result = temp_result
+        else:
+            if keep_first:
+                mask = mask & result[fields].isna().all(axis=1)
+            result[mask] = temp_result[mask]
+
+    return result
 
 
 def is_in_checklist(
