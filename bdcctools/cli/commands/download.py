@@ -12,7 +12,8 @@ from ..util.logger import LOGGER
 
 
 @click.command(
-    short_help="Download necessary data to run the bdcctools geo command line utility."
+    short_help="Download necessary data to run the bdcctools geographic and taxonomic "
+               "command line utilities."
 )
 @click.argument("url", type=str)
 @click.argument("dst", type=str, default=None, required=False)

@@ -1,9 +1,16 @@
 """
-$ bdcctools geo
+$ bdcctools geographic
 """
 
 import click
-import bdcctools.geographic
+from bdcctools.geographic.local import (
+    get_layer_field_historical,
+    intersects_layer_historical,
+    find_outliers,
+    find_spatial_duplicates
+)
+from bdcctools.io import read_geographic_table
+from bdcctools.utils import verify
 from rasterstats import point_query
 
 from ..options import geographic as opts
@@ -65,83 +72,73 @@ def geographic(
 
     if not quiet:
         LOGGER.info(f"Reading records from {src}.")
-    records = bdcctools.geographic.read_records(
-        src, lon_col, lat_col, crs=crs, drop_empty_coords=True
-    )
+    records = read_geographic_table(src, lon_col, lat_col, crs=crs)
 
+    # 1. Removal of records with incomplete or missing coordinates.
+    if not quiet:
+        LOGGER.info("Removing missing or incomplete coordinates.")
+    records = records.dropna(how="any", subset=[lon_col, lat_col])
+
+    # 2. Administrative boundaries verification.
     if not quiet:
         LOGGER.info("Validating administrative boundaries.")
     admin_paths = [admin0_path, admin1_path, admin2_path]
+    admin_fields = [admin0_match, admin1_match, admin2_match]
     admin_cols = [admin0_col, admin1_col, admin2_col]
-    admin_match_fields = [admin0_match, admin1_match, admin2_match]
     keys = ["admin0", "admin1", "admin2"]
-    admin_flag_names = [CONFIG.get("flagnames", key) for key in keys]
-    admin_suggested_names = [CONFIG.get("suggestednames", key) for key in keys]
-    admin_source_names = [CONFIG.get("sourcenames", key) for key in keys]
-    for path, col_name, match_field, flag_name, suggested_name, source_name in zip(
-        admin_paths,
-        admin_cols,
-        admin_match_fields,
-        admin_flag_names,
-        admin_suggested_names,
-        admin_source_names
-    ):
-        records = bdcctools.geographic.check_historical(
+    for path, field, col, key in zip(admin_paths, admin_fields, admin_cols, keys):
+        expected, source = get_layer_field_historical(
             records,
             path,
             date_col,
-            flag_name,
+            field,
             direction="backward",
             round_unmatched=True,
             default_year=default_year,
-            op="match",
-            left_col=col_name,
-            right_col=match_field,
-            suggested_name=suggested_name,
-            add_source=True,
-            source_name=source_name,
-            drop=drop,
+            return_source=True
         )
+        flag_name = CONFIG.get("flagnames", key)
+        suggested_name = CONFIG.get("suggestednames", key)
+        records = verify(
+            records, col, expected, flag_name, True, suggested_name, drop=drop
+        )
+        records[CONFIG.get("sourcenames", key)] = source
 
+    # 3. Urban limits verification.
     if not quiet:
         LOGGER.info("Identifying records in urban areas.")
-    records = bdcctools.geographic.check_historical(
+    intersects, source = intersects_layer_historical(
         records,
         urban_path,
         date_col,
-        CONFIG.get("flagnames", "urban"),
         direction="nearest",
         default_year=default_year,
-        op="intersection",
-        add_source=True,
-        source_name=CONFIG.get("sourcenames", "urban"),
-        drop=drop
+        return_source=True,
     )
+    records[CONFIG.get("flagnames", "urban")] = intersects
+    records[CONFIG.get("sourcenames", "urban")] = source
+    if drop:
+        records = records[~records[CONFIG.get("flagnames", "urban")]]
 
+    # 4. Elevation consistency
     if not quiet:
         LOGGER.info("Extracting elevation values and identifying outliers.")
-    records[CONFIG.get("valuenames", "elevation")] = point_query(
-            records.geometry, dem_path, interpolate="nearest"
+    values = point_query(records.geometry, dem_path, interpolate="nearest")
+    records[CONFIG.get("valuenames", "elevation")] = values
+    is_outlier = find_outliers(
+        records, species_col, CONFIG.get("valuenames", "elevation"), method="iqr"
     )
-    records = bdcctools.geographic.find_outliers(
-        records,
-        species_col,
-        CONFIG.get("valuenames", "elevation"),
-        CONFIG.get("flagnames", "elevation"),
-        method="iqr",
-        drop=drop
-    )
+    records[CONFIG.get("flagnames", "elevation")] = is_outlier
+    if drop:
+        records = records[~records[CONFIG.get("flagnames", "elevation")]]
 
+    # 5. Spatial duplicates
     if not quiet:
         LOGGER.info("Identifying spatial duplicates.")
-    records = bdcctools.geographic.find_spatial_duplicates(
-        records,
-        species_col,
-        CONFIG.get("flagnames", "spatialduplicate"),
-        resolution=gridres,
-        drop=drop,
-        mark=mark
-    )
+    is_duplicate = find_spatial_duplicates(records, species_col, gridres, mark=mark)
+    records[CONFIG.get("flagnames", "spatialduplicate")] = is_duplicate
+    if drop:
+        records = records[~records[CONFIG.get("flagnames", "spatialduplicate")]]
 
     if not quiet:
         LOGGER.info(f"Saving results to {dst}.")
