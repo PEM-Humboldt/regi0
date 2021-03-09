@@ -146,14 +146,6 @@ optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*"
 
 [[package]]
-name = "et-xmlfile"
-version = "1.0.1"
-description = "An implementation of lxml.xmlfile for the standard library"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "filelock"
 version = "3.0.12"
 description = "A platform independent file lock."
@@ -185,6 +177,20 @@ s3 = ["boto3 (>=1.2.4)"]
 test = ["pytest (>=3)", "pytest-cov", "boto3 (>=1.2.4)", "mock"]
 
 [[package]]
+name = "GDAL"
+version = "3.2.1"
+description = "GDAL: Geospatial Data Abstraction Library"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+numpy = ["numpy (>1.19.0)"]
+
+[package.source]
+type = "url"
+url = "https://bdcc-data.s3.amazonaws.com/GDAL-3.2.1-cp38-cp38-win_amd64.whl"
+[[package]]
 name = "gdown"
 version = "3.12.2"
 description = "Google Drive direct download of big files."
@@ -200,17 +206,17 @@ tqdm = "*"
 
 [[package]]
 name = "geopandas"
-version = "0.8.2"
+version = "0.9.0"
 description = "Geographic pandas extensions"
 category = "main"
 optional = false
-python-versions = ">=3.5"
+python-versions = ">=3.6"
 
 [package.dependencies]
-fiona = "*"
-pandas = ">=0.23.0"
+fiona = ">=1.8"
+pandas = ">=0.24.0"
 pyproj = ">=2.2.0"
-shapely = "*"
+shapely = ">=1.6"
 
 [[package]]
 name = "idna"
@@ -268,14 +274,6 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "jdcal"
-version = "1.4.1"
-description = "Julian dates from proleptic Gregorian and Julian calendars."
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "jedi"
 version = "0.18.0"
 description = "An autocompletion tool for Python that can be used for text editors."
@@ -320,18 +318,6 @@ description = "NumPy is the fundamental package for array computing with Python.
 category = "main"
 optional = false
 python-versions = ">=3.7"
-
-[[package]]
-name = "openpyxl"
-version = "3.0.6"
-description = "A Python library to read/write Excel 2010 xlsx/xlsm files"
-category = "main"
-optional = false
-python-versions = ">=3.6,"
-
-[package.dependencies]
-et-xmlfile = "*"
-jdcal = "*"
 
 [[package]]
 name = "packaging"
@@ -439,14 +425,14 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "pygeos"
-version = "0.8"
+version = "0.9"
 description = "GEOS wrapped in numpy ufuncs"
 category = "main"
 optional = false
 python-versions = ">=3"
 
 [package.dependencies]
-numpy = ">=1.10"
+numpy = ">=1.13"
 
 [package.extras]
 docs = ["sphinx", "numpydoc"]
@@ -727,7 +713,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "9fc30041d3655d21a5cc882ed5b31cf9205481fabc843621666e044a0636a111"
+content-hash = "094335c26b8dd6a555587382aa50a28827daea066cc9ef94bd715ea8bd2f4638"
 
 [metadata.files]
 affine = [
@@ -785,9 +771,6 @@ decorator = [
     {file = "decorator-4.4.2-py2.py3-none-any.whl", hash = "sha256:41fa54c2a0cc4ba648be4fd43cff00aedf5b9465c9bf18d64325bc225f08f760"},
     {file = "decorator-4.4.2.tar.gz", hash = "sha256:e3a62f0520172440ca0dcc823749319382e377f37f140a0b99ef45fecb84bfe7"},
 ]
-et-xmlfile = [
-    {file = "et_xmlfile-1.0.1.tar.gz", hash = "sha256:614d9722d572f6246302c4491846d2c393c199cfa4edc9af593437691683335b"},
-]
 filelock = [
     {file = "filelock-3.0.12-py3-none-any.whl", hash = "sha256:929b7d63ec5b7d6b71b0fa5ac14e030b3f70b75747cef1b10da9b879fef15836"},
     {file = "filelock-3.0.12.tar.gz", hash = "sha256:18d82244ee114f543149c66a6e0c14e9c4f8a1044b5cdaadd0f82159d6a6ff59"},
@@ -804,12 +787,13 @@ fiona = [
     {file = "Fiona-1.8.18-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:a3de7c1da06bc036dcd8954fa30e089587af335d4e549539169b1de9fe8badba"},
     {file = "Fiona-1.8.18.tar.gz", hash = "sha256:b732ece0ff8886a29c439723a3e1fc382718804bb057519d537a81308854967a"},
 ]
+GDAL = []
 gdown = [
     {file = "gdown-3.12.2.tar.gz", hash = "sha256:4b3a1301e57bfd8dce939bf25ef8fbb4b23967fd0f878eede328bdcc41386bac"},
 ]
 geopandas = [
-    {file = "geopandas-0.8.2-py2.py3-none-any.whl", hash = "sha256:8f53aa98e4ddb054afc46d289c930e96267d32c35c3dc685721ec2fddee77e60"},
-    {file = "geopandas-0.8.2.tar.gz", hash = "sha256:aa9ae82e4e6b52efa244bd4b8bd2363d66693e5592ad1a0f52b6afa8c36348cb"},
+    {file = "geopandas-0.9.0-py2.py3-none-any.whl", hash = "sha256:79f6e557ba0dba76eec44f8351b1c6b42a17c38f5f08fef347e98fe4dae563c7"},
+    {file = "geopandas-0.9.0.tar.gz", hash = "sha256:63972ab4dc44c4029f340600dcb83264eb8132dd22b104da0b654bef7f42630a"},
 ]
 idna = [
     {file = "idna-2.10-py2.py3-none-any.whl", hash = "sha256:b97d804b1e9b523befed77c48dacec60e6dcb0b5391d57af6a65a312a90648c0"},
@@ -826,10 +810,6 @@ ipython = [
 ipython-genutils = [
     {file = "ipython_genutils-0.2.0-py2.py3-none-any.whl", hash = "sha256:72dd37233799e619666c9f639a9da83c34013a73e8bbc79a7a6348d93c61fab8"},
     {file = "ipython_genutils-0.2.0.tar.gz", hash = "sha256:eb2e116e75ecef9d4d228fdc66af54269afa26ab4463042e33785b887c628ba8"},
-]
-jdcal = [
-    {file = "jdcal-1.4.1-py2.py3-none-any.whl", hash = "sha256:1abf1305fce18b4e8aa248cf8fe0c56ce2032392bc64bbd61b5dff2a19ec8bba"},
-    {file = "jdcal-1.4.1.tar.gz", hash = "sha256:472872e096eb8df219c23f2689fc336668bdb43d194094b5cc1707e1640acfc8"},
 ]
 jedi = [
     {file = "jedi-0.18.0-py2.py3-none-any.whl", hash = "sha256:18456d83f65f400ab0c2d3319e48520420ef43b23a086fdc05dff34132f0fb93"},
@@ -868,10 +848,6 @@ numpy = [
     {file = "numpy-1.20.1-cp39-cp39-win_amd64.whl", hash = "sha256:9c94cab5054bad82a70b2e77741271790304651d584e2cdfe2041488e753863b"},
     {file = "numpy-1.20.1-pp37-pypy37_pp73-manylinux2010_x86_64.whl", hash = "sha256:9eb551d122fadca7774b97db8a112b77231dcccda8e91a5bc99e79890797175e"},
     {file = "numpy-1.20.1.zip", hash = "sha256:3bc63486a870294683980d76ec1e3efc786295ae00128f9ea38e2c6e74d5a60a"},
-]
-openpyxl = [
-    {file = "openpyxl-3.0.6-py2.py3-none-any.whl", hash = "sha256:1a4b3869c2500b5c713e8e28341cdada49ecfcff1b10cd9006945f5bcefc090d"},
-    {file = "openpyxl-3.0.6.tar.gz", hash = "sha256:b229112b46e158b910a5d1b270b212c42773d39cab24e8db527f775b82afc041"},
 ]
 packaging = [
     {file = "packaging-20.9-py2.py3-none-any.whl", hash = "sha256:67714da7f7bc052e064859c05c595155bd1ee9f69f76557e21f051443c20947a"},
@@ -928,22 +904,23 @@ py = [
     {file = "py-1.10.0.tar.gz", hash = "sha256:21b81bda15b66ef5e1a777a21c4dcd9c20ad3efd0b3f817e7a809035269e1bd3"},
 ]
 pygeos = [
-    {file = "pygeos-0.8-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:e1ecb3d9edf56eb55208f8d9ff0d314926af3b0527e024172f2fe142b046f4ea"},
-    {file = "pygeos-0.8-cp35-cp35m-win32.whl", hash = "sha256:efb21aa3b01957c21237aaffbecfabc76f6411a9b7c75d359f1b9eb2d7239181"},
-    {file = "pygeos-0.8-cp35-cp35m-win_amd64.whl", hash = "sha256:6585a6adaad8ad3ebcf67e7854211fe9a2bc9beb59dc945b60db6ad40a3a9bd6"},
-    {file = "pygeos-0.8-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:5294e7c8e732325a1f7d370ba0fea1faabc6d14926fbbb2b67a4ae618ed47ed2"},
-    {file = "pygeos-0.8-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:92bae740bc2ccbb9d03f86995e936ff5a6e41b19a9da0499e8985e6e940a7a93"},
-    {file = "pygeos-0.8-cp36-cp36m-win32.whl", hash = "sha256:35b36a819a663a09f8585c6a67fc7c016004769ae08496b6de10b176e7ba61e1"},
-    {file = "pygeos-0.8-cp36-cp36m-win_amd64.whl", hash = "sha256:ff14eff6248b65b46481f06d4141b7b0dd9e3a0a6b9bf10b1a2c0eddccc94ad6"},
-    {file = "pygeos-0.8-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:1e95c79e34abad166824f3e0bf2412c9ea9873fcf51e0cacfb483f8955505aec"},
-    {file = "pygeos-0.8-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:696f2106b7c4a4f33b813cac141cb8483d420d4209f8e1dbde94e5e572cdac16"},
-    {file = "pygeos-0.8-cp37-cp37m-win32.whl", hash = "sha256:914fe40a9da4a4bd280448f173b48e9232aa652d5ff38e23c7039633fe57e92f"},
-    {file = "pygeos-0.8-cp37-cp37m-win_amd64.whl", hash = "sha256:c2bcf0aa4ecad93617d35072230ec9215ca6f9537bf75f959cd4084117269369"},
-    {file = "pygeos-0.8-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:0df97a1cc15fef561c36596f065cac8e05e1b0de08292ad7a07140a5fa6b4015"},
-    {file = "pygeos-0.8-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:36e2b60a987b2ce0ce988a334f2afa8925864456dec2c03891af8fd900a89504"},
-    {file = "pygeos-0.8-cp38-cp38-win32.whl", hash = "sha256:97a16e1ea243ac65176890d642597276c2c413ba8442a8b4f52cbe1b24ba5f68"},
-    {file = "pygeos-0.8-cp38-cp38-win_amd64.whl", hash = "sha256:650e56de79eceb75b216c3c08c6d703680d845395f5ea9fd67201bfa8240f6a0"},
-    {file = "pygeos-0.8.tar.gz", hash = "sha256:45b7e1aaa5fc9ff53565ef089fb75c53c419ace8cee18385ec1d7c1515c17cbc"},
+    {file = "pygeos-0.9-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:425221deda0e355166fcf7ce69613de4a52d6cff6ca667ccd1dc446fbad097c4"},
+    {file = "pygeos-0.9-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:82ddf8a6f4ea93d952678e9523f08debea5361d908490b25ac5fd46ed712a652"},
+    {file = "pygeos-0.9-cp36-cp36m-win32.whl", hash = "sha256:bbf661e2d2aa1fcbe10b4f6d739384a4f58e1006d51ef8d0e577fc62618aec16"},
+    {file = "pygeos-0.9-cp36-cp36m-win_amd64.whl", hash = "sha256:3f9126534e9bc88e872eae267032d0fab35f351d469caf6ffef4e1002bad4550"},
+    {file = "pygeos-0.9-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:4341501c725c8945319970f1e572a514719a17ddec6571d319561bb4ae6edf17"},
+    {file = "pygeos-0.9-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:531661dc547b0a9e03cf3cd8166a11d6a0e8cb3ecb71b8e6b240f6f28314023e"},
+    {file = "pygeos-0.9-cp37-cp37m-win32.whl", hash = "sha256:845567e866dbd8821675dce32d63bc9e6aa3a0384e8d5a7f259baf3bafbfd0c9"},
+    {file = "pygeos-0.9-cp37-cp37m-win_amd64.whl", hash = "sha256:3eaee0e9f9fcc7b6370bcfe839b15fcaa93dab3c894681df3e3437692decc4f1"},
+    {file = "pygeos-0.9-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:b17fe2ed942e3b83c4afb4d0bb5870ac21a26f8353b137444f49a6b6beb71d2f"},
+    {file = "pygeos-0.9-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:006aee5215d305afa96ce3e930a5fc00cfe9cc5e7c79f194922cd2eeb5547e2a"},
+    {file = "pygeos-0.9-cp38-cp38-win32.whl", hash = "sha256:bc017fe4521577f8a4f62baf6c4f0882b8c8a0b0fbf65befe5060b1921dfa80e"},
+    {file = "pygeos-0.9-cp38-cp38-win_amd64.whl", hash = "sha256:fae860732c532697f3708e8da669e057ce6692ed88740f493a522c5ed2f87aac"},
+    {file = "pygeos-0.9-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:c3d127091b18d98cd460cc5b20e2acabcf74668e8170146f40a158c01bbad055"},
+    {file = "pygeos-0.9-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:8e5b246dd7f1c5c554245a545424cac226443babfd7d6ef71a02b5635da9e8da"},
+    {file = "pygeos-0.9-cp39-cp39-win32.whl", hash = "sha256:b55e9bb4e03a30b809bdda102574d7e09e79907fe4f09c5b53be8c47585e1185"},
+    {file = "pygeos-0.9-cp39-cp39-win_amd64.whl", hash = "sha256:aaa10b3a29a6fce9036f80ccfdf96ddb75575ecef8f0dbdbb0a8c456a3793084"},
+    {file = "pygeos-0.9.tar.gz", hash = "sha256:c0584b20e95f80ee57277a6eb1e5d7f86600f8b1ef3c627d238e243afdcc0cc7"},
 ]
 pygments = [
     {file = "Pygments-2.8.1-py3-none-any.whl", hash = "sha256:534ef71d539ae97d4c3a4cf7d6f110f214b0e687e92f9cb9d2a3b0d3101289c8"},
