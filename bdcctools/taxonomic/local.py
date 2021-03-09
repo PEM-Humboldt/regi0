@@ -99,7 +99,7 @@ def get_checklist_fields_multiple(
             result = temp_result
         else:
             if keep_first:
-                mask = mask & result[fields].isna().all(axis=1)
+                mask = result[fields].isna().all(axis=1) & mask
             result[mask] = temp_result[mask]
 
     return result
@@ -111,7 +111,7 @@ def is_in_checklist(
     name_field: str,
     add_supplied_names: bool = False,
     expand: bool = True
-) -> Union[pd.DataFrame, pd.Series]:
+) -> pd.DataFrame:
     """
 
     Parameters
@@ -135,7 +135,59 @@ def is_in_checklist(
     result = names.isin(checklist[name_field])
     result.name = "in_checklist"
 
+    result.loc[names.isna()] = pd.NA
+
     if add_supplied_names:
         result = pd.concat([result, names], axis=1)
+
+    if isinstance(result, pd.Series):
+        result = pd.DataFrame(result)
+
+    return result
+
+
+def is_in_checklist_multiple(
+    names: Union[list, pd.Series, str],
+    filenames: list,
+    name_field: str,
+    add_supplied_names: bool = False,
+    expand: bool = True,
+    keep_first: bool = True,
+    add_source: bool = False,
+    source_name: str = "source"
+) -> Union[pd.DataFrame, pd.Series]:
+    """
+
+    Parameters
+    ----------
+    names
+    filenames
+    name_field
+    add_supplied_names
+    expand
+    keep_first
+    add_source
+    source_name
+
+    Returns
+    -------
+
+    """
+    result = None
+    for fn in filenames:
+        checklist = read_table(fn)
+        temp_result = is_in_checklist(
+            names, checklist, name_field, add_supplied_names, expand
+        )
+        mask = temp_result["in_checklist"].fillna(False)
+        if add_source:
+            stem = pathlib.Path(fn).stem
+            temp_result.loc[mask, source_name] = stem
+        if result is None:
+            result = temp_result
+        else:
+            if keep_first:
+                mask = ~result["in_checklist"].fillna(False) & mask
+            result[mask] = temp_result[mask]
 
     return result
