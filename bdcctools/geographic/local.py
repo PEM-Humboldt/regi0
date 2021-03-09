@@ -105,7 +105,7 @@ def _historical(
         if op == "intersection":
             year_result = intersects_layer(year_gdf, other)
         elif op == "match":
-            year_result = match_layer_field(year_gdf, other, field)
+            year_result = get_layer_field(year_gdf, other, field)
         else:
             raise ValueError("`op` must be either 'intersection' or 'match'.")
 
@@ -117,6 +117,49 @@ def _historical(
         return result, source
     else:
         return result
+
+
+def get_layer_field(
+    gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, field: str, op: str = "intersects",
+) -> pd.Series:
+    """
+
+
+    Parameters
+    ----------
+    gdf
+    other
+    field
+    op
+
+    Returns
+    -------
+
+    """
+    join = gpd.sjoin(gdf, other, how="left", op=op)
+
+    return join[field]
+
+
+def get_layer_field_historical(
+    gdf: gpd.GeoDataFrame, others_path: str, date_col: str, field: str, **kwargs
+) -> pd.Series:
+    """
+
+
+    Parameters
+    ----------
+    gdf
+    others_path
+    date_col
+    field
+    kwargs
+
+    Returns
+    -------
+
+    """
+    return _historical(gdf, others_path, date_col, op="match", field=field, **kwargs)
 
 
 def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Series:
@@ -172,58 +215,55 @@ def intersects_layer_historical(
     return _historical(gdf, others_path, date_col, op="intersection", **kwargs)
 
 
-def match_layer_field(
-    gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, field: str, op: str = "intersects",
+def find_outliers(
+    gdf: gpd.GeoDataFrame,
+    species_col: str,
+    value_col: str,
+    method: str = "std",
+    threshold: float = 2.0
 ) -> pd.Series:
     """
-
+    Finds outlier records based on values of a specific column.
 
     Parameters
     ----------
-    gdf
-    other
-    field
-    op
+    gdf:         GeoDataframe with records.
+    species_col: Column name with the species name for each record.
+    value_col:   Column name with values to find outliers from.
+    method:      Method to find outliers. Can be "std" for Standard
+                 Deviation, "iqr" for Interquartile Range or "zscore" for
+                 Z Score. For more details on the implementations, take
+                 a look at the code of the is_outlier function.
+    threshold:   For the "std" method is the value to multiply the
+                 standard deviation with. For the "zscore" method, it is
+                 the lower limit (negative) and the upper limit (positive)
+                 to compare Z Scores to.
 
     Returns
     -------
-
+    Boolean pandas Series.
     """
-    join = gpd.sjoin(gdf, other, how="left", op=op)
+    result = pd.Series([], index=gdf.index, dtype=bool)
+    for species in gdf[species_col].unique():
+        mask = gdf[species_col] == species
+        values = gdf.loc[mask, value_col]
+        result.loc[mask] = utils.is_outlier(values, method, threshold)
+        # Result for records that do not have a value is left empty. This
+        # is done here instead of returning the respective nan values in
+        # the is_outlier function because numpy cannot combine Boolean and
+        # nan values in a single array (while pandas allows it).
+        result.loc[mask & gdf[value_col].isna()] = pd.NA
 
-    return join[field]
-
-
-def match_layer_field_historical(
-    gdf: gpd.GeoDataFrame, others_path: str, date_col: str, field: str, **kwargs
-) -> pd.Series:
-    """
-
-
-    Parameters
-    ----------
-    gdf
-    others_path
-    date_col
-    field
-    kwargs
-
-    Returns
-    -------
-
-    """
-    return _historical(gdf, others_path, date_col, op="match", field=field, **kwargs)
+    return result
 
 
 def find_spatial_duplicates(
     gdf: gpd.GeoDataFrame,
     species_col: str,
-    flag_name: str,
     resolution: float,
     bounds: Union[list, tuple] = None,
-    mark: str = "all",
-    drop: bool = False
-) -> gpd.GeoDataFrame:
+    mark: str = "all"
+) -> pd.Series:
     """
     Find records of the same species that are in the same cell of a
     specific grid.
@@ -232,29 +272,25 @@ def find_spatial_duplicates(
     ----------
     gdf:         GeoDataframe with records.
     species_col: Column name with the species name for each record.
-    flag_name:   Column name for the flag (whether records are spatial
-                 duplicates).
     resolution:  Grid resolution.
     bounds:      Grid bounds (xmin, ym, xmax, ymax). If no bounds are
                  passed, the bounds from gdf will be taken.
     mark:        What duplicates to mark. Can be "head", to mark all
                  bur the last, "tail" to mark all but the first, or
                  "all".
-    drop:        Whether to drop records that are spatial duplicates.
 
     Returns
     -------
-    Original GeoDataFrame (gdf) with an extra column.
+    Boolean pandas Series.
 
     Notes
     -----
-    bounds and resolution should match gdf coordinate reference system.
+    `bounds` and `resolution` should match `gdf` coordinate reference system.
     """
     gdf = gdf.copy()
 
     if not bounds:
         bounds = gdf.geometry.total_bounds
-
     grid = utils.create_id_grid(*bounds, resolution, gdf.crs.srs)
     ids = point_query(
         gdf, grid.read(1), affine=grid.transform, interpolate="nearest", nodata=-9999
@@ -270,15 +306,10 @@ def find_spatial_duplicates(
         keep = "first"
     else:
         raise ValueError("Mark must be one of 'head', 'tail' or 'all'.")
-    gdf[flag_name] = gdf.duplicated(subset, keep=keep)
+    result = gdf.duplicated(subset, keep=keep)
 
-    # Flag for records that do not have a grid ID is left empty.
+    # Result for records that do not have a grid ID is left empty.
     no_grid_id = gdf["__grid_id"].isna()
-    gdf.loc[no_grid_id, flag_name] = pd.NA
+    result.loc[no_grid_id] = pd.NA
 
-    if drop:
-        gdf = gdf[~gdf[flag_name]]
-
-    gdf = gdf.drop(columns=["__grid_id"])
-
-    return gdf
+    return result
