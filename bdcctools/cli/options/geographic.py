@@ -1,10 +1,9 @@
 """
-Options for $ bdcctools geo.
+Options for $ bdcctools geographic
 """
-
 import click
 
-from ..util.geoconfig import CONFIG
+from ..util.config import CONFIG
 
 crs = click.option(
     "--crs",

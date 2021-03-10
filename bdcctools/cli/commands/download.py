@@ -1,13 +1,12 @@
 """
 $ bdcctools download
 """
-
 import os
 
 import click
 import gdown
 
-from ..util.geoconfig import CONFIG, CONFIG_PATH
+from ..util.config import CONFIG, CONFIG_PATH
 from ..util.logger import LOGGER
 
 
@@ -25,15 +24,16 @@ from ..util.logger import LOGGER
     show_default=True
 )
 def download(url, dst, quiet):
-
     if not os.path.exists(CONFIG_PATH):
         raise Exception("Config file not found. Run `bdcctools setup` first.")
 
-    output_path = gdown.download(url, dst, quiet=quiet)
+    # output_path = gdown.download(url, dst, quiet=quiet)
+    output_path = "/home/marcelo/misc/bdcc-test/bdcc_data.zip"
 
     if not quiet:
         LOGGER.info(f"Extracting data in {os.path.basename(output_path)}")
     extracted_paths = gdown.extractall(output_path)
+    print(extracted_paths)
 
     if not quiet:
         LOGGER.info(f"Updating config at {CONFIG_PATH}.")
@@ -43,5 +43,8 @@ def download(url, dst, quiet):
             name = os.path.splitext(os.path.basename(path))[0]
             if CONFIG.has_option("paths", name):
                 CONFIG.set("paths", name, path)
+        else:
+            if path.endswith("txt/"):
+                CONFIG.set("paths", "checklists", path)
     with open(CONFIG_PATH, "w") as config_file:
         CONFIG.write(config_file)

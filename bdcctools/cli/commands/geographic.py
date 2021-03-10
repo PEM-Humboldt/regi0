@@ -1,7 +1,6 @@
 """
 $ bdcctools geographic
 """
-
 import click
 from bdcctools.geographic.local import (
     get_layer_field_historical,
@@ -14,7 +13,7 @@ from bdcctools.utils import verify
 from rasterstats import point_query
 
 from ..options import geographic as opts
-from ..util.geoconfig import CONFIG
+from ..util.config import CONFIG
 from ..util.logger import LOGGER
 
 
@@ -69,7 +68,6 @@ def geographic(
     drop,
     quiet
 ):
-
     if not quiet:
         LOGGER.info(f"Reading records from {src}.")
     records = read_geographic_table(src, lon_col, lat_col, crs=crs)

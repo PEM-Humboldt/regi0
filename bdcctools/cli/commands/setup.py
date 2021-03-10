@@ -1,7 +1,6 @@
 """
 $ bdcctools setup
 """
-
 import pathlib
 import os
 import shutil
@@ -11,10 +10,9 @@ import click
 
 
 @click.command(
-    short_help="Setups the configuration files required to run the other CLI commands."
+    short_help="Sets up the configuration files required to run the other CLI commands."
 )
 def setup():
-
     root = pathlib.Path(__file__).parent.parent
     template_config_folder = root.joinpath("config")
     target_conf_folder = appdirs.user_config_dir("bdcctools")
