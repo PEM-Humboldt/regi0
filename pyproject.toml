@@ -32,7 +32,11 @@ rasterio = [
 rasterstats = "^0.15.0"
 requests = "^2.25.0"
 scipy = "^1.5.4"
-shapely = "^1.7.1"
+shapely = [
+    { platform = "darwin", version = "^1.7.1" },
+    { platform = "linux", version = "^1.7.1" },
+    { platform = "win32", url="https://bdcc-data.s3.amazonaws.com/Shapely-1.7.1-cp38-cp38-win_amd64.whl" }
+]
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
