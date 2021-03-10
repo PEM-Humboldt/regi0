@@ -10,7 +10,7 @@ import geopandas as gpd
 import pandas as pd
 from rasterstats import point_query
 
-from . import utils
+from bdcctools.geographic import utils
 
 
 def _historical(
@@ -87,9 +87,9 @@ def _historical(
     else:
         raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
 
-    result = pd.Series(index=gdf.index, dtype="")
+    result = pd.Series(index=gdf.index)
     if return_source:
-        source = pd.Series(gdf.index, dtype="object")
+        source = pd.Series(index=gdf.index)
 
     for year in historical_year.dropna().unique():
         layer = layers[years.index(year)]
@@ -243,7 +243,7 @@ def find_outliers(
     -------
     Boolean pandas Series.
     """
-    result = pd.Series([], index=gdf.index, dtype=bool)
+    result = pd.Series(index=gdf.index, dtype=bool)
     for species in gdf[species_col].unique():
         mask = gdf[species_col] == species
         values = gdf.loc[mask, value_col]
