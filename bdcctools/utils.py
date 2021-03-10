@@ -38,7 +38,7 @@ def verify(
 
     df[flag_name] = df[observed_col] == expected
     if add_suggested:
-        df[suggested_name] = expected
+        df.loc[~df[flag_name], suggested_name] = expected.loc[~df[flag_name]]
 
     if drop:
         df = df[~df[flag_name]]
