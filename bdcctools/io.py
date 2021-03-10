@@ -30,7 +30,7 @@ def read_geographic_table(
     GeoDataFrame.
     """
     dtypes = {lon_col: float, lat_col: float}
-    df = read_table(fn, dtypes=dtypes)
+    df = read_table(fn, dtype=dtypes)
     geometry = gpd.points_from_xy(df[lon_col], df[lat_col])
     gdf = gpd.GeoDataFrame(df, geometry=geometry, crs=crs)
 
@@ -52,11 +52,11 @@ def read_table(fn: str, **kwargs) -> pd.DataFrame:
     """
     ext = pathlib.Path(fn).suffix
     if ext == ".csv":
-        df = pd.read_csv(fn, kwargs)
+        df = pd.read_csv(fn, **kwargs)
     elif ext == ".txt":
-        df = pd.read_table(fn, kwargs)
+        df = pd.read_table(fn, **kwargs)
     elif ext in (".xls", ".xlsx"):
-        df = pd.read_excel(fn, kwargs)
+        df = pd.read_excel(fn, **kwargs)
     else:
         raise ValueError("Input file extension is not supported.")
 
