@@ -1,10 +1,9 @@
 """
-Options for $ bdcctools tax.
+Options for $ bdcctools taxonomic
 """
-
 import click
 
-from ..util.taxconfig import CONFIG
+from ..util.config import CONFIG
 
 species_col = click.option(
     "--species-col",
@@ -14,67 +13,28 @@ species_col = click.option(
     show_default=True
 )
 
-add_suggested = click.option(
-    "--add-suggested",
-    default=CONFIG.getboolean("behaviour", "add_suggested"),
-    is_flag=True,
-    help="Add suggested species names.",
-    show_default=True
-)
-
-add_source = click.option(
-    "--add-source",
-    default=CONFIG.getboolean("behaviour", "add_source"),
-    is_flag=True,
-    help="Add source for suggested species names.",
-    show_default=True
-)
-
-add_authority = click.option(
-    "--add-authority",
-    default=CONFIG.getboolean("behaviour", "add_authority"),
-    is_flag=True,
-    help="Add scientific name authority.",
-    show_default=True
-)
-
-authority_col = click.option(
-    "--authority-col",
-    default=CONFIG.get("colnames", "authority"),
+data_sources = click.option(
+    "--data-sources",
     type=str,
-    help="Name for the authority column.",
+    default=None,
+    help="Data source IDs to pass to Global Names Resolver API.",
     show_default=True
 )
 
-add_cites_listing = click.option(
-    "--add-cites-listing",
-    default=CONFIG.getboolean("behaviour", "add_cites_listing"),
-    is_flag=True,
-    help="Add cites listing.",
+checklists_path = click.option(
+    "--checklists-path",
+    type=click.Path(exists=True),
+    default=CONFIG.get("paths", "checklists"),
+    help="Path to a folder with the checklists.",
     show_default=True
 )
 
-cites_listing_col = click.option(
-    "--cites-listing-col",
-    default=CONFIG.get("colnames", "cites_listing"),
+fields = click.option(
+    "--fields",
     type=str,
-    help="Name for the cites listing column.",
-    show_default=True
-)
-
-add_risk_category = click.option(
-    "--add-risk-category",
-    default=CONFIG.getboolean("behaviour", "add_risk_category"),
-    is_flag=True,
-    help="Add IUCN risk category.",
-    show_default=True
-)
-
-risk_category_col = click.option(
-    "--risk-category-col",
-    default=CONFIG.get("colnames", "risk_category"),
-    type=str,
-    help="Name for the risk category column.",
+    default=None,
+    help="Checklist field(s) to retrieve. Pass it multiple times for multiple fields.",
+    multiple=True,
     show_default=True
 )
 
@@ -93,5 +53,3 @@ quiet = click.option(
     help="Silence information logging.",
     show_default=True
 )
-
-

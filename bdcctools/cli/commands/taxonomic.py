@@ -1,13 +1,18 @@
 """
-$ bdcctools tax
+$ bdcctools taxonomic
 """
+import glob
+import os
 
 import click
 import pandas as pd
-import bdcctools.taxonomic
+from bdcctools.io import read_table, write_table
+from bdcctools.taxonomic.local import get_checklist_fields_multiple
+from bdcctools.taxonomic.web.gnr import get_classification
+from bdcctools.utils import verify
 
 from ..options import taxonomic as opts
-from ..util.taxconfig import CONFIG
+from ..util.config import CONFIG
 from ..util.logger import LOGGER
 
 
@@ -17,84 +22,79 @@ from ..util.logger import LOGGER
 @click.argument("src", type=click.Path(exists=True))
 @click.argument("dst", type=click.Path(exists=False))
 @opts.species_col
-@opts.add_suggested
-@opts.add_source
-@opts.add_authority
-@opts.authority_col
-@opts.add_cites_listing
-@opts.cites_listing_col
-@opts.add_risk_category
-@opts.risk_category_col
+@opts.data_sources
+@opts.checklists_path
+@opts.fields
 @opts.drop
 @opts.quiet
 def taxonomic(
     src,
     dst,
     species_col,
-    add_suggested,
-    add_source,
-    add_authority,
-    authority_col,
-    add_cites_listing,
-    cites_listing_col,
-    add_risk_category,
-    risk_category_col,
+    data_sources,
+    checklists_path,
+    fields,
     drop,
     quiet
 ):
     if not quiet:
         LOGGER.info(f"Reading records from {src}.")
-    df = pd.read_csv(src)
+    records = read_table(src)
 
     if not quiet:
-        LOGGER.info("Validating scientific species.")
+        LOGGER.info("Validating scientific names using GNR.")
+    if data_sources:
+        data_sources = data_sources.split(",")
+    classification = get_classification(
+        records[species_col],
+        add_supplied_names=False,
+        add_source=True,
+        expand=True,
+        best_match_only=True,
+        data_source_ids=data_sources
+    )
+    species = classification["species"]
     flag_name = CONFIG.get("flagnames", "species")
     suggested_name = CONFIG.get("suggestednames", "species")
-    df = bdcctools.taxonomic.check_species(
-        df,
+    records = verify(
+        records,
         species_col,
+        species,
         flag_name,
-        add_suggested=add_suggested,
+        add_suggested=True,
         suggested_name=suggested_name,
-        add_source=add_source,
-        source_name=CONFIG.get("sourcenames", "species"),
         drop=drop
     )
+    records[CONFIG.get("sourcenames", "species")] = classification["source"]
 
-    # For adding either the authorities, thee cites listings or the risk
-    # categories, it is necessary to pass accepted scientific names.
-    # Hence, if the user decides to add suggested names when running the
-    # name resolver, a new series is created with the combination of
-    # originally correct names and the new suggested ones for those cases
-    # where the resolver found a suggestion.
-    if add_suggested:
-        accepted_names = df.loc[df[flag_name], species_col]
-        suggested_names = df.loc[~df[flag_name], suggested_name]
-        names = pd.concat([accepted_names, suggested_names]).sort_index()
-    else:
-        names = df[species_col]
+    # For extracting new information based on the scientific names, it is
+    # necessary to pass accepted scientific names. Hence, if the user a
+    # new series is created with the combination of originally correct
+    # names and the new suggested ones for those cases where the resolver
+    # found a suggestion.
+    accepted_names = records.loc[records[flag_name], species_col]
+    suggested_names = records.loc[~records[flag_name], suggested_name]
+    names = pd.concat([accepted_names, suggested_names]).sort_index()
 
-    if add_authority:
+    if checklists_path:
+        filenames = glob.glob(os.path.join(checklists_path, "*"))
+    if fields:
+        fields = list(fields)
         if not quiet:
-            LOGGER.info("Retrieving scientific name authorship.")
-        df[authority_col] = bdcctools.taxonomic.get_authority(
-            names, CONFIG.get("tokens", "iucn")
+            LOGGER.info("Retrieving fields from local checklists.")
+        result = get_checklist_fields_multiple(
+            names,
+            filenames,
+            species_col,
+            fields,
+            add_supplied_names=False,
+            expand=True,
+            keep_first=True,
+            add_source=True,
+            source_name="source"
         )
-
-    if add_cites_listing:
-        if not quiet:
-            LOGGER.info("Retrieving cites listing.")
-        df[cites_listing_col] = bdcctools.taxonomic.get_cites_listing(
-            names, CONFIG.get("tokens", "speciesplus")
-        )
-
-    if add_risk_category:
-        if not quiet:
-            LOGGER.info("Retrieving global risk categories from IUCN.")
-        df[risk_category_col] = bdcctools.taxonomic.get_risk_category(
-            names, CONFIG.get("tokens", "iucn")
-        )
+        records = pd.concat([records, result], axis=1)
 
     if not quiet:
         LOGGER.info(f"Saving results to {dst}.")
-    df.to_csv(dst, index=False)
+    write_table(records, dst, index=False)
