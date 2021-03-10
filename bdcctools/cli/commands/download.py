@@ -27,8 +27,7 @@ def download(url, dst, quiet):
     if not os.path.exists(CONFIG_PATH):
         raise Exception("Config file not found. Run `bdcctools setup` first.")
 
-    # output_path = gdown.download(url, dst, quiet=quiet)
-    output_path = "/home/marcelo/misc/bdcc-test/bdcc_data.zip"
+    output_path = gdown.download(url, dst, quiet=quiet)
 
     if not quiet:
         LOGGER.info(f"Extracting data in {os.path.basename(output_path)}")
