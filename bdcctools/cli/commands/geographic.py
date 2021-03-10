@@ -11,10 +11,14 @@ from bdcctools.geographic.local import (
 from bdcctools.io import read_geographic_table, write_table
 from bdcctools.utils import verify
 from rasterstats import point_query
+from shapely import speedups
 
 from ..options import geographic as opts
 from ..util.config import CONFIG
 from ..util.logger import LOGGER
+
+
+speedups.disable()
 
 
 @click.command(
