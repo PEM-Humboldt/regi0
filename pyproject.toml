@@ -21,6 +21,7 @@ GDAL = [
 gdown = "^3.12.2"
 geopandas = "^0.9.0"
 numpy = "^1.19.4"
+openpyxl = "^3.0.7"
 pandas = "^1.1.4"
 pygeos = "^0.9"
 rasterio = [
