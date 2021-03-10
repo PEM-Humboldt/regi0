@@ -110,7 +110,10 @@ def get_classification(
     add_source:         Add source column to the resulting DataFrame.
     expand:             Expand DataFrame rows to match `names` size. If
                         False, the number of rows will correspond to
-                        the number of unique names in `names`.
+                        the number of unique names in `names`. Only
+                        has effect if `resolve` is called with
+                        "best_match_only" set to True.
+    kwargs:             `resolve` keyword arguments.
 
     Returns
     -------
