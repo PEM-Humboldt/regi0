@@ -61,3 +61,26 @@ def read_table(fn: str, **kwargs) -> pd.DataFrame:
         raise ValueError("Input file extension is not supported.")
 
     return df
+
+
+def write_table(df: pd.DataFrame, fn: str, **kwargs) -> None:
+    """
+    Writes tabular data (csv, txt, xls or xlsx) to disk.
+
+    Parameters
+    ----------
+    df:     DataFrame.
+    fn:     Filename with extension. Can be a relative or absolute path.
+    kwargs: pandas read_csv, read_table and read_excel keyword arguments.
+
+    Returns
+    -------
+    None
+    """
+    ext = pathlib.Path(fn).suffix
+    if ext == ".csv":
+        df.to_csv(fn, **kwargs)
+    elif ext in (".xls", ".xlsx"):
+        df.to_excel(fn, **kwargs)
+    else:
+        raise ValueError("Input file extension is not supported.")

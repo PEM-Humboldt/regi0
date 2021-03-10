@@ -8,7 +8,7 @@ from bdcctools.geographic.local import (
     find_outliers,
     find_spatial_duplicates
 )
-from bdcctools.io import read_geographic_table
+from bdcctools.io import read_geographic_table, write_table
 from bdcctools.utils import verify
 from rasterstats import point_query
 
@@ -140,4 +140,5 @@ def geographic(
 
     if not quiet:
         LOGGER.info(f"Saving results to {dst}.")
-    records.drop(columns="geometry").to_csv(dst, index=False)
+    records = records.drop(columns="geometry")
+    write_table(records, dst, index=False)
