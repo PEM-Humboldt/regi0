@@ -32,7 +32,6 @@ def download(url, dst, quiet):
     if not quiet:
         LOGGER.info(f"Extracting data in {os.path.basename(output_path)}")
     extracted_paths = gdown.extractall(output_path)
-    print(extracted_paths)
 
     if not quiet:
         LOGGER.info(f"Updating config at {CONFIG_PATH}.")
