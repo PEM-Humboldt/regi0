@@ -19,19 +19,26 @@ def get_checklist_fields(
     expand: bool = True
 ) -> pd.DataFrame:
     """
+    Retrieves values for one or multiple fields from a checklist given
+    some species names.
 
     Parameters
     ----------
-    names
-    checklist
-    name_field
-    fields
-    add_supplied_names
-    expand
+    names:              Pandas Series with species names.
+    checklist:          Pandas DataFrame wih checklist information.
+    name_field:         Name of the column in `checklist` with species
+                        names.
+    fields:             List of fields (columns) to retrieve from
+                        `checklist`.
+    add_supplied_names: Whether to add `names` as an extra column in the
+                        result.
+    expand:             Whether to expand result rows to match `names`
+                        size. If False, the number of rows will correspond
+                        to the number of unique names in `names`.
 
     Returns
     -------
-
+    Pandas DataFrame with the values retrieved from `checklist`.
     """
     if isinstance(names, (list, str)):
         names = pd.Series(names)
@@ -68,22 +75,32 @@ def get_checklist_fields_multiple(
     source_name: str = "source"
 ) -> pd.DataFrame:
     """
+    Retrieves values for one or multiple fields from multiple checklists
+    given some species names. If a species name is found on more than one
+    checklist, only the field(s) values for one of them is kept.
 
     Parameters
     ----------
-    names
-    filenames
-    name_field
-    fields
-    add_supplied_names
-    expand
-    keep_first
-    add_source
-    source_name
+    names:              Pandas Series with species names.
+    filenames:          List of checklist file names.
+    name_field:         Name of the column in `checklist` with species
+                        names.
+    fields:             List of fields (columns) to retrieve from
+                        `checklist`.
+    add_supplied_names: Whether to add `names` as an extra column in the
+                        result.
+    expand:             Whether to expand result rows to match `names`
+                        size. If False, the number of rows will correspond
+                        to the number of unique names in `names`.
+    keep_first:         Whether to keep the first match from a checklist
+                        or use the latest.
+    add_source:         Whether to add the checklist name where the values
+                        were retrieved from.
+    source_name:        Name of the column with the source.
 
     Returns
     -------
-
+    Pandas DataFrame with the values retrieved from the checklists.
     """
     result = None
     for fn in filenames:
@@ -113,18 +130,25 @@ def is_in_checklist(
     expand: bool = True
 ) -> pd.DataFrame:
     """
+    Checks whether some species names are found in a given checklist.
 
     Parameters
     ----------
-    names
-    checklist
-    name_field
-    add_supplied_names
-    expand
+    names:              Pandas Series with species names.
+    checklist:          Pandas DataFrame wih checklist information.
+    name_field:         Name of the column in `checklist` with species
+                        names.
+    add_supplied_names: Whether to add `names` as an extra column in the
+                        result.
+    expand:             Whether to expand result rows to match `names`
+                        size. If False, the number of rows will correspond
+                        to the number of unique names in `names`.
 
     Returns
     -------
-
+    Pandas DataFrame with a Boolean Series indicating whether `names` are
+    present in `checklist`. If add_supplied_names=True is passed, the
+    result will have an extra column.
     """
     if isinstance(names, (list, str)):
         names = pd.Series(names)
@@ -157,21 +181,30 @@ def is_in_checklist_multiple(
     source_name: str = "source"
 ) -> Union[pd.DataFrame, pd.Series]:
     """
+    Checks whether some species names are found in a multiple checklist.
 
     Parameters
     ----------
-    names
-    filenames
-    name_field
-    add_supplied_names
-    expand
-    keep_first
-    add_source
-    source_name
+    names:              Pandas Series with species names.
+    filenames:          List of checklist file names.
+    name_field:         Name of the column in `checklist` with species
+                        names.
+    add_supplied_names: Whether to add `names` as an extra column in the
+                        result.
+    expand:             Whether to expand result rows to match `names`
+                        size. If False, the number of rows will correspond
+                        to the number of unique names in `names`.
+    keep_first:         Whether to keep the first match from a checklist
+                        or use the latest.
+    add_source:         Whether to add the checklist name where the values
+                        were retrieved from.
+    source_name:        Name of the column with the source.
 
     Returns
     -------
-
+    Pandas DataFrame with a Boolean Series indicating whether `names` are
+    present in the checklists. If add_supplied_names=True or
+    add_source=True, the result will have extra columns.
     """
     result = None
     for fn in filenames:
