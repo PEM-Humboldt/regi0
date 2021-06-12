@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 import pandas as pd
 import requests
 
-from ..utils import expand_result
+from bdcctools.taxonomic.utils import expand_result
 
 API_URL = "https://api.speciesplus.net/api/v1/"
 
@@ -57,9 +57,9 @@ def get_taxon_concepts(
     add_supplied_names: Add supplied scientific names column to the
                         resulting DataFrame.
     add_source:         Add source column to the resulting DataFrame.
-    expand:             Expand DataFrame rows to match `names` size. If
-                        False, the number of rows will correspond to
-                        the number of unique names in `names`.
+    expand:             Whether to expand result rows to match `names`
+                        size. If False, the number of rows will correspond
+                        to the number of unique names in `names`.
 
     Returns
     -------
@@ -85,6 +85,6 @@ def get_taxon_concepts(
     if add_source:
         df["source"] = "Species+/CITES"
     if expand:
-        df = expand_result(names, df)
+        df = expand_result(df, names)
 
     return df

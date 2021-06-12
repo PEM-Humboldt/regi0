@@ -38,7 +38,7 @@ def df():
 
 @pytest.fixture()
 def result(names, df):
-    return expand_result(names, df)
+    return expand_result(df, names)
 
 
 def test_order(result, names):

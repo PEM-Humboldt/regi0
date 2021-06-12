@@ -69,9 +69,10 @@ def write_table(df: pd.DataFrame, fn: str, **kwargs) -> None:
 
     Parameters
     ----------
-    df:     DataFrame.
+    df:     pandas DataFrame.
     fn:     Filename with extension. Can be a relative or absolute path.
-    kwargs: pandas read_csv, read_table and read_excel keyword arguments.
+    kwargs: Keyword arguments for pandas read_csv, read_table and
+        `   read_excel functions.
 
     Returns
     -------

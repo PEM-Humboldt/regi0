@@ -35,11 +35,11 @@ def _historical(
 
     Parameters
     ----------
-    gdf:             GeoDataframe with records.
+    gdf:             GeoDataFrame with records.
     others_path:     Folder with shapefiles or GeoPackage file with
                      historical data. Shapefile names of GeoPackage layer
-                     names must have a four-digit year anywhere in order to
-                     extract it and match it with the records collection
+                     names must have a four-digit year anywhere in order
+                     to extract it and match it with the records collection
                      date.
     date_col:        Column name with the collection date.
     direction:       Whether to search for prior, subsequent, or closest
@@ -50,13 +50,13 @@ def _historical(
                      a collection date or whose collection data did not
                      match with any year. Can be "last" for the most recent
                      year in the historical data, "fist" for the oldest
-                     year in the historical data or "none" to skip a default
-                     year assignation. Keep in mind that records without
-                     a collection date won't be validated.
+                     year in the historical data or "none" to skip a
+                     default year assignation. Keep in mind that records
+                     without a collection date won't be validated.
     op:              Operation to execute. Can be "intersection" to execute
                      check_intersection or "match" to execute check_match.
-    field:
-    return_source:
+    field:           Field to get from layers when `op` is "match".
+    return_source:   Whether to return a column with layer source.
 
     Returns
     -------
@@ -123,18 +123,21 @@ def get_layer_field(
     gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, field: str, op: str = "intersects",
 ) -> pd.Series:
     """
-
+    Gets the corresponding values of a specific field by performing a
+    spatial join between a GeoDataFrame with records and a GeoDataFrame
+    representing a vector layer.
 
     Parameters
     ----------
-    gdf
-    other
-    field
-    op
+    gdf:   GeoDataFrame with records.
+    other: GeoDataFrame with the target layer.
+    field: Name of the field to extract values from.
+    op:    Spatial join operation accepted by the GeoDataFrame's sjoin
+           method.
 
     Returns
     -------
-
+    Pandas Series with the extracted field values.
     """
     join = gpd.sjoin(gdf, other, how="left", op=op)
 
@@ -143,36 +146,45 @@ def get_layer_field(
 
 def get_layer_field_historical(
     gdf: gpd.GeoDataFrame, others_path: str, date_col: str, field: str, **kwargs
-) -> pd.Series:
+) -> Union[pd.Series, tuple]:
     """
-
+    Gets the corresponding values of a specific field by performing a
+    spatial join between a GeoDataFrame with records and multiple
+    historical vector layers.
 
     Parameters
     ----------
-    gdf
-    others_path
-    date_col
-    field
-    kwargs
+    gdf:         GeoDataFrame with records.
+    others_path: Path of a .gpkg file or a folder containing .shp files
+                 with the historical layers.
+    date_col:    Name of the date column in `gdf` to match historical
+                 layers with.
+    field:       Name of the field to extract values from. Must exist in
+                 all the historical layers.
+    kwargs:      Keyword arguments accepted by the _historical function.
 
     Returns
     -------
-
+    Pandas Series with the extracted field values. If return_source=True
+    is passed, it returns a tuple containing the Series with the extracted
+    values and another Series (of the same length) with their corresponding
+    source.
     """
     return _historical(gdf, others_path, date_col, op="match", field=field, **kwargs)
 
 
 def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Series:
     """
+    Checks whether records from `gdf` intersect any feature of `other`.
 
     Parameters
     ----------
-    gdf
-    other
+    gdf:   GeoDataFrame with records.
+    other: GeoDataFrame with features to intersect records with.
 
     Returns
     -------
-
+    Boolean pandas Series.
     """
     other = other.copy()
 
@@ -197,20 +209,25 @@ def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Serie
 
 def intersects_layer_historical(
     gdf: gpd.GeoDataFrame, others_path: str, date_col: str, **kwargs
-) -> pd.Series:
+) -> Union[pd.Series, tuple]:
     """
-
+    Checks whether records from `gdf` intersect any feature of their
+    corresponding historical vector layer.
 
     Parameters
     ----------
-    gdf
-    others_path
-    date_col
-    kwargs
+    gdf:         GeoDataFrame with records.
+    others_path: Path of a .gpkg file or a folder containing .shp files
+                 with the historical layers.
+    date_col:    Name of the date column in `gdf` to match historical
+                 layers with.
+    kwargs:      Keyword arguments accepted by the _historical function.
 
     Returns
     -------
-
+    Boolean pandas Series. If return_source=True is passed, it returns a
+    tuple containing the Boolean Series and another Series (of the same
+    length) with the corresponding source.
     """
     return _historical(gdf, others_path, date_col, op="intersection", **kwargs)
 
@@ -270,7 +287,7 @@ def find_spatial_duplicates(
 
     Parameters
     ----------
-    gdf:         GeoDataframe with records.
+    gdf:         GeoDataFrame with records.
     species_col: Column name with the species name for each record.
     resolution:  Grid resolution.
     bounds:      Grid bounds (xmin, ym, xmax, ymax). If no bounds are
@@ -285,7 +302,8 @@ def find_spatial_duplicates(
 
     Notes
     -----
-    `bounds` and `resolution` should match `gdf` coordinate reference system.
+    `bounds` and `resolution` should match `gdf` coordinate reference
+    system.
     """
     gdf = gdf.copy()
 

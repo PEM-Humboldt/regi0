@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from ..utils import expand_result
+from bdcctools.taxonomic.utils import expand_result
 
 API_URL = "http://resolver.globalnames.org/name_resolvers.json"
 
@@ -22,7 +22,7 @@ def resolve(
     with_context: bool = False,
     with_vernaculars: bool = False,
     with_canonical_ranks: bool = False
-) -> list:
+) -> pd.DataFrame:
     """
     Receives a list of names and resolves each against the entire resolver
     database or against specific data sources using the Global Names
@@ -108,12 +108,11 @@ def get_classification(
     add_supplied_names: Add supplied scientific names column to the
                         resulting DataFrame.
     add_source:         Add source column to the resulting DataFrame.
-    expand:             Expand DataFrame rows to match `names` size. If
-                        False, the number of rows will correspond to
-                        the number of unique names in `names`. Only
-                        has effect if `resolve` is called with
-                        "best_match_only" set to True.
-    kwargs:             `resolve` keyword arguments.
+    expand:             Whether to expand result rows to match `names`
+                        size. If False, the number of rows will correspond
+                        to the number of unique names in `names`. Only
+                        has effect if best_match_only=True is passed.
+    kwargs:             Keyword arguments of the resolve function.
 
     Returns
     -------
@@ -142,6 +141,6 @@ def get_classification(
         df["source"] = result["data_source_title"]
     if kwargs.get("best_match_only"):
         if expand:
-            df = expand_result(names, df)
+            df = expand_result(df, names)
 
     return df

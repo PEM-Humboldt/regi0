@@ -7,7 +7,7 @@ from typing import Union
 import pandas as pd
 
 
-from ..io import read_table
+from bdcctools.io import read_table
 
 
 def get_checklist_fields(
