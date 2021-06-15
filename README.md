@@ -81,7 +81,7 @@ Instale [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/instal
 git clone https://github.com/PEM-Humboldt/bdcctools.git
 ```
 
-2. Luego, ubíquese dentro de del directorio del proyecto:
+2. Luego, ubíquese dentro del directorio del proyecto:
 
  ```
 cd bdcctools
