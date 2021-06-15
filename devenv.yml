@@ -1,0 +1,10 @@
+name: bdcctools
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - gdal=3.2.2
+  - fiona
+  - rasterio
+  - pygeos
