@@ -71,20 +71,20 @@ poetry run pip install "C:\foo\bar\rasterio-1.2.4-cp39-cp39-win_amd64.whl"
 ##### [WIP] Si su sistema operativo es linux
 Dependiendo de la distribución puede requerir instalar algunos paquetes adicionales.
 
-#### Opcionón 2
+#### Opción 2
 Instale [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 
 ### Instalación de dependencias
 1. En primer lugar, es necesario clonar este repositorio localmente. Para esto, ejecute:
 
 ```
-git clone https://github.com/PEM-Humboldt/bdcctools.git
+git clone https://github.com/PEM-Humboldt/bdcc-tools.git
 ```
 
 2. Luego, ubíquese dentro del directorio del proyecto:
 
  ```
-cd bdcctools
+cd bdcc-tools
 ```
 
 En caso de haber optado por la opción 1 en la configuración del entorno de desarrollo, salte al paso 5, si optó por la opción 2, continúe con el paso 3.
