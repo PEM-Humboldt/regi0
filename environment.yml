@@ -3,9 +3,10 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python>=3.6
   - appdirs
   - click
-  - Fiona
+  - fiona
   - gdal
   - gdown
   - geopandas
@@ -16,6 +17,6 @@ dependencies:
   - rasterio
   - rasterstats
   - requests
-  - Rtree
+  - rtree
   - scipy
   - shapely
