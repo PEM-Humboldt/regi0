@@ -1,0 +1,22 @@
+name: bdcctools-dev
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.6
+  - appdirs
+  - click
+  - fiona
+  - gdal
+  - gdown
+  - geopandas
+  - numpy
+  - openpyxl
+  - pandas
+  - pygeos
+  - rasterio
+  - rasterstats
+  - requests
+  - rtree
+  - scipy
+  - shapely
