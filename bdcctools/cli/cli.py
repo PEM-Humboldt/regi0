@@ -1,7 +1,6 @@
 """
 CLI entry point.
 """
-
 import click
 
 from .commands.download import download
