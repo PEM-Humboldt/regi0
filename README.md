@@ -7,7 +7,7 @@ BDCC Tools: Biodiversity Data Cleaning and Curation Tools.
 
 Con `pip`:
 ```shell
-
+pip install bdcctools
 ```
 
 Con `conda`:
