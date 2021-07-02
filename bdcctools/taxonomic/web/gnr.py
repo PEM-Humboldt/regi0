@@ -88,6 +88,15 @@ def resolve(
 
     data = response.json()["data"]
 
+    # The pd.json_normalize() function does not work when record_path
+    # is not found in every single item inside the list of elements
+    # passed. In some cases, the Global Names Resolver API returns items
+    # without this key, so it needs to be added (including an empty
+    # dictionary) before normalizing the result.
+    for item in data:
+        if "results" not in item:
+            item["results"] = [{}]
+
     return pd.json_normalize(data, record_path="results", meta="supplied_name_string")
 
 
