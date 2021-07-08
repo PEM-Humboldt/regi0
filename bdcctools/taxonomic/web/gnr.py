@@ -68,7 +68,7 @@ def resolve(
     if data_source_ids is None:
         data_source_ids = []
 
-    # Apparently, GNR API does not accept Booleans so they need to be
+    # Apparently, the GNR API does not accept Booleans so they need to be
     # converted to lowercase strings first.
     params = {
         "data": "\n".join(names),
@@ -87,6 +87,15 @@ def resolve(
         raise Exception(f"Error calling Global Name Resolver API. {err}")
 
     data = response.json()["data"]
+
+    # The pd.json_normalize() function does not work when record_path
+    # is not found in every single item inside the list of elements
+    # passed. In some cases, the GNR API returns items without this key,
+    # so it needs to be added (including an empty dictionary) before
+    # normalizing the result.
+    for item in data:
+        if "results" not in item:
+            item["results"] = [{}]
 
     return pd.json_normalize(data, record_path="results", meta="supplied_name_string")
 
@@ -130,11 +139,17 @@ def get_classification(
     path_indices = result["classification_path"].str.split("|", expand=True)
 
     for rank in ranks:
-        mask = (rank_indices == rank).any(axis=1)
-        rank_idx = np.nonzero(rank_indices[mask].values == rank)
-        rank_paths = path_indices[mask].values[rank_idx]
-        df.loc[mask, rank] = rank_paths
+        # The GNR API result might have duplicated ranks for one or more
+        # items. Thus, duplicated ranks are removed and only the value for
+        # first the appearance is kept.
+        rank_idx = np.nonzero(rank_indices.values == rank)
+        unique_idx = np.unique(rank_idx[0], return_index=True)[1]
+        new_idx = np.column_stack(rank_idx)[unique_idx]
+        rank_idx = tuple(new_idx.T)
+        rank_paths = path_indices.values[rank_idx]
+        df.loc[(rank_indices == rank).any(axis=1), rank] = rank_paths
 
+    df = df.replace("", np.nan)
     if add_supplied_names:
         df["supplied_name"] = unique_names
     if add_source:
