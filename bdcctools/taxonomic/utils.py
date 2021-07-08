@@ -4,18 +4,27 @@ Helper functions for the taxonomic module.
 import pandas as pd
 
 
-def clean_names(s: pd.Series) -> pd.Series:
+def clean_names(names: pd.Series) -> pd.Series:
     """
 
     Parameters
     ----------
-    s
+    names
 
     Returns
     -------
 
     """
-    pass
+    exceptions = ["aff", "cf"]
+
+    names = names.str.replace(r"[^\w\s]+", "", regex=True)
+    names = names.str.replace(r"\d+", "", regex=True)
+    for exception in exceptions:
+        names = names.str.replace(exception, "")
+    names = names.replace(r"\s+", ' ', regex=True)
+    names = names.str.split(" ").str[:2].str.join(" ")
+
+    return names
 
 
 def expand_result(df: pd.DataFrame, names: pd.Series) -> pd.DataFrame:
