@@ -4,7 +4,21 @@ Helper functions for the taxonomic module.
 import pandas as pd
 
 
-def expand_result(df: pd.DataFrame, names: pd.Series, ) -> pd.DataFrame:
+def clean_names(s: pd.Series) -> pd.Series:
+    """
+
+    Parameters
+    ----------
+    s
+
+    Returns
+    -------
+
+    """
+    pass
+
+
+def expand_result(df: pd.DataFrame, names: pd.Series) -> pd.DataFrame:
     """
     Expands `df` rows to match `names` size by duplicating rows for
     duplicated names.
