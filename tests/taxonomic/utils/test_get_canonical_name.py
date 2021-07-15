@@ -4,7 +4,7 @@ Test cases for the bdcctools.taxonomic.utils.clean_names function.
 import pandas as pd
 import pytest
 
-from bdcctools.taxonomic.utils import clean_names
+from bdcctools.taxonomic.utils import get_canonical_name
 
 
 @pytest.fixture()
@@ -40,4 +40,4 @@ def expected():
 
 
 def test_clean(names, expected):
-    pd.testing.assert_series_equal(clean_names(names), expected)
+    pd.testing.assert_series_equal(get_canonical_name(names), expected)

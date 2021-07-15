@@ -4,7 +4,7 @@ Helper functions for the taxonomic module.
 import pandas as pd
 
 
-def clean_names(names: pd.Series) -> pd.Series:
+def get_canonical_name(names: pd.Series) -> pd.Series:
     """
 
     Parameters
@@ -15,13 +15,14 @@ def clean_names(names: pd.Series) -> pd.Series:
     -------
 
     """
-    exceptions = ["aff", "cf"]
+    names = names.str.replace(r"\d+|[^\w\s]+", "", regex=True)
+    names = names.replace(r"\s+", " ", regex=True)
 
-    names = names.str.replace(r"[^\w\s]+", "", regex=True)
-    names = names.str.replace(r"\d+", "", regex=True)
-    for exception in exceptions:
-        names = names.str.replace(exception, "")
-    names = names.replace(r"\s+", ' ', regex=True)
+    names = names.str.capitalize()
+    expressions = ["aff", "cf", "sp", "spp", "v"]
+    for expression in expressions:
+        names = names.str.replace(f" {expression} ", " ")
+
     names = names.str.split(" ").str[:2].str.join(" ")
 
     return names
