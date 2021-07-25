@@ -138,7 +138,7 @@ QUALIFIERS = {
         "sp. gr."
     ],
     "species incerta": [
-        "?",
+        # r"?",
         "gen. inc.",
         "gen. et sp. inc.",
         "inc.",

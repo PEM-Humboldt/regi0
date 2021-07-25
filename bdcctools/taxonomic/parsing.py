@@ -29,4 +29,4 @@ def get_canonical_name(names: pd.Series) -> pd.Series:
     names = names.apply(lambda x: " ".join(x), axis=1)
     names = clean_text(names)
 
-    return names.str.split(" ", n=2).str.join(" ")
+    return names.str.split(" ").str[:2].str.join(" ")
