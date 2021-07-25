@@ -24,9 +24,8 @@ def get_canonical_name(names: pd.Series) -> pd.Series:
     qualifiers = pd.Series(sum(QUALIFIERS.values(), []))
     qualifiers = qualifiers.str.replace(".", "", regex=False)
     qualifiers = pd.unique(qualifiers.str.split(" ", expand=True).stack())
-    names = names.str.split(" ", expand=True).replace(qualifiers, "")
-    names = names.fillna("")
-    names = names.apply(lambda x: " ".join(x), axis=1)
+    names = names.str.split(" ", expand=True).replace(qualifiers, pd.NA)
+    names = names.apply(lambda x: x.str.cat(sep=" "), axis=1)
     names = clean_text(names)
 
     return names.str.split(" ").str[:2].str.join(" ")
