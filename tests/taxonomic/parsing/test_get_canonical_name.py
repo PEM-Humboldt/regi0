@@ -6,38 +6,6 @@ import pandas as pd
 from bdcctools.taxonomic.parsing import get_canonical_name
 
 
-# @pytest.fixture()
-# def names():
-#     return pd.Series(
-#         [
-#             "Caluromys lanatus (Olfers, 1818)",
-#             "Didelphis aliventris Lund, 1840",
-#             "[Colobothea aleata Bates, 1885]",
-#             "Anadenanthera pergrina (L.) Speg.",
-#             "Thamnophilus doliatus Lafresnaye 1844)",
-#             "Lonchurus cf lanceolatus",
-#             "Caenolestes aff. convelatus",
-#             "Caenolestes ? fuliginosus"
-#         ]
-#     )
-#
-#
-# @pytest.fixture()
-# def expected():
-#     return pd.Series(
-#         [
-#             "Caluromys lanatus",
-#             "Didelphis aliventris",
-#             "Colobothea aleata",
-#             "Anadenanthera pergrina",
-#             "Thamnophilus doliatus",
-#             "Lonchurus lanceolatus",
-#             "Caenolestes convelatus",
-#             "Caenolestes fuliginosus"
-#         ]
-#     )
-
-
 def test_authors():
     names = pd.Series([
         "Caluromys lanatus (Olfers, 1818)",
@@ -67,6 +35,7 @@ def test_canonical():
         "Homo sapiens",
         "Eunectes murinus"
     ])
+    pd.testing.assert_series_equal(get_canonical_name(names), expected)
 
 
 def test_qualifiers():
