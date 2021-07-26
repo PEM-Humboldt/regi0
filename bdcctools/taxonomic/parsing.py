@@ -9,14 +9,18 @@ from bdcctools.utils import clean_text
 
 def get_canonical_name(names: pd.Series) -> pd.Series:
     """
+    Extracts the canonical name (genus and specific epithet) of a Series
+    of scientific names. It does this by removing special characters,
+    numbers and Open Nomenclature qualifiers (such as aff. or cf.) and
+    then taking the first two words.
 
     Parameters
     ----------
-    names
+    names: pandas Series with the scientific names.
 
     Returns
     -------
-
+    pandas Series with the extracted canonical names.
     """
     names = clean_text(names)
     names = names.str.capitalize()
