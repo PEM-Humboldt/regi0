@@ -4,6 +4,26 @@ General helper functions.
 import pandas as pd
 
 
+def clean_text(s: pd.Series) -> pd.Series:
+    """
+    Removes special characters, leading, trailing and multiple whitespaces
+    from text values in a pandas Series.
+
+    Parameters
+    ----------
+    s: Pandas series to clean.
+
+    Returns
+    -------
+    Clean Series.
+    """
+    s = s.replace(r"\d+|[^\w\s]+", "", regex=True)
+    s = s.replace(r"\s+", " ", regex=True)
+    s = s.str.strip()
+
+    return s
+
+
 def verify(
     df: pd.DataFrame,
     observed_col: str,
