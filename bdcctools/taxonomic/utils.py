@@ -4,30 +4,6 @@ Helper functions for the taxonomic module.
 import pandas as pd
 
 
-def get_canonical_name(names: pd.Series) -> pd.Series:
-    """
-
-    Parameters
-    ----------
-    names
-
-    Returns
-    -------
-
-    """
-    names = names.str.replace(r"\d+|[^\w\s]+", "", regex=True)
-    names = names.replace(r"\s+", " ", regex=True)
-
-    names = names.str.capitalize()
-    expressions = ["aff", "cf", "sp", "spp", "v"]
-    for expression in expressions:
-        names = names.str.replace(f" {expression} ", " ")
-
-    names = names.str.split(" ").str[:2].str.join(" ")
-
-    return names
-
-
 def expand_result(df: pd.DataFrame, names: pd.Series) -> pd.DataFrame:
     """
     Expands `df` rows to match `names` size by duplicating rows for
