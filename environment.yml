@@ -14,6 +14,7 @@ dependencies:
   - openpyxl
   - pandas
   - pygeos
+  - rapidfuzz
   - rasterio
   - rasterstats
   - requests
