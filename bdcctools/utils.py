@@ -11,7 +11,7 @@ def clean_text(s: pd.Series) -> pd.Series:
 
     Parameters
     ----------
-    s: Pandas series to clean.
+    s: pandas Series to clean.
 
     Returns
     -------
@@ -26,13 +26,16 @@ def clean_text(s: pd.Series) -> pd.Series:
 
 def standardize_text(s: pd.Series) -> pd.Series:
     """
+    Standardizes text values by cleaning, converting to lowercase and
+    removing accents.
 
     Parameters
     ----------
-    s
+    s: pandas Series to standardize.
+
     Returns
     -------
-
+    Standardized Series.
     """
     s = clean_text(s)
     s = s.str.lower()
