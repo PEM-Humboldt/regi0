@@ -24,46 +24,18 @@ def clean_text(s: pd.Series) -> pd.Series:
     return s
 
 
-def verify(
-    df: pd.DataFrame,
-    observed_col: str,
-    expected: pd.Series,
-    flag_name: str,
-    add_suggested: bool = False,
-    suggested_name: str = None,
-    drop: bool = False
-) -> pd.DataFrame:
+def standardize_text(s: pd.Series) -> pd.Series:
     """
-    Verifies that the values in a specific column from `df` match some
-    expected values.
 
     Parameters
     ----------
-    df:             pandas DataFrame.
-    observed_col:   Name of the column in `df` with the values to verify.
-    expected:       pandas Series with expected values. Has to match `df`
-                    length.
-    flag_name:      Name of the resulting column indicating whether the
-                    observed values match the expected values.
-    add_suggested:  Whether to add a column to the result with suggested
-                    values for those rows where the observed values do not
-                    match the expected values.
-    suggested_name: Name of the column for the suggested values. Only has
-                    effect when add_suggested=True is passed.
-    drop:           Whether to drop the rows where the observed values
-                    do not match the expected values.
-
+    s
     Returns
     -------
-    Copy of `df` with extra columns.
+
     """
-    df = df.copy()
+    s = clean_text(s)
+    s = s.str.lower()
+    s = s.str.normalize("NFKD").str.encode("ascii", errors="ignore").str.decode("utf-8")
 
-    df[flag_name] = df[observed_col] == expected
-    if add_suggested:
-        df.loc[~df[flag_name], suggested_name] = expected.loc[~df[flag_name]]
-
-    if drop:
-        df = df[~df[flag_name]]
-
-    return df
+    return s
