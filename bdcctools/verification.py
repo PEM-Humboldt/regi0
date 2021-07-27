@@ -84,6 +84,6 @@ def verify(
     if add_suggested:
         df.loc[~df[flag_name], suggested_name] = expected.loc[~df[flag_name]]
     if drop:
-        df = df[~df[flag_name]]
+        df = df[df[flag_name]]
 
     return df
