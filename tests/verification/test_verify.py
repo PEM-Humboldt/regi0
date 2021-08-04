@@ -10,7 +10,7 @@ from bdcctools.verification import verify
 @pytest.fixture
 def df():
     return pd.DataFrame({
-        "species": ["Tremarctos ornatus", "Panthera onca", "Lupus canis"],
+        "species": ["Tremarctos ornatus", "Panthera onca", "Canis lupus"],
         "admin0": ["Colombia", "Mexico", "Venezuela"]
     })
 
