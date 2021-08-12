@@ -16,11 +16,14 @@ def get_canonical_name(names: pd.Series) -> pd.Series:
 
     Parameters
     ----------
-    names: pandas Series with the scientific names.
+    names
+        Series with the scientific names.
 
     Returns
     -------
-    pandas Series with the extracted canonical names.
+    pd.Series
+        Series with the extracted canonical names.
+
     """
     names = clean_text(names)
     names = names.str.capitalize()

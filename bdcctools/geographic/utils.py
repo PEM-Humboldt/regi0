@@ -25,22 +25,29 @@ def create_id_grid(
 
     Parameters
     ----------
-    xmin:       Upper-left corner x coordinate.
-    ymin:       Lower-right corner y coordinate.
-    xmax:       Lower-left corner x coordinate.
-    ymax:       Upper-left corner y coordinate.
-    resolution: Pixel resolution.
-    crs:        Coordinate Reference System. Must be in the form
-                epsg:code.
+    xmin
+        Upper-left corner x coordinate.
+    ymin
+        Lower-right corner y coordinate.
+    xmax
+        Lower-left corner x coordinate.
+    ymax
+        Upper-left corner y coordinate.
+    resolution
+        Pixel resolution.
+    crs
+        Coordinate Reference System. Must be in the form epsg:code.
 
     Returns
     -------
-    In-memory raster with unique IDs.
+    rasterio.io.DatasetWriter
+        In-memory raster with unique IDs.
 
     Notes
     -----
-    Coordinates and resolution should agree with the reference system
+    Coordinates and resolution should match with the reference system
     passed in crs.
+
     """
     height = np.ceil((ymax - ymin) / resolution).astype(int)
     width = np.ceil((xmax - xmin) / resolution).astype(int)
@@ -70,16 +77,14 @@ def extract_year(string: str) -> int:
 
     Parameters
     ----------
-    string: String to extract the year from.
+    string
+        String to extract the year from.
 
     Returns
     -------
-    Four-digit integer representing the year.
+    int
+        Four-digit integer representing the year.
 
-    Notes
-    -----
-    Regex expression was taken from:
-    https://stackoverflow.com/a/49853325/7144368
     """
     expr = r"(?:19|20)\d{2}"
     matches = re.findall(expr, string)
@@ -103,23 +108,23 @@ def get_nearest_year(
 
     Parameters
     ----------
-    dates:           Series with datetime-like objects.
-    reference_years: List of years to round each row to.
-    direction:       Whether to search for prior, subsequent, or closest
-                     matches. Can be "backward", "nearest" or "forward".
-                     For more information go to:
-                     https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge_asof.html
-    round_unmatched: Whether to round unmatched rows to the nearest year
-                     using a different direction than the one specified.
+    dates
+        Series with datetime-like objects.
+    reference_years
+        List of years to round each row to.
+    direction
+        Whether to search for prior, subsequent, or closest matches. Can
+        be "backward", "nearest" or "forward". For more information go to:
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge_asof.html
+    round_unmatched
+        Whether to round unmatched rows to the nearest year using a
+        different direction than the one specified.
 
     Returns
     -------
-    Series with the nearest years.
+    pd.Series
+        Series with the nearest years.
 
-    Notes
-    -----
-    This function is based on the answer given on:
-    https://stackoverflow.com/a/64881346/7144368
     """
     if not dates.name:
         dates.name = "__date"
@@ -157,17 +162,20 @@ def is_outlier(
 
     Parameters
     ----------
-    values:     1D NumPy array of values.
-    method:     Method to classify outliers. Can be "std", "iqr" or
-                "zscore".
-    threshold:  For the "std" method is the value to multiply the
-                standard deviation with. For the "zscore" method, it is
-                the lower limit (negative) and the upper limit (positive)
-                to compare Z Scores to.
+    values
+        1D NumPy array of values.
+    method
+        Method to classify outliers. Can be "std", "iqr" or "zscore".
+    threshold
+        For the "std" method is the value to multiply the standard
+        deviation with. For the "zscore" method, it is the lower limit
+        (negative) and the upper limit (positive) to compare Z Scores to.
 
     Returns
     -------
-    Boolean NumPy array.
+    np.ndarray
+        1D boolean NumPy array indicating whether values are outliers.
+
     """
     if method == "iqr":
         iqr = stats.iqr(values, nan_policy="omit")

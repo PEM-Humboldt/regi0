@@ -31,37 +31,35 @@ def resolve(
 
     Parameters
     ----------
-    names:                  List of species names to resolve.
-    data_source_ids:        List of specific data sources IDs to resolve
-                            against. A list of all the available data
-                            sources and their IDs can be found at:
-                            http://resolver.globalnames.org/data_sources.
-    resolve_once:           Find the first available match instead of
-                            matches across all data sources with all
-                            possible renderings of a name.
-    best_match_only:        Returns just one result with the highest
-                            score.
-    with_context:           Reduce the likelihood of matches to taxonomic
-                            homonyms. When True, a common taxonomic
-                            context is calculated for all supplied names
-                            from matches in data sources that have
-                            classification tree paths. Names out of
-                            determined context are penalized during
-                            score calculation.
-    with_vernaculars:       Return 'vernacular' field to present common
-                            names provided by a data source for a
-                            particular match.
-    with_canonical_ranks:   Returns 'canonical_form' with infraspecific
-                            ranks, if they are present.
+    names
+        List of species names to resolve.
+    data_source_ids
+        List of specific data sources IDs to resolve against. A list of
+        all the available data sources and their IDs can be found at:
+        http://resolver.globalnames.org/data_sources.
+    resolve_once
+        Find the first available match instead of matches across all data
+        sources with all possible renderings of a name.
+    best_match_only
+        Returns just one result with the highest score.
+    with_context
+        Reduce the likelihood of matches to taxonomic homonyms. When True,
+        a common taxonomic context is calculated for all supplied names
+        from matches in data sources that have classification tree paths.
+        Names out of determined context are penalized during score
+        calculation.
+    with_vernaculars
+        Return 'vernacular' field to present common names provided by a
+        data source for a particular match.
+    with_canonical_ranks
+        Returns 'canonical_form' with infraspecific ranks, if they are
+        present.
 
     Returns
     -------
-    List with the results for each name in names.
+    pd.DataFrame
+        DataFrame where rows are the result for each match.
 
-    Notes
-    -----
-    More information on the GNR API can be found at:
-    http://resolver.globalnames.org/api
     """
     if isinstance(names, str):
         names = [names]
@@ -113,19 +111,24 @@ def get_classification(
 
     Parameters
     ----------
-    names:              Scientific name(s) to get results for.
-    add_supplied_names: Add supplied scientific names column to the
-                        resulting DataFrame.
-    add_source:         Add source column to the resulting DataFrame.
-    expand:             Whether to expand result rows to match `names`
-                        size. If False, the number of rows will correspond
-                        to the number of unique names in `names`. Only
-                        has effect if best_match_only=True is passed.
-    kwargs:             Keyword arguments of the resolve function.
+    names
+        Scientific name(s) to get results for.
+    add_supplied_names
+        Add supplied scientific names column to the resulting DataFrame.
+    add_source
+        Add source column to the resulting DataFrame.
+    expand
+        Whether to expand result rows to match `names` size. If False, the
+        number of rows will correspond to the number of unique names in
+        `names`. Only has effect if best_match_only=True is passed.
+    **kwargs
+        Keyword arguments of the resolve function.
 
     Returns
     -------
-    Classification DataFrame.
+    pd.DataFrame
+        DataFrame with the ranks for each match.
+
     """
     if isinstance(names, (list, str)):
         names = pd.Series(names)
