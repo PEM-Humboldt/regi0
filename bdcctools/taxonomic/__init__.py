@@ -4,8 +4,5 @@ from bdcctools.taxonomic.local import (
     is_in_checklist,
     is_in_checklist_multiple
 )
-from bdcctools.taxonomic.web import (
-    gnr,
-    iucn,
-    speciesplus
-)
+from bdcctools.taxonomic.parsing import get_canonical_name
+from bdcctools.taxonomic.web import gnr, iucn, speciesplus
