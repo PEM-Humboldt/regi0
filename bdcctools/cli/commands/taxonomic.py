@@ -9,7 +9,7 @@ import pandas as pd
 from bdcctools.io import read_table, write_table
 from bdcctools.taxonomic.local import get_checklist_fields_multiple
 from bdcctools.taxonomic.web.gnr import get_classification
-from bdcctools.utils import verify
+from bdcctools.verification import verify
 
 from ..options import taxonomic as opts
 from ..util.config import CONFIG
