@@ -10,6 +10,3 @@ python:
         path: .
         extra_requirements:
           - docs
-
-conda:
-  environment: environment.yml

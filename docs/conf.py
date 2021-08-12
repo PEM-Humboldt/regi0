@@ -35,6 +35,26 @@ extensions = [
     "sphinx.ext.napoleon"
 ]
 
+autodoc_mock_imports = [
+    "appdirs",
+    "click",
+    "Fiona",
+    "gdal",
+    "gdown",
+    "geopandas",
+    "numpy",
+    "openpyxl",
+    "pandas",
+    "pygeos",
+    "rapidfuzz",
+    "rasterio",
+    "rasterstats",
+    "requests",
+    "Rtree",
+    "scipy",
+    "shapely"
+]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
