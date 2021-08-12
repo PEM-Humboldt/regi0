@@ -35,32 +35,41 @@ def _historical(
 
     Parameters
     ----------
-    gdf:             GeoDataFrame with records.
-    others_path:     Folder with shapefiles or GeoPackage file with
-                     historical data. Shapefile names of GeoPackage layer
-                     names must have a four-digit year anywhere in order
-                     to extract it and match it with the records collection
-                     date.
-    date_col:        Column name with the collection date.
-    direction:       Whether to search for prior, subsequent, or closest
-                     years. Can be "backward", "nearest" or "forward".
-    round_unmatched: Whether to round unmatched rows to the nearest year
-                     using a different direction than the one specified.
-    default_year:    Default year to take for records that do not have
-                     a collection date or whose collection data did not
-                     match with any year. Can be "last" for the most recent
-                     year in the historical data, "fist" for the oldest
-                     year in the historical data or "none" to skip a
-                     default year assignation. Keep in mind that records
-                     without a collection date won't be validated.
-    op:              Operation to execute. Can be "intersection" to execute
-                     check_intersection or "match" to execute check_match.
-    field:           Field to get from layers when `op` is "match".
-    return_source:   Whether to return a column with layer source.
+    gdf
+        GeoDataFrame with records.
+    others_path
+        Folder with shapefiles or GeoPackage file with historical data.
+        Shapefile names of GeoPackage layer names must have a four-digit
+        year anywhere in order to extract it and match it with the records
+        collection date.
+    date_col
+        Column name with the collection date.
+    direction
+        Whether to search for prior, subsequent, or closest years. Can be
+         "backward", "nearest" or "forward".
+    round_unmatched
+        Whether to round unmatched rows to the nearest year using a
+        different direction than the one specified.
+    default_year
+        Default year to take for records that do not have a collection
+        date or whose collection data did not match with any year. Can be
+        "last" for the most recent year in the historical data, "fist" for
+        the oldest year in the historical data or "none" to skip a default
+        year assignation. Keep in mind that records without a collection
+        date won't be validated.
+    op
+        Operation to execute. Can be "intersection" to execute
+        check_intersection or "match" to execute check_match.
+    field
+        Field to get from layers when `op` is "match".
+    return_source
+        Whether to return a column with layer source.
 
     Returns
     -------
-    Original GeoDataFrame (gdf) with extra columns.
+    gpd.GeoDataFrame
+        Original GeoDataFrame (gdf) with extra columns.
+
     """
     if os.path.isdir(others_path):
         layers = glob.glob(os.path.join(others_path, "*.shp"))
@@ -129,15 +138,21 @@ def get_layer_field(
 
     Parameters
     ----------
-    gdf:   GeoDataFrame with records.
-    other: GeoDataFrame with the target layer.
-    field: Name of the field to extract values from.
-    op:    Spatial join operation accepted by the GeoDataFrame's sjoin
-           method.
+    gdf
+        GeoDataFrame with records.
+    other
+        GeoDataFrame with the target layer.
+    field
+        Name of the field to extract values from.
+    op
+        Spatial join operation accepted by the GeoDataFrame's sjoin
+        method.
 
     Returns
     -------
-    Pandas Series with the extracted field values.
+    pd.Series
+        Extracted values.
+
     """
     join = gpd.sjoin(gdf, other, how="left", op=op)
 
@@ -154,21 +169,26 @@ def get_layer_field_historical(
 
     Parameters
     ----------
-    gdf:         GeoDataFrame with records.
-    others_path: Path of a .gpkg file or a folder containing .shp files
-                 with the historical layers.
-    date_col:    Name of the date column in `gdf` to match historical
-                 layers with.
-    field:       Name of the field to extract values from. Must exist in
-                 all the historical layers.
-    kwargs:      Keyword arguments accepted by the _historical function.
+    gdf
+        GeoDataFrame with records.
+    others_path
+        Path of a .gpkg file or a folder containing .shp files with the
+        historical layers.
+    date_col
+        Name of the date column in `gdf` to match historical layers with.
+    field
+        Name of the field to extract values from. Must exist in all the
+        historical layers.
+    **kwargs
+        Keyword arguments accepted by the _historical function.
 
     Returns
     -------
-    Pandas Series with the extracted field values. If return_source=True
-    is passed, it returns a tuple containing the Series with the extracted
-    values and another Series (of the same length) with their corresponding
-    source.
+    values
+        Extracted values.
+    source
+        Corresponding source.
+
     """
     return _historical(gdf, others_path, date_col, op="match", field=field, **kwargs)
 
@@ -179,12 +199,16 @@ def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Serie
 
     Parameters
     ----------
-    gdf:   GeoDataFrame with records.
-    other: GeoDataFrame with features to intersect records with.
+    gdf
+        GeoDataFrame with records.
+    other
+        GeoDataFrame with features to intersect records with.
 
     Returns
     -------
-    Boolean pandas Series.
+    pd.Series
+        Boolean Series indicating whether each record intersects other.
+
     """
     other = other.copy()
 
@@ -216,18 +240,22 @@ def intersects_layer_historical(
 
     Parameters
     ----------
-    gdf:         GeoDataFrame with records.
-    others_path: Path of a .gpkg file or a folder containing .shp files
-                 with the historical layers.
-    date_col:    Name of the date column in `gdf` to match historical
-                 layers with.
-    kwargs:      Keyword arguments accepted by the _historical function.
+    gdf
+        GeoDataFrame with records.
+    others_path
+        Path of a .gpkg file or a folder containing .shp files with the
+        historical layers.
+    date_col
+        Name of the date column in `gdf` to match historical layers with.
+    kwargs
+        Keyword arguments accepted by the _historical function.
 
     Returns
     -------
-    Boolean pandas Series. If return_source=True is passed, it returns a
-    tuple containing the Boolean Series and another Series (of the same
-    length) with the corresponding source.
+    intersects
+        Boolean Series indicating whether each record intersects other.
+    source
+        Corresponding source.
     """
     return _historical(gdf, others_path, date_col, op="intersection", **kwargs)
 
@@ -244,21 +272,25 @@ def find_outliers(
 
     Parameters
     ----------
-    gdf:         GeoDataframe with records.
-    species_col: Column name with the species name for each record.
-    value_col:   Column name with values to find outliers from.
-    method:      Method to find outliers. Can be "std" for Standard
-                 Deviation, "iqr" for Interquartile Range or "zscore" for
-                 Z Score. For more details on the implementations, take
-                 a look at the code of the is_outlier function.
-    threshold:   For the "std" method is the value to multiply the
-                 standard deviation with. For the "zscore" method, it is
-                 the lower limit (negative) and the upper limit (positive)
-                 to compare Z Scores to.
+    gdf
+        GeoDataframe with records.
+    species_col
+        Column name with the species name for each record.
+    value_col
+        Column name with values to find outliers from.
+    method
+        Method to find outliers. Can be "std" for Standard Deviation,
+        "iqr" for Interquartile Range or "zscore" for Z Score.
+    threshold
+        For the "std" method is the value to multiply the standard
+        deviation with. For the "zscore" method, it is the lower limit
+        (negative) and the upper limit (positive) to compare Z Scores to.
 
     Returns
     -------
-    Boolean pandas Series.
+    pd.Series
+        Boolean Series indicating whether values are outliers.
+
     """
     result = pd.Series(index=gdf.index, dtype=bool)
     for species in gdf[species_col].unique():
@@ -287,23 +319,29 @@ def find_spatial_duplicates(
 
     Parameters
     ----------
-    gdf:         GeoDataFrame with records.
-    species_col: Column name with the species name for each record.
-    resolution:  Grid resolution.
-    bounds:      Grid bounds (xmin, ym, xmax, ymax). If no bounds are
-                 passed, the bounds from gdf will be taken.
-    mark:        What duplicates to mark. Can be "head", to mark all
-                 bur the last, "tail" to mark all but the first, or
-                 "all".
+    gdf
+        GeoDataFrame with records.
+    species_col
+        Column name with the species name for each record.
+    resolution
+        Grid resolution.
+    bounds
+        Grid bounds (xmin, ym, xmax, ymax). If no bounds are passed, the
+        bounds from gdf will be taken.
+    mark
+        Which duplicates to mark. Can be "head", to mark all but the last,
+        "tail" to mark all but the first, or "all".
 
     Returns
     -------
-    Boolean pandas Series.
+    pd.Series
+        Boolean Series indicating whether records are spatial duplicates.
 
     Notes
     -----
-    `bounds` and `resolution` should match `gdf` coordinate reference
+    bounds and resolution should match gdf coordinate reference
     system.
+
     """
     gdf = gdf.copy()
 

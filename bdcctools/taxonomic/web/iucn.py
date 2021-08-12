@@ -20,12 +20,16 @@ def _request(url: str, token: str) -> requests.Response:
 
     Parameters
     ----------
-    url:   IUCN API endpoint.
-    token: IUCN API authentication token.
+    url
+        IUCN API endpoint.
+    token
+        IUCN API authentication token.
 
     Returns
     -------
-    Request response.
+    requests.Reponse
+        Request response.
+
     """
     try:
         response = requests.get(url, params={"token": token})
@@ -52,18 +56,24 @@ def get_country_occurrence(
 
     Parameters
     ----------
-    names:              Scientific name(s) to get results for.
-    token:              Species+/CITES checklist API authentication token.
-    add_supplied_names: Add supplied scientific names column to the
-                        resulting DataFrame.
-    add_source:         Add source column to the resulting DataFrame.
-    expand:             Whether to expand result rows to match `names`
-                        size. If False, the number of rows will correspond
-                        to the number of unique names in `names`.
+    names
+        Scientific name(s) to get results for.
+    token
+        Species+/CITES checklist API authentication token.
+    add_supplied_names
+        Add supplied scientific names column to the resulting DataFrame.
+    add_source
+        Add source column to the resulting DataFrame.
+    expand
+        Whether to expand result rows to match `names` size. If False,
+        the number of rows will correspond to the number of unique names
+        in `names`.
 
     Returns
     -------
-    Country occurrence DataFrame.
+    pd.DataFrame
+        DataFrame with information about country occurrence for each name.
+
     """
     if isinstance(names, (list, str)):
         names = pd.Series(names)
@@ -106,18 +116,24 @@ def get_species_info(
 
     Parameters
     ----------
-    names:              Scientific name(s) to get results for.
-    token:              Species+/CITES checklist API authentication token.
-    add_supplied_names: Add supplied scientific names column to the
-                        resulting DataFrame.
-    add_source:         Add source column to the resulting DataFrame.
-    expand:             Whether to expand result rows to match `names`
-                        size. If False, the number of rows will correspond
-                        to the number of unique names in `names`.
+    names
+        Scientific name(s) to get results for.
+    token
+        Species+/CITES checklist API authentication token.
+    add_supplied_names
+        Add supplied scientific names column to the resulting DataFrame.
+    add_source
+        Add source column to the resulting DataFrame.
+    expand
+        Whether to expand result rows to match `names` size. If False,
+        the number of rows will correspond to the number of unique names
+        in `names`.
 
     Returns
     -------
-    Species info DataFrame.
+    pd.DataFrame
+        DataFrame with IUCN species information for each name.
+
     """
     if isinstance(names, (list, str)):
         names = pd.Series(names)

@@ -9,7 +9,7 @@ from bdcctools.geographic.local import (
     find_spatial_duplicates
 )
 from bdcctools.io import read_geographic_table, write_table
-from bdcctools.utils import verify
+from bdcctools.verification import verify
 from rasterstats import point_query
 
 from ..options import geographic as opts

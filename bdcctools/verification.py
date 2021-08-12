@@ -15,17 +15,25 @@ def match(
     threshold: float = 0.8,
 ) -> pd.Series:
     """
+    Compares values between two different Series to check if they match.
 
     Parameters
     ----------
     left
+        Left Series.
     right
+        Right Series.
     preprocess
+        Whether to clean and standardize values before comparing them.
     fuzzy
+        Whether to compare values using fuzzy logic.
     threshold
+        Threshold to define equal values using fuzzy logic.
 
     Returns
     -------
+    pd.Series
+        Series with booleans indicating whether the values match.
 
     """
     if preprocess:
@@ -58,24 +66,33 @@ def verify(
 
     Parameters
     ----------
-    df:             pandas DataFrame.
-    observed_col:   Name of the column in `df` with the values to verify.
-    expected:       pandas Series with expected values. Has to match `df`
-                    length.
-    flag_name:      Name of the resulting column indicating whether the
-                    observed values match the expected values.
-    add_suggested:  Whether to add a column to the result with suggested
-                    values for those rows where the observed values do not
-                    match the expected values.
-    suggested_name: Name of the column for the suggested values. Only has
-                    effect when add_suggested=True is passed.
-    drop:           Whether to drop the rows where the observed values
-                    do not match the expected values.
-    kwargs:         Keyword arguments accepted by the match function.
+    df
+        DataFrame with values.
+    observed_col
+        Name of the column in `df` with the values to verify.
+    expected
+        Series with expected values. Has to match `df` length.
+    flag_name
+        Name of the resulting column indicating whether the observed
+        values match the expected values.
+    add_suggested
+        Whether to add a column to the result with suggested values for
+        those rows where the observed values do not match the expected
+        values.
+    suggested_name
+        Name of the column for the suggested values. Only has effect when
+        add_suggested=True is passed.
+    drop
+        Whether to drop the rows where the observed values do not match
+        the expected values.
+    kwargs
+        Keyword arguments accepted by the match function.
 
     Returns
     -------
-    Copy of `df` with extra columns.
+    pd.DataFrame
+        Copy of `df` with extra columns.
+
     """
     df = df.copy()
 

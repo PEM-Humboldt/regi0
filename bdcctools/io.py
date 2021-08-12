@@ -19,15 +19,21 @@ def read_geographic_table(
 
     Parameters
     ----------
-    fn:      Filename with extension. Can be a relative or absolute path.
-    lon_col: Name of the longitude column.
-    lat_col: Name of the latitude column.
-    crs:     Coordinate reference system with the corresponding EPSG code.
-             Must be in the form epsg:code.
+    fn
+        Filename with extension. Can be a relative or absolute path.
+    lon_col
+        Name of the longitude column.
+    lat_col
+        Name of the latitude column.
+    crs
+        Coordinate reference system with the corresponding EPSG code.
+        Must be in the form epsg:code.
 
     Returns
     -------
-    GeoDataFrame.
+    gpd.GeoDataFrame
+        GeoDataFrame with the records.
+
     """
     dtypes = {lon_col: float, lat_col: float}
     df = read_table(fn, dtype=dtypes)
@@ -43,12 +49,16 @@ def read_table(fn: str, **kwargs) -> pd.DataFrame:
 
     Parameters
     ----------
-    fn:     Filename with extension. Can be a relative or absolute path.
-    kwargs: pandas read_csv, read_table and read_excel keyword arguments.
+    fn
+        Filename with extension. Can be a relative or absolute path.
+    **kwargs
+        pandas read_csv, read_table and read_excel keyword arguments.
 
     Returns
     -------
-    DataFrame.
+    pd.DataFrame
+        DataFrame with the tabular data.
+
     """
     ext = pathlib.Path(fn).suffix
     if ext == ".csv":
@@ -69,14 +79,18 @@ def write_table(df: pd.DataFrame, fn: str, **kwargs) -> None:
 
     Parameters
     ----------
-    df:     pandas DataFrame.
-    fn:     Filename with extension. Can be a relative or absolute path.
-    kwargs: Keyword arguments for pandas read_csv, read_table and
-        `   read_excel functions.
+    df
+        DataFrame to write to disk.
+    fn
+        Filename with extension. Can be a relative or absolute path.
+    **kwargs
+        Keyword arguments for pandas read_csv, read_table and read_excel
+        functions.
 
     Returns
     -------
     None
+
     """
     ext = pathlib.Path(fn).suffix
     if ext == ".csv":
