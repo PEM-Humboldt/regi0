@@ -11,11 +11,14 @@ def clean_text(s: pd.Series) -> pd.Series:
 
     Parameters
     ----------
-    s: pandas Series to clean.
+    s
+        Series to clean.
 
     Returns
     -------
-    Clean Series.
+    pd.Series
+        Clean Series.
+
     """
     s = s.replace(r"\d+|[^\w\s]+", "", regex=True)
     s = s.replace(r"\s+", " ", regex=True)
@@ -31,11 +34,14 @@ def standardize_text(s: pd.Series) -> pd.Series:
 
     Parameters
     ----------
-    s: pandas Series to standardize.
+    s
+        Series to standardize.
 
     Returns
     -------
-    Standardized Series.
+    pd.Series
+        Standardized Series.
+
     """
     s = clean_text(s)
     s = s.str.lower()

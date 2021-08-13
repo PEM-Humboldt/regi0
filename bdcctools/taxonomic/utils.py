@@ -11,8 +11,10 @@ def expand_result(df: pd.DataFrame, names: pd.Series) -> pd.DataFrame:
 
     Parameters
     ----------
-    df:    pandas DataFrame to expand.
-    names: pandas Series with species names.
+    df
+        DataFrame to expand.
+    names
+        Series with species names.
 
     Returns
     -------
