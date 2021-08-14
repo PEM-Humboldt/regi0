@@ -6,13 +6,9 @@
 
 # -- Path setup --------------------------------------------------------------
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
 
 # -- Project information -----------------------------------------------------
@@ -35,26 +31,6 @@ extensions = [
     "sphinx.ext.napoleon"
 ]
 
-autodoc_mock_imports = [
-    "appdirs",
-    "click",
-    "Fiona",
-    "gdal",
-    "gdown",
-    "geopandas",
-    "numpy",
-    "openpyxl",
-    "pandas",
-    "pygeos",
-    "rapidfuzz",
-    "rasterio",
-    "rasterstats",
-    "requests",
-    "Rtree",
-    "scipy",
-    "shapely"
-]
-
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -63,6 +39,17 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
+# List of modules to mock on build time.
+autodoc_mock_imports = [
+    "fiona",
+    "geopandas",
+    "numpy",
+    "pandas",
+    "rapidfuzz",
+    "rasterio",
+    "rasterstats",
+    "scipy"
+]
 
 # -- Options for HTML output -------------------------------------------------
 
