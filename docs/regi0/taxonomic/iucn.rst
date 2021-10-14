@@ -1,0 +1,5 @@
+regi0.taxonomic.iucn
+========================
+
+.. autofunction:: regi0.taxonomic.iucn.get_country_occurrence
+.. autofunction:: regi0.taxonomic.iucn.get_species_info

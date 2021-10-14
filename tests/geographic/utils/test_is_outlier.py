@@ -1,10 +1,10 @@
 """
-Test cases for the bdcctools.geographic.utils.is_outlier function.
+Test cases for the regi0.geographic.utils.is_outlier function.
 """
 import numpy as np
 import pytest
 
-from bdcctools.geographic.utils import is_outlier
+from regi0.geographic.utils import is_outlier
 
 
 @pytest.fixture()

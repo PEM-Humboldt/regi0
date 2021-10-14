@@ -1,4 +1,4 @@
-name: bdcctools-dev
+name: regi0-dev
 channels:
   - conda-forge
   - defaults

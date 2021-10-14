@@ -1,9 +1,9 @@
 """
-Test cases for the bdcctools.geographic.utils.extract_year function.
+Test cases for the regi0.geographic.utils.extract_year function.
 """
 import pytest
 
-from bdcctools.geographic.utils import extract_year
+from regi0.geographic.utils import extract_year
 
 
 def test_separate():

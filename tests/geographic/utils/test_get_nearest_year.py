@@ -1,11 +1,11 @@
 """
-Test cases for the bdcctools.geographic.utils.get_nearest_year function.
+Test cases for the regi0.geographic.utils.get_nearest_year function.
 """
 import numpy as np
 import pandas as pd
 import pytest
 
-from bdcctools.geographic.utils import get_nearest_year
+from regi0.geographic.utils import get_nearest_year
 
 
 @pytest.fixture()
