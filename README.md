@@ -14,6 +14,18 @@ Con `conda`:
 
 ```
 
+## Ejecución
+Para asegurarse que la instalación de `regio` fue satisfactoria ejecute el siguiente comando:
+
+```shell
+python -c "import regi0"
+```
+Si el comando no arroja ningún error, la instalación fue satisfactoria.
+
+Puede acceder a las funciones de `regi0` importando el paquete desde una consola o un script de Python. Para mayor información sobre las funciones disponibles, consulte la [documentación](https://regi0.readthedocs.io).
+
+`regi0` también ofrece una interfaz de línea de comando (CLI) construida sobre las funciones disponibles para ejecutar flujos predefinidos de verificación geográfica y taxonómica sobre registros biológicos. Puede consultar más información sobre esta interfaz [acá](regi0/cli/README.md) o en la [documentación](https://regi0.readthedocs.io).
+
 
 ## Cómo contribuir
 
@@ -57,6 +69,15 @@ Ubicado dentro del proyecto, ejecute:
 ```
 pytest tests/
 ```
+
+## Autores y contribuidores
+
+* Erika Suarez-Valencia - [erikasv](https://github.com/erikasv)
+* Helena Olaya-Rodríguez - [heleolaya](https://github.com/heleolaya)
+* Marcelo Villa-Piñeros - [marcelovilla](https://github.com/marcelovilla)
+
+## Licencia
+Este paquete tiene una licencia MIT. Ver [LICENSE.txt](LICENSE.txt) para más información.
 
 
 [1]: https://github.com/Toblerity/Fiona#installation
