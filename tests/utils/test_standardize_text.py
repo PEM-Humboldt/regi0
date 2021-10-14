@@ -1,9 +1,9 @@
 """
-Test cases for the bdcctools.utils.standardize function.
+Test cases for the regi0.utils.standardize function.
 """
 import pandas as pd
 
-from bdcctools.utils import standardize_text
+from regi0.utils import standardize_text
 
 
 def test_accents():

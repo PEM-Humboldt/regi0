@@ -1,10 +1,10 @@
 """
-Test cases for the bdcctools.taxonomic.utils.expand_results function.
+Test cases for the regi0.taxonomic.utils.expand_results function.
 """
 import pandas as pd
 import pytest
 
-from bdcctools.taxonomic.utils import expand_result
+from regi0.taxonomic.utils import expand_result
 
 
 @pytest.fixture()

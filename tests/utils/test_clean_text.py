@@ -1,9 +1,9 @@
 """
-Test cases for the bdcctools.utils.clean_text function.
+Test cases for the regi0.utils.clean_text function.
 """
 import pandas as pd
 
-from bdcctools.utils import clean_text
+from regi0.utils import clean_text
 
 
 def test_numbers():

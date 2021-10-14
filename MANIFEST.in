@@ -1,1 +1,1 @@
-include bdcctools/cli/config/*.ini
+include regi0/cli/config/*.ini

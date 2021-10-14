@@ -1,10 +1,10 @@
 """
-Test cases for the bdcctools.verification.verify function.
+Test cases for the regi0.verification.verify function.
 """
 import pandas as pd
 import pytest
 
-from bdcctools.verification import verify
+from regi0.verification import verify
 
 
 @pytest.fixture

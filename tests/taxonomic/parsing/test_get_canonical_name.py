@@ -1,9 +1,9 @@
 """
-Test cases for the bdcctools.taxonomic.parsing.clean_names function.
+Test cases for the regi0.taxonomic.parsing.clean_names function.
 """
 import pandas as pd
 
-from bdcctools.taxonomic.parsing import get_canonical_name
+from regi0.taxonomic.parsing import get_canonical_name
 
 
 def test_authors():
