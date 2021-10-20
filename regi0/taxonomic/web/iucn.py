@@ -3,6 +3,7 @@ Wrappers for IUCN API calls.
 
 API documentation can be found at: https://apiv3.iucnredlist.org/api/v3/docs
 """
+from collections import defaultdict
 from typing import Union
 from urllib.parse import urljoin
 
@@ -41,6 +42,65 @@ def _request(url: str, token: str) -> requests.Response:
         raise Exception(f"Error calling IUCN API. {msg}")
 
     return response
+
+
+def get_common_names(
+    names: pd.Series,
+    token: str,
+    add_supplied_names: bool = False,
+    add_source: bool = False,
+    expand: bool = True
+):
+    """
+    Gets common names for multiple species using the IUCN API.
+
+    Parameters
+    ----------
+    names
+        Scientific name(s) to get results for.
+    token
+        IUCN API authentication token.
+    add_supplied_names
+        Add supplied scientific names column to the resulting DataFrame.
+    add_source
+        Add source column to the resulting DataFrame.
+    expand
+        Whether to expand result rows to match `names` size. If False,
+        the number of rows will correspond to the number of unique names
+        in `names`.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with common names.
+
+    """
+    if isinstance(names, (list, str)):
+        names = pd.Series(names)
+
+    endpoint = urljoin(API_URL, "species/common_names/")
+    df = pd.DataFrame()
+
+    unique_names = names.dropna().unique()
+    for name in unique_names:
+        response = _request(urljoin(endpoint, name), token)
+        if response.json().get("result"):
+            result = defaultdict(list)
+            for item in response.json().get("result"):
+                result[item["language"]].append(item["taxonname"])
+            result = pd.Series(result)
+        else:
+            result = pd.Series([], dtype="object")
+        df = df.append(result, ignore_index=True)
+
+    if add_supplied_names:
+        df["supplied_name"] = unique_names
+    if add_source:
+        df["source"] = "IUCN"
+    if expand:
+        df = expand_result(df, names)
+
+    return df
 
 
 def get_country_occurrence(
