@@ -6,8 +6,7 @@ from typing import Union
 
 import pandas as pd
 
-
-from regi0.io import read_table
+from ..readers import read_table
 
 
 def get_checklist_fields(

@@ -2,7 +2,7 @@
 Open Nomenclature qualifiers and their abbreviations. Taken from Sigovini
 et al. (2016). See: https://doi.org/10.1111/2041-210X.12594
 """
-QUALIFIERS = {
+qualifiers = {
     "aberratio": [
         "ab."
     ],

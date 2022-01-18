@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import requests
 
-from regi0.taxonomic.utils import expand_result
+from .._helpers import expand_result
 
 API_URL = "http://resolver.globalnames.org/name_resolvers.json"
 
