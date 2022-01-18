@@ -4,7 +4,7 @@ General verification functions.
 import pandas as pd
 from rapidfuzz import fuzz
 
-from regi0.utils import standardize_text
+from regi0._helpers import standardize_text
 
 
 def match(
@@ -19,15 +19,15 @@ def match(
 
     Parameters
     ----------
-    left
+    left : pd.Series
         Left Series.
-    right
+    right : pd.Series
         Right Series.
-    preprocess
+    preprocess : bool
         Whether to clean and standardize values before comparing them.
-    fuzzy
+    fuzzy : bool
         Whether to compare values using fuzzy logic.
-    threshold
+    threshold : float
         Threshold to define equal values using fuzzy logic.
 
     Returns
@@ -66,23 +66,23 @@ def verify(
 
     Parameters
     ----------
-    df
+    df : pd.DataFrame
         DataFrame with values.
-    observed_col
+    observed_col : str
         Name of the column in `df` with the values to verify.
-    expected
+    expected : pd.Series
         Series with expected values. Has to match `df` length.
-    flag_name
+    flag_name : str
         Name of the resulting column indicating whether the observed
         values match the expected values.
-    add_suggested
+    add_suggested : bool
         Whether to add a column to the result with suggested values for
         those rows where the observed values do not match the expected
         values.
-    suggested_name
+    suggested_name : str
         Name of the column for the suggested values. Only has effect when
         add_suggested=True is passed.
-    drop
+    drop : bool
         Whether to drop the rows where the observed values do not match
         the expected values.
     kwargs

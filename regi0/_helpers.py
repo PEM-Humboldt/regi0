@@ -11,7 +11,7 @@ def clean_text(s: pd.Series) -> pd.Series:
 
     Parameters
     ----------
-    s
+    s : pd.Series
         Series to clean.
 
     Returns
@@ -34,7 +34,7 @@ def standardize_text(s: pd.Series) -> pd.Series:
 
     Parameters
     ----------
-    s
+    s : pd.Series
         Series to standardize.
 
     Returns
