@@ -2,6 +2,7 @@
 Helper functions for the geographic module.
 """
 import re
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -25,22 +26,22 @@ def create_id_grid(
 
     Parameters
     ----------
-    xmin
+    xmin : float
         Upper-left corner x coordinate.
-    ymin
+    ymin : float
         Lower-right corner y coordinate.
-    xmax
+    xmax : float
         Lower-left corner x coordinate.
-    ymax
+    ymax : float
         Upper-left corner y coordinate.
-    resolution
+    resolution : float
         Pixel resolution.
-    crs
+    crs : str
         Coordinate Reference System. Must be in the form epsg:code.
 
     Returns
     -------
-    rasterio.io.DatasetWriter
+    DatasetWriter
         In-memory raster with unique IDs.
 
     Notes
@@ -77,7 +78,7 @@ def extract_year(string: str) -> int:
 
     Parameters
     ----------
-    string
+    string : str
         String to extract the year from.
 
     Returns
@@ -98,9 +99,9 @@ def extract_year(string: str) -> int:
 
 def get_nearest_year(
     dates: pd.Series,
-    reference_years: list,
+    reference_years: Union[list, tuple],
     direction: str = "backward",
-    round_unmatched=True,
+    round_unmatched: bool = True,
 ) -> pd.Series:
     """
     Get the nearest year for each row in a Series from a given list of
@@ -108,21 +109,21 @@ def get_nearest_year(
 
     Parameters
     ----------
-    dates
+    dates : Series
         Series with datetime-like objects.
-    reference_years
+    reference_years : list or tuple
         List of years to round each row to.
-    direction
+    direction : str
         Whether to search for prior, subsequent, or closest matches. Can
         be "backward", "nearest" or "forward". For more information go to:
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge_asof.html
-    round_unmatched
+    round_unmatched : bool
         Whether to round unmatched rows to the nearest year using a
         different direction than the one specified.
 
     Returns
     -------
-    pd.Series
+    Series
         Series with the nearest years.
 
     """
@@ -162,18 +163,18 @@ def is_outlier(
 
     Parameters
     ----------
-    values
+    values : ndarray
         1D NumPy array of values.
-    method
+    method : str
         Method to classify outliers. Can be "std", "iqr" or "zscore".
-    threshold
+    threshold : float
         For the "std" method is the value to multiply the standard
         deviation with. For the "zscore" method, it is the lower limit
         (negative) and the upper limit (positive) to compare Z Scores to.
 
     Returns
     -------
-    np.ndarray
+    ndarray
         1D boolean NumPy array indicating whether values are outliers.
 
     """
@@ -183,18 +184,15 @@ def is_outlier(
         q3 = np.nanpercentile(values, 75)
         lower_limit = q1 - (1.5 * iqr)
         upper_limit = q3 + (1.5 * iqr)
-
     elif method == "std":
         std = np.nanstd(values)
         mean = np.nanmean(values)
         lower_limit = mean - (threshold * std)
         upper_limit = mean + (threshold * std)
-
     elif method == "zscore":
         values = stats.zscore(values, nan_policy="omit")
         lower_limit = -threshold
         upper_limit = threshold
-
     else:
         raise ValueError("`method` must be one of 'std', 'iqr', 'zscore'.")
 

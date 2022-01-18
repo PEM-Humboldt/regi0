@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from regi0.geographic.utils import get_nearest_year
+from regi0.geographic._helpers import get_nearest_year
 
 
 @pytest.fixture()

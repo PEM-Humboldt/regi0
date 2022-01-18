@@ -1,9 +1,9 @@
 """
-Test cases for the regi0.utils.clean_text function.
+Test cases for the regi0._helpers.clean_text function.
 """
 import pandas as pd
 
-from regi0.utils import clean_text
+from regi0._helpers import clean_text
 
 
 def test_numbers():

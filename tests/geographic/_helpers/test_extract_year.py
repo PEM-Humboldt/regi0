@@ -3,7 +3,7 @@ Test cases for the regi0.geographic.utils.extract_year function.
 """
 import pytest
 
-from regi0.geographic.utils import extract_year
+from regi0.geographic._helpers import extract_year
 
 
 def test_separate():

@@ -4,7 +4,7 @@ Test cases for the regi0.geographic.utils.create_id_grid function.
 import numpy as np
 import pytest
 
-from regi0.geographic.utils import create_id_grid
+from regi0.geographic._helpers import create_id_grid
 
 
 @pytest.fixture(scope="module")
