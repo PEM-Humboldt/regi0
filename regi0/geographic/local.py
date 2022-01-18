@@ -3,7 +3,7 @@ Functions for local geographic verifications.
 """
 import glob
 import os
-from typing import Union
+from typing import Union, Literal
 
 import fiona
 import geopandas as gpd
@@ -23,7 +23,7 @@ def _historical(
     default_year: str = "none",
     op: str = "intersection",
     field: str = None,
-    return_source: bool = False
+    return_source: bool = False,
 ) -> Union[pd.Series, tuple]:
     """
     Checks whether records in gdf intersect with features in other or if
@@ -132,7 +132,10 @@ def _historical(
 
 
 def get_layer_field(
-    gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, field: str, predicate: str = "intersects",
+    gdf: gpd.GeoDataFrame,
+    other: gpd.GeoDataFrame,
+    field: str,
+    predicate: str = "intersects",
 ) -> pd.Series:
     """
     Gets the corresponding values of a specific field by performing a
@@ -268,7 +271,7 @@ def find_outliers(
     species_col: str,
     value_col: str,
     method: str = "std",
-    threshold: float = 2.0
+    threshold: float = 2.0,
 ) -> pd.Series:
     """
     Finds outlier records based on values of a specific column.
@@ -314,7 +317,7 @@ def find_spatial_duplicates(
     species_col: str,
     resolution: float,
     bounds: Union[list, tuple] = None,
-    mark: str = "all"
+    keep: Literal[False, "first", "last"] = False,
 ) -> pd.Series:
     """
     Find records of the same species that are in the same cell of a
@@ -331,9 +334,12 @@ def find_spatial_duplicates(
     bounds : list or tuple
         Grid bounds (xmin, ym, xmax, ymax). If no bounds are passed, the
         bounds from gdf will be taken.
-    mark : str
-        Which duplicates to mark. Can be "head", to mark all but the last,
-        "tail" to mark all but the first, or "all".
+    keep : str
+        Which duplicates to mark. Can be:
+
+        - False: mark all duplicates as True.
+        - 'first': mark duplicates as True except for the first occurrence.
+        - 'last': mark duplicates as True except for the last occurrence.
 
     Returns
     -------
@@ -351,21 +357,10 @@ def find_spatial_duplicates(
     if not bounds:
         bounds = gdf.geometry.total_bounds
     grid = _helpers.create_id_grid(*bounds, resolution, gdf.crs.srs)
-    ids = point_query(
+    gdf["__grid_id"] = point_query(
         gdf, grid.read(1), affine=grid.transform, interpolate="nearest", nodata=-9999
     )
-    gdf["__grid_id"] = ids
-
-    subset = [species_col, "__grid_id"]
-    if mark == "all":
-        keep = False
-    elif mark == "head":
-        keep = "last"
-    elif mark == "tail":
-        keep = "first"
-    else:
-        raise ValueError("Mark must be one of 'head', 'tail' or 'all'.")
-    result = gdf.duplicated(subset, keep=keep)
+    result = gdf.duplicated(subset=[species_col, "__grid_id"], keep=keep)
 
     # Result for records that do not have a grid ID is left empty.
     no_grid_id = gdf["__grid_id"].isna()
