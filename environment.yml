@@ -1,0 +1,21 @@
+name: regi0-dev
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python>=3.6
+  - appdirs
+  - click
+  - fiona
+  - geopandas>=0.10
+  - numpy>=1.15
+  - openpyxl
+  - pandas
+  - pygeos
+  - rapidfuzz
+  - rasterio>=1.2
+  - rasterstats
+  - requests
+  - rtree
+  - scipy
+  - shapely
