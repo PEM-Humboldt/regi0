@@ -7,13 +7,16 @@ import pytest
 
 from regi0.readers import read_geographic_table
 
-DATA_FOLDER = pathlib.Path(__file__).parents[0].joinpath("data")
+
+@pytest.fixture(scope="session")
+def data_path():
+    return pathlib.Path(__file__).parents[0].joinpath("data").resolve()
 
 
 @pytest.fixture(scope="session")
-def records():
+def records(data_path):
     return read_geographic_table(
-        DATA_FOLDER.joinpath("csv/birds.csv"),
+        data_path.joinpath("csv/birds.csv"),
         "decimalLongitude",
         "decimalLatitude",
         crs="epsg:4326",
