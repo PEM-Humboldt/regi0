@@ -191,4 +191,3 @@ def test_folder(records, data_path):
         ]
     )
     pd.testing.assert_series_equal(result, expected, check_names=False)
-
