@@ -1,9 +1,8 @@
 """
 Functions for local geographic verifications.
 """
-import glob
-import os
-from typing import Union, Literal
+import pathlib
+from typing import Union
 
 import fiona
 import geopandas as gpd
@@ -16,7 +15,7 @@ from . import _helpers
 
 def _historical(
     gdf: gpd.GeoDataFrame,
-    others_path: str,
+    others_path: Union[str, pathlib.Path],
     date_col: str,
     direction: str = "nearest",
     round_unmatched: bool = False,
@@ -38,7 +37,7 @@ def _historical(
     ----------
     gdf : gpd.GeoDataFrame
         GeoDataFrame with records.
-    others_path : str
+    others_path : str or Path
         Folder with shapefiles or GeoPackage file with historical data.
         Shapefile names of GeoPackage layer names must have a four-digit
         year anywhere in order to extract it and match it with the records
@@ -74,17 +73,20 @@ def _historical(
         Corresponding source. Only provided if return_source is True.
 
     """
-    if os.path.isdir(others_path):
-        layers = glob.glob(os.path.join(others_path, "*.shp"))
+    if not isinstance(others_path, pathlib.Path):
+        others_path = pathlib.Path(others_path)
+
+    if others_path.is_dir():
+        layers = list(others_path.glob("*.shp"))
         if not layers:
             raise Exception("`others_path` must contain shapefiles.")
         input_type = "shp"
     else:
-        if others_path.endswith(".gpkg"):
+        if others_path.suffix == ".gpkg":
             layers = fiona.listlayers(others_path)
             input_type = "gpkg"
         else:
-            raise ValueError("`others_path` must be a GeoPackage.")
+            raise ValueError("`others_path` must be a GeoPackage file.")
 
     years = list(map(_helpers.extract_year, layers))
     historical_year = _helpers.get_nearest_year(
@@ -99,15 +101,15 @@ def _historical(
     else:
         raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
 
-    result = pd.Series(index=gdf.index)
+    result = pd.Series(index=gdf.index, dtype="object")
     if return_source:
-        source = pd.Series(index=gdf.index)
+        source = pd.Series(index=gdf.index, dtype="object")
 
     for year in historical_year.dropna().unique():
         layer = layers[years.index(year)]
         if input_type == "shp":
             other = gpd.read_file(layer)
-            year_source = os.path.splitext(os.path.basename(layer))[0]
+            year_source = layer.stem
         elif input_type == "gpkg":
             other = gpd.read_file(others_path, layer=layer)
             year_source = layer
@@ -133,8 +135,9 @@ def _historical(
 
 def get_layer_field(
     gdf: gpd.GeoDataFrame,
-    other: gpd.GeoDataFrame,
+    other: Union[str, pathlib.Path, gpd.GeoDataFrame],
     field: str,
+    layer: str = None,
     predicate: str = "intersects",
 ) -> pd.Series:
     """
@@ -150,6 +153,8 @@ def get_layer_field(
         GeoDataFrame with the target layer.
     field : str
         Name of the field to extract values from.
+    layer : str
+        Layer name. Only has effect when other is a geopackage file.
     predicate : str
         Spatial join operation accepted by the GeoDataFrame's sjoin
         method.
@@ -160,6 +165,12 @@ def get_layer_field(
         Extracted values.
 
     """
+    if isinstance(other, str):
+        other = pathlib.Path(other)
+
+    if not isinstance(other, gpd.GeoDataFrame):
+        other = gpd.read_file(other, layer=layer)
+
     join = gpd.sjoin(gdf, other, how="left", op=predicate)
 
     return join[field]
@@ -317,7 +328,7 @@ def find_spatial_duplicates(
     species_col: str,
     resolution: float,
     bounds: Union[list, tuple] = None,
-    keep: Literal[False, "first", "last"] = False,
+    keep: Union[bool, str] = False,
 ) -> pd.Series:
     """
     Find records of the same species that are in the same cell of a
