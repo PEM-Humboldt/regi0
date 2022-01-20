@@ -17,9 +17,17 @@ var/
 .installed.cfg
 *.egg
 
-# Unit test reports
-.pytest_cache
+# Docs
+docs/_build
+docs/_static
+docs/_templates
 
 # Editor configuration
 .idea
 .vscode
+
+# Unit test reports
+.pytest_cache
+
+# Tox
+.tox
