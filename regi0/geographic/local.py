@@ -18,7 +18,6 @@ def _historical(
     others_path: Union[str, pathlib.Path],
     date_col: str,
     direction: str = "nearest",
-    round_unmatched: bool = False,
     default_year: str = "none",
     op: str = "intersection",
     field: str = None,
@@ -47,9 +46,6 @@ def _historical(
     direction : str
         Whether to search for prior, subsequent, or closest years. Can be
          "backward", "nearest" or "forward".
-    round_unmatched : bool
-        Whether to round unmatched rows to the nearest year using a
-        different direction than the one specified.
     default_year : str
         Default year to take for records that do not have a collection
         date or whose collection data did not match with any year. Can be
@@ -90,7 +86,7 @@ def _historical(
 
     years = list(map(_helpers.extract_year, layers))
     historical_year = _helpers.get_nearest_year(
-        gdf[date_col], years, direction=direction, round_unmatched=round_unmatched
+        gdf[date_col], years, direction=direction
     )
     if default_year == "last":
         historical_year = historical_year.fillna(max(years))

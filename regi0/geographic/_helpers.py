@@ -1,6 +1,7 @@
 """
 Helper functions for the geographic module.
 """
+import pathlib
 import re
 from typing import Union
 
@@ -70,15 +71,17 @@ def create_id_grid(
     return grid
 
 
-def extract_year(string: str) -> int:
+def extract_year(x: Union[str, pathlib.Path]) -> int:
     """
-    Extracts a four-digit valid year (1900-2099) from a string. If there
-    are multiple four-digit valid years on the string, the first
-    occurrence is returned.
+    Extracts a four-digit valid year (1900-2099) from a string or path.
+    If a path is given, the year will be extracted from the stem and
+    all other parts of the path will be ignored. If there are multiple
+    four-digit valid years on the string, the first occurrence is
+    returned.
 
     Parameters
     ----------
-    string : str
+    x : str
         String to extract the year from.
 
     Returns
@@ -87,8 +90,11 @@ def extract_year(string: str) -> int:
         Four-digit integer representing the year.
 
     """
+    if isinstance(x, pathlib.Path):
+        x = x.stem
+
     expr = r"(?:19|20)\d{2}"
-    matches = re.findall(expr, string)
+    matches = re.findall(expr, x)
     if matches:
         year = matches[0]
     else:
@@ -100,8 +106,7 @@ def extract_year(string: str) -> int:
 def get_nearest_year(
     dates: pd.Series,
     reference_years: Union[list, tuple],
-    direction: str = "backward",
-    round_unmatched: bool = True,
+    direction,
 ) -> pd.Series:
     """
     Get the nearest year for each row in a Series from a given list of
@@ -117,9 +122,6 @@ def get_nearest_year(
         Whether to search for prior, subsequent, or closest matches. Can
         be "backward", "nearest" or "forward". For more information go to:
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge_asof.html
-    round_unmatched : bool
-        Whether to round unmatched rows to the nearest year using a
-        different direction than the one specified.
 
     Returns
     -------
@@ -127,6 +129,8 @@ def get_nearest_year(
         Series with the nearest years.
 
     """
+    dates = dates.copy()
+
     if not dates.name:
         dates.name = "__date"
 
@@ -137,12 +141,6 @@ def get_nearest_year(
 
     dummy_df = pd.DataFrame({years.name: reference_years, "__year": reference_years})
     result = pd.merge_asof(years, dummy_df, on=years.name, direction=direction)["__year"]
-
-    if round_unmatched:
-        if direction == "backward":
-            result[result.isna()] = min(reference_years)
-        elif direction == "forward":
-            result[result.isna()] = max(reference_years)
 
     # merge_asof result has a new index that has to be changed for the original. Also,
     # merge_asof does not work with NaN values. All dates that are NaNs are discarded in

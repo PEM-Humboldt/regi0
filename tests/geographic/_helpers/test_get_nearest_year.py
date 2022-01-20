@@ -1,5 +1,5 @@
 """
-Test cases for the regi0.geographic.utils.get_nearest_year function.
+Test cases for the regi0.geographic._helpers.get_nearest_year function.
 """
 import numpy as np
 import pandas as pd
@@ -18,14 +18,8 @@ def years():
     return [1963, 1980, 2010, 2014]
 
 
-def test_defaults(dates, years):
-    result = get_nearest_year(dates, years)
-    expected = pd.Series([1963, np.nan, 2010, 1980, 1980])
-    pd.testing.assert_series_equal(result, expected)
-
-
-def test_no_rounding_unmatched(dates, years):
-    result = get_nearest_year(dates, years, round_unmatched=False)
+def test_direction_backwards(dates, years):
+    result = get_nearest_year(dates, years, direction="backward")
     expected = pd.Series([np.nan, np.nan, 2010, 1980, 1980])
     pd.testing.assert_series_equal(result, expected)
 
@@ -44,6 +38,6 @@ def test_direction_forward(dates, years):
 
 def test_repeated_years(dates):
     years = [1963, 1980, 2010, 1963, 1980, 2014, 2010, 2014]
-    result = get_nearest_year(dates, years)
-    expected = pd.Series([1963, np.nan, 2010, 1980, 1980])
+    result = get_nearest_year(dates, years, direction="backward")
+    expected = pd.Series([np.nan, np.nan, 2010, 1980, 1980])
     pd.testing.assert_series_equal(result, expected)
