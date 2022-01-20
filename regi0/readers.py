@@ -14,7 +14,7 @@ def read_geographic_table(
     lat_col: str,
     crs: str = "epsg:4326",
     drop_empty_coords: bool = False,
-    reset_index: bool = True
+    reset_index: bool = True,
 ) -> gpd.GeoDataFrame:
     """
     Reads tabular data (csv, txt, xls or xlsx) and converts it to a
