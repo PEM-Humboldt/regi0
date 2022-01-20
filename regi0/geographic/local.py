@@ -35,7 +35,7 @@ def _historical(
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    gdf : GeoDataFrame
         GeoDataFrame with records.
     others_path : str or Path
         Folder with shapefiles or GeoPackage file with historical data.
@@ -147,9 +147,9 @@ def get_layer_field(
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    gdf : GeoDataFrame
         GeoDataFrame with records.
-    other : gpd.GeoDataFrame
+    other : GeoDataFrame
         GeoDataFrame with the target layer.
     field : str
         Name of the field to extract values from.
@@ -186,7 +186,7 @@ def get_layer_field_historical(
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    gdf : GeoDataFrame
         GeoDataFrame with records.
     others_path : str
         Path of a .gpkg file or a folder containing .shp files with the
@@ -210,15 +210,21 @@ def get_layer_field_historical(
     return _historical(gdf, others_path, date_col, op="match", field=field, **kwargs)
 
 
-def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Series:
+def intersects_layer(
+    gdf: gpd.GeoDataFrame,
+    other: Union[str, pathlib.Path, gpd.GeoDataFrame],
+    layer: str = None,
+) -> pd.Series:
     """
     Checks whether records from `gdf` intersect any feature of `other`.
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    gdf : GeoDataFrame
         GeoDataFrame with records.
-    other : gpd.GeoDataFrame
+    layer : str
+        Layer name. Only has effect when other is a geopackage file.
+    other : str, Path or GeoDataFrame
         GeoDataFrame with features to intersect records with.
 
     Returns
@@ -227,6 +233,12 @@ def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Serie
         Boolean Series indicating whether each record intersects other.
 
     """
+    if isinstance(other, str):
+        other = pathlib.Path(other)
+
+    if not isinstance(other, gpd.GeoDataFrame):
+        other = gpd.read_file(other, layer=layer)
+
     other = other.copy()
 
     # Ideally, one could check if the elements of `gdf` intersect any of
@@ -257,7 +269,7 @@ def intersects_layer_historical(
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    gdf : GeoDataFrame
         GeoDataFrame with records.
     others_path : str
         Path of a .gpkg file or a folder containing .shp files with the
@@ -289,7 +301,7 @@ def find_outliers(
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    gdf : GeoDataFrame
         GeoDataframe with records.
     species_col : str
         Column name with the species name for each record.
@@ -336,7 +348,7 @@ def find_spatial_duplicates(
 
     Parameters
     ----------
-    gdf : gpd.GeoDataFrame
+    gdf : GeoDataFrame
         GeoDataFrame with records.
     species_col : str
         Column name with the species name for each record.
