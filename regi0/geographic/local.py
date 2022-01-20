@@ -18,7 +18,7 @@ def _historical(
     others_path: Union[str, pathlib.Path],
     date_col: str,
     direction: str = "nearest",
-    default_year: str = "none",
+    default_year: str = None,
     op: str = "intersection",
     field: str = None,
     return_source: bool = False,
@@ -39,8 +39,8 @@ def _historical(
     others_path : str or Path
         Folder with shapefiles or GeoPackage file with historical data.
         Shapefile names of GeoPackage layer names must have a four-digit
-        year anywhere in order to extract it and match it with the records
-        collection date.
+        year anywhere in order to extract it and match it with the
+        records' collection date.
     date_col : str
         Column name with the collection date.
     direction : str
@@ -48,11 +48,12 @@ def _historical(
          "backward", "nearest" or "forward".
     default_year : str
         Default year to take for records that do not have a collection
-        date or whose collection data did not match with any year. Can be
-        "last" for the most recent year in the historical data, "fist" for
-        the oldest year in the historical data or "none" to skip a default
-        year assignation. Keep in mind that records without a collection
-        date won't be validated.
+        date or whose collection data did not match with any year. Can be:
+
+        - 'first': takes the earliest year in the historical data.
+        - 'last': takes the latest year in the historical data.
+        - None: skips a default year assignation. Keep in mind that
+        records without a collection date won't be validated.
     op : str
         Operation to execute. Can be "intersection" to execute
         check_intersection or "match" to execute check_match.
@@ -86,16 +87,8 @@ def _historical(
 
     years = list(map(_helpers.extract_year, layers))
     historical_year = _helpers.get_nearest_year(
-        gdf[date_col], years, direction=direction
+        gdf[date_col], years, direction=direction, default_year=default_year
     )
-    if default_year == "last":
-        historical_year = historical_year.fillna(max(years))
-    elif default_year == "first":
-        historical_year = historical_year.fillna(min(years))
-    elif default_year == "none":
-        pass
-    else:
-        raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
 
     result = pd.Series(index=gdf.index, dtype="object")
     if return_source:

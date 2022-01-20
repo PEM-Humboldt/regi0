@@ -15,7 +15,7 @@ def dates():
 
 @pytest.fixture()
 def years():
-    return [1963, 1980, 2010, 2014]
+    return [1980, 2010, 2014, 1963]
 
 
 def test_direction_backwards(dates, years):
@@ -36,8 +36,13 @@ def test_direction_forward(dates, years):
     pd.testing.assert_series_equal(result, expected)
 
 
-def test_repeated_years(dates):
-    years = [1963, 1980, 2010, 1963, 1980, 2014, 2010, 2014]
-    result = get_nearest_year(dates, years, direction="backward")
-    expected = pd.Series([np.nan, np.nan, 2010, 1980, 1980])
+def test_default_year_first(dates, years):
+    result = get_nearest_year(dates, years, direction="backward", default_year="first")
+    expected = pd.Series([1963, np.nan, 2010, 1980, 1980])
+    pd.testing.assert_series_equal(result, expected)
+
+
+def test_default_year_last(dates, years):
+    result = get_nearest_year(dates, years, direction="backward", default_year="last")
+    expected = pd.Series([2014, np.nan, 2010, 1980, 1980])
     pd.testing.assert_series_equal(result, expected)

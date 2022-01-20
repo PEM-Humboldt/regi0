@@ -106,7 +106,8 @@ def extract_year(x: Union[str, pathlib.Path]) -> int:
 def get_nearest_year(
     dates: pd.Series,
     reference_years: Union[list, tuple],
-    direction,
+    direction: str,
+    default_year: str = None,
 ) -> pd.Series:
     """
     Get the nearest year for each row in a Series from a given list of
@@ -120,8 +121,21 @@ def get_nearest_year(
         List of years to round each row to.
     direction : str
         Whether to search for prior, subsequent, or closest matches. Can
-        be "backward", "nearest" or "forward". For more information go to:
+        be
+
+        - 'backward'
+        - 'nearest'
+        - 'forward'
+        For more information go to:
         https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge_asof.html
+    default_year : str
+        Default year to take for records that do not have a collection
+        date or whose collection data did not match with any year. Can be:
+
+        - 'last': takes the earliest year in the historical data
+        - 'fist': takes the latest year in the historical data
+        - 'none': skips a default year assignation. Keep in mind that
+        records without a collection date won't be validated.
 
     Returns
     -------
@@ -141,6 +155,14 @@ def get_nearest_year(
 
     dummy_df = pd.DataFrame({years.name: reference_years, "__year": reference_years})
     result = pd.merge_asof(years, dummy_df, on=years.name, direction=direction)["__year"]
+
+    if default_year:
+        if default_year == "first":
+            result.loc[result.isna()] = (min(reference_years))
+        elif default_year == "last":
+            result.loc[result.isna()] = (max(reference_years))
+        else:
+            raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
 
     # merge_asof result has a new index that has to be changed for the original. Also,
     # merge_asof does not work with NaN values. All dates that are NaNs are discarded in
