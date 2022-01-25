@@ -1,20 +1,20 @@
 """
-Test cases for the regi0.geographic.utils.create_id_grid function.
+Test cases for the regi0.geographic.outliers.create_id_grid function.
 """
 import numpy as np
 import pytest
 
-from regi0.geographic._helpers import create_id_grid
+from regi0.geographic.duplicates import _create_id_grid
 
 
 @pytest.fixture(scope="module")
 def matching_grid():
-    return create_id_grid(-1.0, -1.0, 2.0, 4.0, 0.25)
+    return _create_id_grid(-1.0, -1.0, 2.0, 4.0, 0.25)
 
 
 @pytest.fixture(scope="module")
 def unmatching_grid():
-    return create_id_grid(1.0, 1.0, 4.0, 4.0, 0.33)
+    return _create_id_grid(1.0, 1.0, 4.0, 4.0, 0.33)
 
 
 def test_width(matching_grid):
@@ -48,5 +48,5 @@ def test_force_origin(unmatching_grid):
 
 
 def test_other_crs():
-    grid = create_id_grid(0, 0, 1000, 1000, 100, crs="epsg:3857")
+    grid = _create_id_grid(0, 0, 1000, 1000, 100, crs="epsg:3857")
     assert grid.crs.to_string() == "EPSG:3857"

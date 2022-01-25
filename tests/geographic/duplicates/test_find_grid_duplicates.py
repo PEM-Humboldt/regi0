@@ -1,13 +1,13 @@
 """
-Test cases for the regi0.geographic.local.find_spatial_duplicates function.
+Test cases for the regi0.geographic.duplicates.find_grid_duplicates function.
 """
 import pandas as pd
 
-from regi0.geographic.local import find_spatial_duplicates
+from regi0.geographic.duplicates import find_grid_duplicates
 
 
 def test_records_bounds_high_res(records):
-    result = find_spatial_duplicates(
+    result = find_grid_duplicates(
         records,
         "scientificName",
         resolution=0.008333333767967150002,
@@ -42,7 +42,7 @@ def test_records_bounds_high_res(records):
 
 
 def test_other_bounds_low_res(records):
-    result = find_spatial_duplicates(
+    result = find_grid_duplicates(
         records,
         "scientificName",
         resolution=0.1333333402874744,
@@ -78,7 +78,7 @@ def test_other_bounds_low_res(records):
 
 
 def test_keep_first(records):
-    result = find_spatial_duplicates(
+    result = find_grid_duplicates(
         records, "scientificName", resolution=0.008333333767967150002, keep="first"
     )
     expected = pd.Series(
@@ -111,7 +111,7 @@ def test_keep_first(records):
 
 
 def test_keep_last(records):
-    result = find_spatial_duplicates(
+    result = find_grid_duplicates(
         records, "scientificName", resolution=0.008333333767967150002, keep="last"
     )
     expected = pd.Series(

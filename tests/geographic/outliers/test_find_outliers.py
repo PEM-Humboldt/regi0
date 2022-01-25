@@ -1,14 +1,14 @@
 """
-Test cases for the regi0.geographic.local.find_outliers function.
+Test cases for the regi0.geographic.outliers.find_outliers function.
 """
 import numpy as np
 import pandas as pd
 
-from regi0.geographic.local import find_outliers
+from regi0.geographic.outliers import find_value_outliers
 
 
 def test_iqr(records):
-    result = find_outliers(
+    result = find_value_outliers(
         records, "scientificName", "minimumElevationInMeters", method="iqr"
     )
     expected = pd.Series(
@@ -41,7 +41,7 @@ def test_iqr(records):
 
 
 def test_std(records):
-    result = find_outliers(
+    result = find_value_outliers(
         records, "scientificName", "minimumElevationInMeters", method="std"
     )
     expected = pd.Series(
@@ -74,7 +74,7 @@ def test_std(records):
 
 
 def test_zscore(records):
-    result = find_outliers(
+    result = find_value_outliers(
         records, "scientificName", "minimumElevationInMeters", method="zscore"
     )
     expected = pd.Series(
@@ -107,7 +107,7 @@ def test_zscore(records):
 
 
 def test_std_higher_threshold(records):
-    result = find_outliers(
+    result = find_value_outliers(
         records,
         "scientificName",
         "minimumElevationInMeters",
@@ -144,7 +144,7 @@ def test_std_higher_threshold(records):
 
 
 def test_zscore_higher_threshold(records):
-    result = find_outliers(
+    result = find_value_outliers(
         records,
         "scientificName",
         "minimumElevationInMeters",
