@@ -1,5 +1,5 @@
 """
-Test cases for the regi0.geographic.outliers.find_outliers function.
+Test cases for the regi0.geographic.outliers.find_value_outliers function.
 """
 import numpy as np
 import pandas as pd
