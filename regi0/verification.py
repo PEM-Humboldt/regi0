@@ -19,9 +19,9 @@ def match(
 
     Parameters
     ----------
-    left : pd.Series
+    left : Series
         Left Series.
-    right : pd.Series
+    right : Series
         Right Series.
     preprocess : bool
         Whether to clean and standardize values before comparing them.
@@ -32,7 +32,7 @@ def match(
 
     Returns
     -------
-    pd.Series
+    Series
         Series with booleans indicating whether the values match.
 
     """
