@@ -6,14 +6,14 @@ import os
 
 import click
 import pandas as pd
-from regi0.io import read_table, write_table
+from regi0.readers import read_table, write_table
 from regi0.taxonomic.local import get_checklist_fields_multiple
 from regi0.taxonomic.web.gnr import get_classification
 from regi0.verification import verify
 
 from ..options import taxonomic as opts
-from ..util.config import CONFIG
-from ..util.logger import LOGGER
+from ..utils.config import config
+from ..utils.logger import logger
 
 
 @click.command(
@@ -38,11 +38,11 @@ def taxonomic(
     quiet
 ):
     if not quiet:
-        LOGGER.info(f"Reading records from {src}.")
+        logger.info(f"Reading records from {src}.")
     records = read_table(src)
 
     if not quiet:
-        LOGGER.info("Validating scientific names using GNR.")
+        logger.info("Validating scientific names using GNR.")
     if data_sources:
         data_sources = data_sources.split(",")
     classification = get_classification(
@@ -54,8 +54,8 @@ def taxonomic(
         data_source_ids=data_sources
     )
     species = classification["species"]
-    flag_name = CONFIG.get("flagnames", "species")
-    suggested_name = CONFIG.get("suggestednames", "species")
+    flag_name = config.get("flagnames", "species")
+    suggested_name = config.get("suggestednames", "species")
     records = verify(
         records,
         species_col,
@@ -65,7 +65,7 @@ def taxonomic(
         suggested_name=suggested_name,
         drop=drop
     )
-    records[CONFIG.get("sourcenames", "species")] = classification["source"]
+    records[config.get("sourcenames", "species")] = classification["source"]
 
     # For extracting new information based on the scientific names, it is
     # necessary to pass accepted scientific names. Hence, if the user a
@@ -81,7 +81,7 @@ def taxonomic(
     if fields:
         fields = list(fields)
         if not quiet:
-            LOGGER.info("Retrieving fields from local checklists.")
+            logger.info("Retrieving fields from local checklists.")
         result = get_checklist_fields_multiple(
             names,
             filenames,
@@ -96,5 +96,5 @@ def taxonomic(
         records = pd.concat([records, result], axis=1)
 
     if not quiet:
-        LOGGER.info(f"Saving results to {dst}.")
+        logger.info(f"Saving results to {dst}.")
     write_table(records, dst, index=False)
