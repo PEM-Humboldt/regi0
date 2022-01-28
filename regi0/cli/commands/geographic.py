@@ -1,6 +1,7 @@
 """
 $ regi0 geo
 """
+import pathlib
 import sys
 
 import click
@@ -62,7 +63,7 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
         sys.exit()
 
     if not quiet:
-        logger.info(f"Reading records from {input}.")
+        logger.info(f"Reading records from {pathlib.Path(input).resolve()}.")
     records = regi0.read_geographic_table(
         input,
         config.get("colnames", "longitude"),
@@ -138,6 +139,6 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
             records = records[~records[flagname]]
 
     if not quiet:
-        logger.info(f"Saving results to {output}.")
+        logger.info(f"Saving results to {pathlib.Path(output).resolve()}.")
     records = records.drop(columns="geometry")
     regi0.write_table(records, output, index=False)
