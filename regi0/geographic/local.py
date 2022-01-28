@@ -229,7 +229,6 @@ def get_layer_field(
     other: Union[str, pathlib.Path, gpd.GeoDataFrame],
     field: str,
     layer: str = None,
-    predicate: str = "intersects",
 ) -> pd.Series:
     """
     Gets the corresponding values of a specific field by performing a
@@ -246,9 +245,6 @@ def get_layer_field(
         Name of the field to extract values from.
     layer : str
         Layer name. Only has effect when other is a geopackage file.
-    predicate : str
-        Spatial join operation accepted by the GeoDataFrame's sjoin
-        method.
 
     Returns
     -------
@@ -262,7 +258,7 @@ def get_layer_field(
     if not isinstance(other, gpd.GeoDataFrame):
         other = gpd.read_file(other, layer=layer)
 
-    join = gpd.sjoin(gdf, other, how="left", op=predicate)
+    join = gpd.sjoin(gdf, other, how="left", predicate="intersects")
 
     return join[field]
 
@@ -330,8 +326,6 @@ def intersects_layer(
     if not isinstance(other, gpd.GeoDataFrame):
         other = gpd.read_file(other, layer=layer)
 
-    other = other.copy()
-
     # Ideally, one could check if the elements of `gdf` intersect any of
     # the features of `other` with the following line:
     # gdf.intersects(other.geometry.unary_union)
@@ -341,8 +335,9 @@ def intersects_layer(
     # constant value (e.g. 1) in `other` and do a spatial join. Elements
     # of `gdf` that have a value for that column intersect any of the
     # features in `other`.
+    other = other.copy()
     other["__dummy"] = 1
-    join = gpd.sjoin(gdf, other, how="left", op="intersects")
+    join = gpd.sjoin(gdf, other, how="left", predicate="intersects")
     intersects = join["__dummy"].notna()
     intersects.name = None
 
