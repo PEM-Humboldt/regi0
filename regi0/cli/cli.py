@@ -3,8 +3,8 @@ CLI entry point.
 """
 import click
 
-from .geographic import geo
-from .setup import setup
+from regi0.cli.commands.geographic import geo
+from regi0.cli.commands.setup import setup
 
 
 @click.group()

@@ -6,8 +6,8 @@ import sys
 import click
 import regi0
 
-from .utils.config import config
-from .utils.logger import logger
+from ..utils.config import config
+from ..utils.logger import logger
 
 
 @click.command()
@@ -92,6 +92,9 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
                 config.get("flagnames", level),
                 add_suggested=True,
                 suggested_name=config.get("suggestednames", level),
+                add_source=True,
+                source=source,
+                source_name=config.get("sourcenames", level),
                 drop=remove,
                 preprocess=config.get("verification", "preprocess"),
                 fuzzy=config.get("verification", "fuzzy"),

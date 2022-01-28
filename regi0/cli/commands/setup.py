@@ -7,7 +7,7 @@ import shutil
 import appdirs
 import click
 
-from .utils.logger import logger
+from regi0.cli.utils.logger import logger
 
 
 @click.command()
