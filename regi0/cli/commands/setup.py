@@ -32,10 +32,8 @@ def setup(overwrite):
     if config_folder.joinpath("settings.ini").exists():
         if not overwrite:
             logger.warning(
-                f"""
-                    Configuration file already exists in {config_folder}. Run this 
-                    command with the -o/--overwrite flag to overwrite it.
-                """
+                f"Configuration file already exists in {config_folder}. Run this command"
+                f" with the -o/--overwrite flag to overwrite it."
             )
             return
 
