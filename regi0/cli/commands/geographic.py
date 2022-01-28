@@ -76,7 +76,7 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
     for name, level in admin_map.items():
         if name in admin:
             if not quiet:
-                logger.info("Verifying country divisions.")
+                logger.info(f"Verifying {name} divisions.")
             values, source = regi0.geographic.get_layer_field_historical(
                 records,
                 config.get("paths", level),
@@ -95,7 +95,7 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
                 drop=remove,
                 preprocess=config.get("verification", "preprocess"),
                 fuzzy=config.get("verification", "fuzzy"),
-                trheshold=config.get("verification", "threshold"),
+                threshold=config.getfloat("verification", "threshold"),
             )
 
     if urban:
@@ -127,7 +127,7 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
         records[flagname] = regi0.geographic.find_grid_duplicates(
             records,
             config.get("colnames", "species"),
-            config.get("duplicates", "pixelsize"),
+            config.getfloat("duplicates", "pixelsize"),
             bounds,
             keep,
         )

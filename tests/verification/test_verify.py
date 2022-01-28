@@ -9,10 +9,12 @@ from regi0.verification import verify
 
 @pytest.fixture
 def df():
-    return pd.DataFrame({
-        "species": ["Tremarctos ornatus", "Panthera onca", "Canis lupus"],
-        "admin0": ["Colombia", "Mexico", "Venezuela"]
-    })
+    return pd.DataFrame(
+        {
+            "species": ["Tremarctos ornatus", "Panthera onca", "Canis lupus"],
+            "admin0": ["Colombia", "Mexico", "Venezuela"],
+        }
+    )
 
 
 @pytest.fixture
@@ -23,7 +25,9 @@ def countries():
 def test_flag(df, countries):
     df = verify(df, "admin0", countries, "correct_country", drop=False)
     expected = pd.Series([True, True, False])
-    pd.testing.assert_series_equal(df["correct_country"], expected, check_names=False)
+    pd.testing.assert_series_equal(
+        df["correct_country"], expected, check_dtype=False, check_names=False
+    )
 
 
 def test_suggestions(df, countries):
@@ -34,7 +38,7 @@ def test_suggestions(df, countries):
         "correct_country",
         add_suggested=True,
         suggested_name="suggested_country",
-        drop=False
+        drop=False,
     )
     expected = pd.Series([pd.NA, pd.NA, "Canada"])
     pd.testing.assert_series_equal(df["suggested_country"], expected, check_names=False)

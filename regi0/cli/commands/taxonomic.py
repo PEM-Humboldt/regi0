@@ -11,9 +11,9 @@ from regi0.taxonomic.local import get_checklist_fields_multiple
 from regi0.taxonomic.web.gnr import get_classification
 from regi0.verification import verify
 
-from ..options import taxonomic as opts
-from ..utils.config import config
-from ..utils.logger import logger
+from regi0.cli.options import taxonomic as opts
+from regi0.cli.utils.config import config
+from regi0.cli.utils.logger import logger
 
 
 @click.command(
