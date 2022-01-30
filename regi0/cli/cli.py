@@ -3,8 +3,9 @@ CLI entry point.
 """
 import click
 
-from regi0.cli.commands.geographic import geo
-from regi0.cli.commands.setup import setup
+from .commands.geographic import geo
+from .commands.setup import setup
+from .commands.taxonomic import tax
 
 
 @click.group()
@@ -14,3 +15,4 @@ def main():
 
 main.add_command(geo)
 main.add_command(setup)
+main.add_command(tax)

@@ -2,7 +2,6 @@
 $ regi0 geo
 """
 import pathlib
-import sys
 
 import click
 import regi0
@@ -15,26 +14,23 @@ from ..utils.logger import logger
 @click.argument("input", type=click.Path(exists=True))
 @click.argument("output", type=click.Path(exists=False))
 @click.option(
-    "-a",
-    "--admin",
+    "--skip-admin",
     type=click.Choice(["country", "stateProvince", "county"]),
     multiple=True,
-    help="Administrative divisions to verify.",
+    help="Administrative divisions to skip during verification.",
 )
 @click.option(
-    "-u",
-    "--urban",
+    "--skip-urban",
     default=False,
     is_flag=True,
-    help="Verify urban limits.",
+    help="Skip urban limits verification.",
     show_default=True,
 )
 @click.option(
-    "-d",
-    "--duplicates",
+    "--skip-duplicates",
     default=False,
     is_flag=True,
-    help="Identify duplicate records.",
+    help="Skip the identification of duplicate records.",
     show_default=True,
 )
 @click.option(
@@ -53,14 +49,14 @@ from ..utils.logger import logger
     help="Silence information logging.",
     show_default=True,
 )
-def geo(input, output, admin, urban, duplicates, remove, quiet):
+def geo(input, output, skip_admin, skip_urban, skip_duplicates, remove, quiet):
     """
-    Executes a flexible _geographic verification workflow on a set of
+    Executes a flexible geographic verification workflow on a set of
     biological records.
     """
     if not config.sections():
         logger.error("No configuration file found. Please run regi0 setup first.")
-        sys.exit()
+        return
 
     if not quiet:
         logger.info(f"Reading records from {pathlib.Path(input).resolve()}.")
@@ -75,7 +71,7 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
 
     admin_map = {"country": "admin0", "stateProvince": "admin1", "county": "admin2"}
     for name, level in admin_map.items():
-        if name in admin:
+        if name not in skip_admin:
             if not quiet:
                 logger.info(f"Verifying {name} divisions.")
             values, source = regi0.geographic.get_layer_field_historical(
@@ -102,7 +98,7 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
                 threshold=config.getfloat("verification", "threshold"),
             )
 
-    if urban:
+    if not skip_urban:
         if not quiet:
             logger.info("Verifying urban limits.")
         flagname = config.get("flagnames", "urban")
@@ -112,7 +108,7 @@ def geo(input, output, admin, urban, duplicates, remove, quiet):
         if remove:
             records = records[~records[flagname]]
 
-    if duplicates:
+    if not skip_duplicates:
         if not quiet:
             logger.info("Identifying duplicate records.")
 
