@@ -11,9 +11,9 @@ from ..readers import read_table
 
 def get_checklist_fields(
     names: Union[list, pd.Series, str],
-    checklist: pd.DataFrame,
+    checklist: Union[str, pathlib.Path, pd.DataFrame],
     name_field: str,
-    fields: Union[list, str],
+    fields: Union[list, str, tuple],
     add_supplied_names: bool = False,
     expand: bool = True
 ) -> pd.DataFrame:
@@ -23,27 +23,33 @@ def get_checklist_fields(
 
     Parameters
     ----------
-    names
+    names : Series
         Series with species names.
-    checklist
-        DataFrame wih checklist information.
-    name_field
+    checklist : str, Path or DataFrame
+        Path to table or DataFrame wih checklist information.
+    name_field : str
         Name of the column in `checklist` with species names.
-    fields
+    fields : list, str or tuple
         List of fields (columns) to retrieve from `checklist`.
-    add_supplied_names
+    add_supplied_names : bool
         Whether to add `names` as an extra column in the result.
-    expand
+    expand : bool
         Whether to expand result rows to match `names` size. If False,
         the number of rows will correspond to the number of unique names
         in `names`.
 
     Returns
     -------
-    pd.DataFrame
+    DataFrame
         DataFrame with the values retrieved from `checklist`.
 
     """
+    if isinstance(checklist, str):
+        checklist = pathlib.Path(checklist)
+
+    if not isinstance(checklist, pd.DataFrame):
+        checklist = read_table(checklist)
+
     if isinstance(names, (list, str)):
         names = pd.Series(names)
     names.name = "supplied_name"
