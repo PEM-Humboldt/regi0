@@ -16,12 +16,12 @@ def get_canonical_name(names: pd.Series) -> pd.Series:
 
     Parameters
     ----------
-    names
+    names : Series
         Series with the scientific names.
 
     Returns
     -------
-    pd.Series
+    Series
         Series with the extracted canonical names.
 
     """

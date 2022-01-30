@@ -11,14 +11,16 @@ def expand_result(df: pd.DataFrame, names: pd.Series) -> pd.DataFrame:
 
     Parameters
     ----------
-    df
+    df : DataFrame
         DataFrame to expand.
-    names
+    names : Series
         Series with species names.
 
     Returns
     -------
-    Copy of `df` wih duplicated rows to match `names` size.
+    DataFrame
+        Copy of `df` wih duplicated rows to match `names` size.
+
     """
     df = df.copy()
     names = names.copy()
