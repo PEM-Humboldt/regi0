@@ -150,7 +150,7 @@ def _historical(
          "backward", "nearest" or "forward".
     default_year : str
         Default year to take for records that do not have a collection
-        date or whose collection data did not match with any year. Can be:
+        date or whose collection date did not match with any year. Can be:
 
         - 'first': takes the earliest year in the historical data.
         - 'last': takes the latest year in the historical data.
