@@ -1,1 +1,2 @@
-include regi0/cli/config/*.ini
+include regi0/cli/config/logger.ini
+include regi0/cli/config/settings.ini

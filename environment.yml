@@ -7,15 +7,13 @@ dependencies:
   - appdirs
   - click
   - fiona
-  - gdal
-  - gdown
-  - geopandas
-  - numpy
+  - geopandas>=0.10
+  - numpy>=1.15
   - openpyxl
   - pandas
   - pygeos
   - rapidfuzz
-  - rasterio
+  - rasterio>=1.2
   - rasterstats
   - requests
   - rtree

@@ -1,28 +1,129 @@
 """
-Functions for local geographic verifications.
+Functions to extract information from local data.
 """
-import glob
-import os
+import pathlib
+import re
 from typing import Union
 
 import fiona
 import geopandas as gpd
+import numpy as np
 import pandas as pd
-from rasterstats import point_query
 
-from regi0.geographic import utils
+
+def _extract_year(x: Union[str, pathlib.Path]) -> int:
+    """
+    Extracts a four-digit valid year (1900-2099) from a string or path.
+    If a path is given, the year will be extracted from the stem and
+    all other parts of the path will be ignored. If there are multiple
+    four-digit valid years on the string, the first occurrence is
+    returned.
+
+    Parameters
+    ----------
+    x : str
+        String to extract the year from.
+
+    Returns
+    -------
+    int
+        Four-digit integer representing the year.
+
+    """
+    if isinstance(x, pathlib.Path):
+        x = x.stem
+
+    expr = r"(?:19|20)\d{2}"
+    matches = re.findall(expr, x)
+    if matches:
+        year = matches[0]
+    else:
+        raise Exception("The string does not have any valid year.")
+
+    return int(year)
+
+
+def _get_nearest_year(
+    dates: pd.Series,
+    reference_years: Union[list, tuple],
+    direction: str,
+    default_year: str = None,
+) -> pd.Series:
+    """
+    Get the nearest year for each row in a Series from a given list of
+    years.
+
+    Parameters
+    ----------
+    dates : Series
+        Series with datetime-like objects.
+    reference_years : list or tuple
+        List of years to round each row to.
+    direction : str
+        Whether to search for prior, subsequent, or closest matches. Can
+        be
+
+        - 'backward'
+        - 'nearest'
+        - 'forward'
+        For more information go to:
+        https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.merge_asof.html
+    default_year : str
+        Default year to take for records that do not have a collection
+        date or whose collection data did not match with any year. Can be:
+
+        - 'last': takes the earliest year in the historical data
+        - 'fist': takes the latest year in the historical data
+        - 'none': skips a default year assignation. Keep in mind that
+        records without a collection date won't be validated.
+
+    Returns
+    -------
+    Series
+        Series with the nearest years.
+
+    """
+    dates = dates.copy()
+
+    if not dates.name:
+        dates.name = "__date"
+
+    reference_years = sorted(reference_years)
+    has_date = dates.notna()
+    years = pd.to_datetime(dates[has_date]).dt.year
+    years = years.sort_values()
+
+    dummy_df = pd.DataFrame({years.name: reference_years, "__year": reference_years})
+    result = pd.merge_asof(years, dummy_df, on=years.name, direction=direction)["__year"]
+
+    if default_year:
+        if default_year == "first":
+            result.loc[result.isna()] = min(reference_years)
+        elif default_year == "last":
+            result.loc[result.isna()] = max(reference_years)
+        else:
+            raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
+
+    # merge_asof result has a new index that has to be changed for the original. Also,
+    # merge_asof does not work with NaN values. All dates that are NaNs are discarded in
+    # the previous steps and then are added as NaNs to the result here.
+    result.index = years.index
+    nans = pd.Series(np.nan, index=dates[~has_date].index)
+    result = result.append(nans)
+    result = result.sort_index()
+
+    return result
 
 
 def _historical(
     gdf: gpd.GeoDataFrame,
-    others_path: str,
+    others_path: Union[str, pathlib.Path],
     date_col: str,
     direction: str = "nearest",
-    round_unmatched: bool = False,
-    default_year: str = "none",
+    default_year: str = None,
     op: str = "intersection",
     field: str = None,
-    return_source: bool = False
+    return_source: bool = False,
 ) -> Union[pd.Series, tuple]:
     """
     Checks whether records in gdf intersect with features in other or if
@@ -35,76 +136,71 @@ def _historical(
 
     Parameters
     ----------
-    gdf
+    gdf : GeoDataFrame
         GeoDataFrame with records.
-    others_path
+    others_path : str or Path
         Folder with shapefiles or GeoPackage file with historical data.
         Shapefile names of GeoPackage layer names must have a four-digit
-        year anywhere in order to extract it and match it with the records
-        collection date.
-    date_col
+        year anywhere in order to extract it and match it with the
+        records' collection date.
+    date_col : str
         Column name with the collection date.
-    direction
+    direction : str
         Whether to search for prior, subsequent, or closest years. Can be
          "backward", "nearest" or "forward".
-    round_unmatched
-        Whether to round unmatched rows to the nearest year using a
-        different direction than the one specified.
-    default_year
+    default_year : str
         Default year to take for records that do not have a collection
-        date or whose collection data did not match with any year. Can be
-        "last" for the most recent year in the historical data, "fist" for
-        the oldest year in the historical data or "none" to skip a default
-        year assignation. Keep in mind that records without a collection
-        date won't be validated.
-    op
+        date or whose collection data did not match with any year. Can be:
+
+        - 'first': takes the earliest year in the historical data.
+        - 'last': takes the latest year in the historical data.
+        - None: skips a default year assignation. Keep in mind that
+        records without a collection date won't be validated.
+    op : str
         Operation to execute. Can be "intersection" to execute
         check_intersection or "match" to execute check_match.
-    field
+    field : str
         Field to get from layers when `op` is "match".
-    return_source
+    return_source : bool
         Whether to return a column with layer source.
 
     Returns
     -------
-    gpd.GeoDataFrame
-        Original GeoDataFrame (gdf) with extra columns.
+    result : pd.Series
+        Extracted values.
+    source : pd.Series
+        Corresponding source. Only provided if return_source is True.
 
     """
-    if os.path.isdir(others_path):
-        layers = glob.glob(os.path.join(others_path, "*.shp"))
+    if not isinstance(others_path, pathlib.Path):
+        others_path = pathlib.Path(others_path)
+
+    if others_path.is_dir():
+        layers = list(others_path.glob("*.shp"))
         if not layers:
             raise Exception("`others_path` must contain shapefiles.")
         input_type = "shp"
     else:
-        if others_path.endswith(".gpkg"):
+        if others_path.suffix == ".gpkg":
             layers = fiona.listlayers(others_path)
             input_type = "gpkg"
         else:
-            raise ValueError("`others_path` must be a GeoPackage.")
+            raise ValueError("`others_path` must be a GeoPackage file.")
 
-    years = list(map(utils.extract_year, layers))
-    historical_year = utils.get_nearest_year(
-        gdf[date_col], years, direction=direction, round_unmatched=round_unmatched
+    years = list(map(_extract_year, layers))
+    historical_year = _get_nearest_year(
+        gdf[date_col], years, direction=direction, default_year=default_year
     )
-    if default_year == "last":
-        historical_year = historical_year.fillna(max(years))
-    elif default_year == "first":
-        historical_year = historical_year.fillna(min(years))
-    elif default_year == "none":
-        pass
-    else:
-        raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
 
-    result = pd.Series(index=gdf.index)
+    result = pd.Series(index=gdf.index, dtype="object")
     if return_source:
-        source = pd.Series(index=gdf.index)
+        source = pd.Series(index=gdf.index, dtype="object")
 
     for year in historical_year.dropna().unique():
         layer = layers[years.index(year)]
         if input_type == "shp":
             other = gpd.read_file(layer)
-            year_source = os.path.splitext(os.path.basename(layer))[0]
+            year_source = layer.stem
         elif input_type == "gpkg":
             other = gpd.read_file(others_path, layer=layer)
             year_source = layer
@@ -129,7 +225,10 @@ def _historical(
 
 
 def get_layer_field(
-    gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame, field: str, op: str = "intersects",
+    gdf: gpd.GeoDataFrame,
+    other: Union[str, pathlib.Path, gpd.GeoDataFrame],
+    field: str,
+    layer: str = None,
 ) -> pd.Series:
     """
     Gets the corresponding values of a specific field by performing a
@@ -138,15 +237,14 @@ def get_layer_field(
 
     Parameters
     ----------
-    gdf
+    gdf : GeoDataFrame
         GeoDataFrame with records.
-    other
+    other : GeoDataFrame
         GeoDataFrame with the target layer.
-    field
+    field : str
         Name of the field to extract values from.
-    op
-        Spatial join operation accepted by the GeoDataFrame's sjoin
-        method.
+    layer : str
+        Layer name. Only has effect when other is a geopackage file.
 
     Returns
     -------
@@ -154,7 +252,13 @@ def get_layer_field(
         Extracted values.
 
     """
-    join = gpd.sjoin(gdf, other, how="left", op=op)
+    if isinstance(other, str):
+        other = pathlib.Path(other)
+
+    if not isinstance(other, gpd.GeoDataFrame):
+        other = gpd.read_file(other, layer=layer)
+
+    join = gpd.sjoin(gdf, other, how="left", predicate="intersects")
 
     return join[field]
 
@@ -169,14 +273,14 @@ def get_layer_field_historical(
 
     Parameters
     ----------
-    gdf
+    gdf : GeoDataFrame
         GeoDataFrame with records.
-    others_path
+    others_path : str
         Path of a .gpkg file or a folder containing .shp files with the
         historical layers.
-    date_col
+    date_col : str
         Name of the date column in `gdf` to match historical layers with.
-    field
+    field : str
         Name of the field to extract values from. Must exist in all the
         historical layers.
     **kwargs
@@ -184,24 +288,30 @@ def get_layer_field_historical(
 
     Returns
     -------
-    values
+    values : pd.Series
         Extracted values.
-    source
-        Corresponding source.
+    source : pd.Series
+        Corresponding source. Only provided if return_source is True.
 
     """
     return _historical(gdf, others_path, date_col, op="match", field=field, **kwargs)
 
 
-def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Series:
+def intersects_layer(
+    gdf: gpd.GeoDataFrame,
+    other: Union[str, pathlib.Path, gpd.GeoDataFrame],
+    layer: str = None,
+) -> pd.Series:
     """
     Checks whether records from `gdf` intersect any feature of `other`.
 
     Parameters
     ----------
-    gdf
+    gdf : GeoDataFrame
         GeoDataFrame with records.
-    other
+    layer : str
+        Layer name. Only has effect when other is a geopackage file.
+    other : str, Path or GeoDataFrame
         GeoDataFrame with features to intersect records with.
 
     Returns
@@ -210,7 +320,11 @@ def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Serie
         Boolean Series indicating whether each record intersects other.
 
     """
-    other = other.copy()
+    if isinstance(other, str):
+        other = pathlib.Path(other)
+
+    if not isinstance(other, gpd.GeoDataFrame):
+        other = gpd.read_file(other, layer=layer)
 
     # Ideally, one could check if the elements of `gdf` intersect any of
     # the features of `other` with the following line:
@@ -221,8 +335,9 @@ def intersects_layer(gdf: gpd.GeoDataFrame, other: gpd.GeoDataFrame) -> pd.Serie
     # constant value (e.g. 1) in `other` and do a spatial join. Elements
     # of `gdf` that have a value for that column intersect any of the
     # features in `other`.
+    other = other.copy()
     other["__dummy"] = 1
-    join = gpd.sjoin(gdf, other, how="left", op="intersects")
+    join = gpd.sjoin(gdf, other, how="left", predicate="intersects")
     intersects = join["__dummy"].notna()
     intersects.name = None
 
@@ -240,12 +355,12 @@ def intersects_layer_historical(
 
     Parameters
     ----------
-    gdf
+    gdf : GeoDataFrame
         GeoDataFrame with records.
-    others_path
+    others_path : str
         Path of a .gpkg file or a folder containing .shp files with the
         historical layers.
-    date_col
+    date_col : str
         Name of the date column in `gdf` to match historical layers with.
     kwargs
         Keyword arguments accepted by the _historical function.
@@ -255,117 +370,6 @@ def intersects_layer_historical(
     intersects
         Boolean Series indicating whether each record intersects other.
     source
-        Corresponding source.
+        Corresponding source. Only provided if return_source is True.
     """
     return _historical(gdf, others_path, date_col, op="intersection", **kwargs)
-
-
-def find_outliers(
-    gdf: gpd.GeoDataFrame,
-    species_col: str,
-    value_col: str,
-    method: str = "std",
-    threshold: float = 2.0
-) -> pd.Series:
-    """
-    Finds outlier records based on values of a specific column.
-
-    Parameters
-    ----------
-    gdf
-        GeoDataframe with records.
-    species_col
-        Column name with the species name for each record.
-    value_col
-        Column name with values to find outliers from.
-    method
-        Method to find outliers. Can be "std" for Standard Deviation,
-        "iqr" for Interquartile Range or "zscore" for Z Score.
-    threshold
-        For the "std" method is the value to multiply the standard
-        deviation with. For the "zscore" method, it is the lower limit
-        (negative) and the upper limit (positive) to compare Z Scores to.
-
-    Returns
-    -------
-    pd.Series
-        Boolean Series indicating whether values are outliers.
-
-    """
-    result = pd.Series(index=gdf.index, dtype=bool)
-    for species in gdf[species_col].unique():
-        mask = gdf[species_col] == species
-        values = gdf.loc[mask, value_col]
-        result.loc[mask] = utils.is_outlier(values, method, threshold)
-        # Result for records that do not have a value is left empty. This
-        # is done here instead of returning the respective nan values in
-        # the is_outlier function because numpy cannot combine Boolean and
-        # nan values in a single array (while pandas allows it).
-        result.loc[mask & gdf[value_col].isna()] = pd.NA
-
-    return result
-
-
-def find_spatial_duplicates(
-    gdf: gpd.GeoDataFrame,
-    species_col: str,
-    resolution: float,
-    bounds: Union[list, tuple] = None,
-    mark: str = "all"
-) -> pd.Series:
-    """
-    Find records of the same species that are in the same cell of a
-    specific grid.
-
-    Parameters
-    ----------
-    gdf
-        GeoDataFrame with records.
-    species_col
-        Column name with the species name for each record.
-    resolution
-        Grid resolution.
-    bounds
-        Grid bounds (xmin, ym, xmax, ymax). If no bounds are passed, the
-        bounds from gdf will be taken.
-    mark
-        Which duplicates to mark. Can be "head", to mark all but the last,
-        "tail" to mark all but the first, or "all".
-
-    Returns
-    -------
-    pd.Series
-        Boolean Series indicating whether records are spatial duplicates.
-
-    Notes
-    -----
-    bounds and resolution should match gdf coordinate reference
-    system.
-
-    """
-    gdf = gdf.copy()
-
-    if not bounds:
-        bounds = gdf.geometry.total_bounds
-    grid = utils.create_id_grid(*bounds, resolution, gdf.crs.srs)
-    ids = point_query(
-        gdf, grid.read(1), affine=grid.transform, interpolate="nearest", nodata=-9999
-    )
-    gdf["__grid_id"] = ids
-
-    subset = [species_col, "__grid_id"]
-    if mark == "all":
-        keep = False
-    elif mark == "head":
-        keep = "last"
-    elif mark == "tail":
-        keep = "first"
-    else:
-        raise ValueError("Mark must be one of 'head', 'tail' or 'all'.")
-    result = gdf.duplicated(subset, keep=keep)
-
-    # Result for records that do not have a grid ID is left empty.
-    no_grid_id = gdf["__grid_id"].isna()
-    result.loc[no_grid_id] = pd.NA
-
-    return result

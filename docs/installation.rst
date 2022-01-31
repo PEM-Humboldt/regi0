@@ -16,7 +16,24 @@ Keep in mind that :code:`regi0` relies on libraries such as :code:`geopandas`, :
 
 2. Install from conda-forge using :code:`conda`:
 
+.. code:: bash
+
+   conda install -c conda-forge regi0
 
 -----------
 From source
 -----------
+There are two options to install :code:`wiutils` from source:
+
+1. Install from the `GitHub repository <https://github.com/PEM-Humboldt/regi0>`_ using :code:`pip` and :code:`git`:
+
+.. code:: bash
+
+   pip install git+https://github.com/PEM-Humboldt/regi0.git#egg=regi0
+
+
+2. Install from the `GitHub repository <https://github.com/PEM-Humboldt/regi0>`_ using :code:`pip`:
+
+.. code:: bash
+
+   pip install --upgrade https://github.com/PEM-Humboldt/regi0/tarball/master

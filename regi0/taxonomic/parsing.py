@@ -3,8 +3,8 @@ Scientific name parsing functions.
 """
 import pandas as pd
 
-from regi0.taxonomic.constants.qualifiers import QUALIFIERS
-from regi0.utils import clean_text
+from ._constants.qualifiers import qualifiers
+from .._helpers import clean_text
 
 
 def get_canonical_name(names: pd.Series) -> pd.Series:
@@ -16,22 +16,22 @@ def get_canonical_name(names: pd.Series) -> pd.Series:
 
     Parameters
     ----------
-    names
+    names : Series
         Series with the scientific names.
 
     Returns
     -------
-    pd.Series
+    Series
         Series with the extracted canonical names.
 
     """
     names = clean_text(names)
     names = names.str.capitalize()
 
-    qualifiers = pd.Series(sum(QUALIFIERS.values(), []))
-    qualifiers = qualifiers.str.replace(".", "", regex=False)
-    qualifiers = pd.unique(qualifiers.str.split(" ", expand=True).stack())
-    names = names.str.split(" ", expand=True).replace(qualifiers, pd.NA)
+    abbreviations = pd.Series(sum(qualifiers.values(), []))
+    abbreviations = abbreviations.str.replace(".", "", regex=False)
+    abbreviations = pd.unique(abbreviations.str.split(" ", expand=True).stack())
+    names = names.str.split(" ", expand=True).replace(abbreviations, pd.NA)
     names = names.apply(lambda x: x.str.cat(sep=" "), axis=1)
     names = clean_text(names)
 

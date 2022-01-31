@@ -1,100 +1,143 @@
 """
-$ regi0 taxonomic
+$ regi0 tax
 """
-import glob
-import os
+import pathlib
 
 import click
 import pandas as pd
-from regi0.io import read_table, write_table
-from regi0.taxonomic.local import get_checklist_fields_multiple
-from regi0.taxonomic.web.gnr import get_classification
-from regi0.verification import verify
+import regi0
 
-from ..options import taxonomic as opts
-from ..util.config import CONFIG
-from ..util.logger import LOGGER
+from ..utils.config import config
+from ..utils.logger import logger
 
 
-@click.command(
-    short_help="Performs a complete taxonomic verification on a set of records."
+@click.command()
+@click.argument("input", type=click.Path(exists=True))
+@click.argument("output", type=click.Path(exists=False))
+@click.option(
+    "--data-source-ids",
+    default="1",
+    show_default=True,
+    help="Data source IDs for GNR. See http://resolver.globalnames.org/data_sources.json"
+    " for a list of available IDs. Multiple IDs must be separated by commas.",
 )
-@click.argument("src", type=click.Path(exists=True))
-@click.argument("dst", type=click.Path(exists=False))
-@opts.species_col
-@opts.data_sources
-@opts.checklists_path
-@opts.fields
-@opts.drop
-@opts.quiet
-def taxonomic(
-    src,
-    dst,
-    species_col,
-    data_sources,
-    checklists_path,
-    fields,
-    drop,
-    quiet
+@click.option(
+    "--add-taxonomy",
+    default=False,
+    is_flag=True,
+    show_default=True,
+    help="Add superior taxonomy classification.",
+)
+@click.option(
+    "--duplicates",
+    default=False,
+    is_flag=True,
+    show_default=True,
+    help="Identify duplicate records.",
+)
+@click.option(
+    "--category",
+    type=click.Choice(["alien", "endemic", "cites", "mads", "iucn"]),
+    multiple=True,
+    help="Administrative divisions to skip during verification.",
+)
+@click.option(
+    "-r",
+    "--remove",
+    default=False,
+    is_flag=True,
+    show_default=True,
+    help="Remove records with positive flags.",
+)
+@click.option(
+    "-q",
+    "--quiet",
+    default=False,
+    is_flag=True,
+    help="Silence information logging.",
+    show_default=True,
+)
+def tax(
+    input, output, data_source_ids, add_taxonomy, duplicates, category, remove, quiet
 ):
-    if not quiet:
-        LOGGER.info(f"Reading records from {src}.")
-    records = read_table(src)
+    """
+    Executes a flexible taxonomic verification workflow on a set of
+    biological records.
+    """
+    if not config.sections():
+        logger.error("No configuration file found. Please run regi0 setup first.")
+        return
 
     if not quiet:
-        LOGGER.info("Validating scientific names using GNR.")
-    if data_sources:
-        data_sources = data_sources.split(",")
-    classification = get_classification(
-        records[species_col],
+        logger.info(f"Reading records from {pathlib.Path(input).resolve()}.")
+    records = regi0.read_table(input)
+
+    if not quiet:
+        logger.info(f"Getting canonical names.")
+    canonical_label = config.get("suggestednames", "canonical")
+    records[canonical_label] = regi0.taxonomic.get_canonical_name(
+        records[config.get("colnames", "species")]
+    )
+
+    if not quiet:
+        logger.info(f"Verifying scientific names using GNR.")
+    data_source_ids = data_source_ids.split(",")
+    classification = regi0.taxonomic.gnr.get_classification(
+        records[canonical_label],
         add_supplied_names=False,
         add_source=True,
         expand=True,
         best_match_only=True,
-        data_source_ids=data_sources
+        data_source_ids=data_source_ids,
     )
-    species = classification["species"]
-    flag_name = CONFIG.get("flagnames", "species")
-    suggested_name = CONFIG.get("suggestednames", "species")
-    records = verify(
+    records = regi0.verify(
         records,
-        species_col,
-        species,
-        flag_name,
+        config.get("colnames", "species"),
+        classification["species"],
+        config.get("flagnames", "species"),
         add_suggested=True,
-        suggested_name=suggested_name,
-        drop=drop
+        suggested_name=config.get("suggestednames", "species"),
+        add_source=True,
+        source=classification["source"],
+        source_name=config.get("sourcenames", "species"),
+        drop=remove,
     )
-    records[CONFIG.get("sourcenames", "species")] = classification["source"]
 
-    # For extracting new information based on the scientific names, it is
-    # necessary to pass accepted scientific names. Hence, if the user a
-    # new series is created with the combination of originally correct
-    # names and the new suggested ones for those cases where the resolver
-    # found a suggestion.
-    accepted_names = records.loc[records[flag_name], species_col]
-    suggested_names = records.loc[~records[flag_name], suggested_name]
-    names = pd.concat([accepted_names, suggested_names]).sort_index()
-
-    if checklists_path:
-        filenames = glob.glob(os.path.join(checklists_path, "*"))
-    if fields:
-        fields = list(fields)
+    if add_taxonomy:
         if not quiet:
-            LOGGER.info("Retrieving fields from local checklists.")
-        result = get_checklist_fields_multiple(
-            names,
-            filenames,
-            species_col,
-            fields,
+            logger.info(f"Adding superior taxonomy retrieved from GNR.")
+        records = pd.concat(
+            [records, classification.drop(columns=["species", "source"])], axis=1
+        )
+
+    if duplicates:
+        try:
+            keep = config.getboolean("duplicates", "keep")
+        except ValueError:
+            keep = config.get("duplicates", "keep")
+        records[config.get("flagnames", "duplicate")] = records.duplicated(
+            subset=[
+                config.get("colnames", "species"),
+                config.get("colnames", "date"),
+                config.get("colnames", "collection"),
+                config.get("colnames", "collector"),
+            ],
+            keep=keep,
+        )
+
+    if category:
+        if not quiet:
+            logger.info("Retrieving categories from checklist.")
+        values = regi0.taxonomic.get_checklist_fields(
+            records[config.get("colnames", "species")],
+            config.get("paths", "checklist"),
+            name_field=config.get("checklist", "species"),
+            fields=[config.get("checklist", cat) for cat in category],
             add_supplied_names=False,
             expand=True,
-            keep_first=True,
-            add_source=True,
-            source_name="source"
         )
-        records = pd.concat([records, result], axis=1)
+        records = pd.concat([records, values], axis=1)
 
     if not quiet:
-        LOGGER.info(f"Saving results to {dst}.")
-    write_table(records, dst, index=False)
+        logger.info(f"Saving results to {pathlib.Path(output).resolve()}.")
+    regi0.write_table(records, output, index=False)
