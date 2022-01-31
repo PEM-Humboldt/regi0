@@ -37,9 +37,9 @@ from ..utils.logger import logger
 )
 @click.option(
     "--category",
-    type=click.Choice(["alien", "endemic", "cites", "mads", "iucn"]),
+    type=click.Choice(["all", "alien", "endemic", "cites", "mads", "iucn"]),
     multiple=True,
-    help="Administrative divisions to skip during verification.",
+    help="Categories from checklist to add to result.",
 )
 @click.option(
     "-r",
@@ -47,7 +47,7 @@ from ..utils.logger import logger
     default=False,
     is_flag=True,
     show_default=True,
-    help="Remove records with positive flags.",
+    help="Remove records with flags.",
 )
 @click.option(
     "-q",
@@ -92,7 +92,7 @@ def tax(
     )
     records = regi0.verify(
         records,
-        config.get("colnames", "species"),
+        config.get("suggestednames", "canonical"),
         classification["species"],
         config.get("flagnames", "species"),
         add_suggested=True,
@@ -116,20 +116,29 @@ def tax(
         except ValueError:
             keep = config.get("duplicates", "keep")
         records[config.get("flagnames", "duplicate")] = records.duplicated(
-            subset=[
-                config.get("colnames", "species"),
-                config.get("colnames", "date"),
-                config.get("colnames", "collection"),
-                config.get("colnames", "collector"),
-            ],
+            subset=config.get("duplicates", "columns").split(","),
             keep=keep,
         )
 
     if category:
         if not quiet:
             logger.info("Retrieving categories from checklist.")
+
+        # For extracting new information based on the scientific names,
+        # it is necessary to pass accepted scientific names. Hence, a
+        # new series is created with the combination of originally correct
+        # names and the new suggested ones for those cases where the
+        # resolver found a suggestion.
+        mask = records[config.get("flagnames", "species")].astype("boolean")
+        accepted_names = records.loc[mask, config.get("suggestednames", "canonical")]
+        suggested_names = records.loc[~mask, config.get("suggestednames", "species")]
+        nans = records[config.get("flagnames", "species")].isna()
+        names = pd.concat([accepted_names, suggested_names, nans]).sort_index()
+
+        if "all" in category:
+            category = ["alien", "endemic", "cites", "mads", "iucn"]
         values = regi0.taxonomic.get_checklist_fields(
-            records[config.get("colnames", "species")],
+            names,
             config.get("paths", "checklist"),
             name_field=config.get("checklist", "species"),
             fields=[config.get("checklist", cat) for cat in category],

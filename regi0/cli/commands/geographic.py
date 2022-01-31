@@ -38,7 +38,7 @@ from ..utils.logger import logger
     "--remove",
     default=False,
     is_flag=True,
-    help="Remove records with positive flags.",
+    help="Remove records with flags.",
     show_default=True,
 )
 @click.option(
@@ -80,6 +80,7 @@ def geo(input, output, skip_admin, skip_urban, skip_duplicates, remove, quiet):
                 config.get("colnames", "date"),
                 config.get("attributes", level),
                 direction=config.get("misc", "direction"),
+                default_year=config.get("misc", "defaultyear"),
                 return_source=True,
             )
             records = regi0.verify(
