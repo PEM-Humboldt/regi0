@@ -38,11 +38,11 @@ def test_direction_forward(dates, years):
 
 def test_default_year_first(dates, years):
     result = _get_nearest_year(dates, years, direction="backward", default_year="first")
-    expected = pd.Series([1963, np.nan, 2010, 1980, 1980])
-    pd.testing.assert_series_equal(result, expected)
+    expected = pd.Series([1963, 1963, 2010, 1980, 1980])
+    pd.testing.assert_series_equal(result, expected, check_dtype=False)
 
 
 def test_default_year_last(dates, years):
     result = _get_nearest_year(dates, years, direction="backward", default_year="last")
-    expected = pd.Series([2014, np.nan, 2010, 1980, 1980])
-    pd.testing.assert_series_equal(result, expected)
+    expected = pd.Series([2014, 2014, 2010, 1980, 1980])
+    pd.testing.assert_series_equal(result, expected, check_dtype=False)
