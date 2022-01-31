@@ -16,6 +16,4 @@ dependencies:
   - rasterio>=1.2
   - rasterstats
   - requests
-  - rtree
   - scipy
-  - shapely
