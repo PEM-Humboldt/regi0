@@ -96,14 +96,6 @@ def _get_nearest_year(
     dummy_df = pd.DataFrame({years.name: reference_years, "__year": reference_years})
     result = pd.merge_asof(years, dummy_df, on=years.name, direction=direction)["__year"]
 
-    if default_year:
-        if default_year == "first":
-            result.loc[result.isna()] = min(reference_years)
-        elif default_year == "last":
-            result.loc[result.isna()] = max(reference_years)
-        else:
-            raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
-
     # merge_asof result has a new index that has to be changed for the original. Also,
     # merge_asof does not work with NaN values. All dates that are NaNs are discarded in
     # the previous steps and then are added as NaNs to the result here.
@@ -111,6 +103,14 @@ def _get_nearest_year(
     nans = pd.Series(np.nan, index=dates[~has_date].index)
     result = result.append(nans)
     result = result.sort_index()
+
+    if default_year:
+        if default_year == "first":
+            result.loc[result.isna()] = min(reference_years)
+        elif default_year == "last":
+            result.loc[result.isna()] = max(reference_years)
+        else:
+            raise ValueError("`default_year` must be either 'first', 'last' or 'none'.")
 
     return result
 
