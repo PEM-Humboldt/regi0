@@ -4,6 +4,8 @@ Regi0 is a Python package with useful functions to complement and verify biologi
 
 ## Installation
 
+Regi0 works with Python versions 3.6 through 3.9.
+
 Using `pip`:
 ```shell
 pip install regi0
