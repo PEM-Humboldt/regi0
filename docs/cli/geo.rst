@@ -67,7 +67,7 @@ to skip the verification of country and state.
 
 - :code:`--skip-urban`: Skip the identification of records that fall inside urban limits.
 
-- :code:`--skip-urban`: Skip the identification of duplicate records.
+- :code:`--skip-duplicates`: Skip the identification of duplicate records.
 
 - :code:`-r/--remove`: Remove records with any flag. For example, if a record had an incorrect country or was identified as a duplicate, it will be removed in the output.
 
