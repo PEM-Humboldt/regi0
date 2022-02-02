@@ -9,3 +9,4 @@ Regi0 is a Python package with useful functions to complement and verify biologi
 
     installation
     regi0/index
+    cli/index
