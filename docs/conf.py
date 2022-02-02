@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.abspath('..'))
 # -- Project information -----------------------------------------------------
 
 project = "regi0"
-copyright = "2020-2021, Programa de Evaluación y Monitoreo de la Biodiversidad - Instituto de Investigación de Recursos Biológicos Alexander von Humboldt"
+copyright = "2020-2022, Programa de Evaluación y Monitoreo de la Biodiversidad - Instituto de Investigación de Recursos Biológicos Alexander von Humboldt"
 author = "Marcelo Villa-Piñeros"
 
 # The full version, including alpha/beta/rc tags
