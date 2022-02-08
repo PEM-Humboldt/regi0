@@ -1,7 +1,7 @@
 Installation
 ============
 
-Regi0 works with Python versions 3.6 through 3.9.
+Regi0 works with Python versions 3.7 through 3.9.
 
 --------------
 Stable release
