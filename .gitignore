@@ -26,6 +26,10 @@ docs/_templates
 .idea
 .vscode
 
+# Geopackage
+*.gpkg-shm
+*.gpkg-wal
+
 # Unit test reports
 .pytest_cache
 
