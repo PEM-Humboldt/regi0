@@ -21,11 +21,11 @@ def _request(url: str, token: str, params: dict) -> requests.Response:
 
     Parameters
     ----------
-    url
+    url : str
         Species+/CITES checklist API endpoint.
-    token
+    token : str
         Species+/CITES checklist API authentication token.
-    params
+    params : dict
         Request parameters.
 
     Returns
@@ -57,22 +57,22 @@ def get_taxon_concepts(
 
     Parameters
     ----------
-    names
+    names : list, Series or str
         Scientific name(s) to get results for.
-    token
+    token : str
         Species+/CITES checklist API authentication token.
-    add_supplied_names
+    add_supplied_names : bool
         Add supplied scientific names column to the resulting DataFrame.
-    add_source
+    add_source : bool
         Add source column to the resulting DataFrame.
-    expand
+    expand : bool
         Whether to expand result rows to match `names` size. If False,
         the number of rows will correspond to the number of unique names
         in `names`.
 
     Returns
     -------
-    pd.Series
+    Series
         Series with the corresponding cites listings.
 
     """

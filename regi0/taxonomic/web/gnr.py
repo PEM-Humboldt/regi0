@@ -31,33 +31,33 @@ def resolve(
 
     Parameters
     ----------
-    names
+    names : list, Series or str
         List of species names to resolve.
-    data_source_ids
+    data_source_ids : list
         List of specific data sources IDs to resolve against. A list of
         all the available data sources and their IDs can be found at:
         http://resolver.globalnames.org/data_sources.
-    resolve_once
+    resolve_once : bool
         Find the first available match instead of matches across all data
         sources with all possible renderings of a name.
-    best_match_only
+    best_match_only : bool
         Returns just one result with the highest score.
-    with_context
+    with_context : bool
         Reduce the likelihood of matches to taxonomic homonyms. When True,
         a common taxonomic context is calculated for all supplied names
         from matches in data sources that have classification tree paths.
         Names out of determined context are penalized during score
         calculation.
-    with_vernaculars
+    with_vernaculars : bool
         Return 'vernacular' field to present common names provided by a
         data source for a particular match.
-    with_canonical_ranks
+    with_canonical_ranks : bool
         Returns 'canonical_form' with infraspecific ranks, if they are
         present.
 
     Returns
     -------
-    pd.DataFrame
+    DataFrame
         DataFrame where rows are the result for each match.
 
     """
@@ -111,13 +111,13 @@ def get_classification(
 
     Parameters
     ----------
-    names
+    names : list, Series or str
         Scientific name(s) to get results for.
-    add_supplied_names
+    add_supplied_names : bool
         Add supplied scientific names column to the resulting DataFrame.
-    add_source
+    add_source : bool
         Add source column to the resulting DataFrame.
-    expand
+    expand : bool
         Whether to expand result rows to match `names` size. If False, the
         number of rows will correspond to the number of unique names in
         `names`. Only has effect if best_match_only=True is passed.
@@ -126,7 +126,7 @@ def get_classification(
 
     Returns
     -------
-    pd.DataFrame
+    DataFrame
         DataFrame with the ranks for each match.
 
     """
