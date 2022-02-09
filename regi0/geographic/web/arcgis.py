@@ -140,7 +140,7 @@ def get_feature_layer_field(
         out_fields=field,
         return_geometry=True,
         out_sr=gdf.crs.to_epsg(),
-        f="GeoJSON"
+        f="GeoJSON",
     )
     other = gpd.GeoDataFrame.from_features(response.json()["features"], crs=gdf.crs)
 
@@ -182,7 +182,7 @@ def intersects_feature_layer(
         out_fields=None,
         return_geometry=True,
         out_sr=gdf.crs.to_epsg(),
-        f="GeoJSON"
+        f="GeoJSON",
     )
     other = gpd.GeoDataFrame.from_features(response.json()["features"], crs=gdf.crs)
 
