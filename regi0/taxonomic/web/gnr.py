@@ -21,7 +21,7 @@ def resolve(
     best_match_only: bool = False,
     with_context: bool = False,
     with_vernaculars: bool = False,
-    with_canonical_ranks: bool = False
+    with_canonical_ranks: bool = False,
 ) -> pd.DataFrame:
     """
     Receives a list of names and resolves each against the entire resolver
@@ -75,7 +75,7 @@ def resolve(
         "best_match_only": str(best_match_only).lower(),
         "with_context": str(with_context).lower(),
         "with_vernaculars": str(with_vernaculars).lower(),
-        "with_canonical_ranks": str(with_canonical_ranks).lower()
+        "with_canonical_ranks": str(with_canonical_ranks).lower(),
     }
 
     try:

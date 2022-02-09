@@ -49,7 +49,7 @@ def get_taxon_concepts(
     token: str,
     add_supplied_names: bool = False,
     add_source: bool = False,
-    expand: bool = True
+    expand: bool = True,
 ) -> pd.DataFrame:
     """
     Calls the taxon_concepts endpoint of the Species+/CITES checklist API

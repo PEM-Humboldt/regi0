@@ -15,7 +15,7 @@ def get_checklist_fields(
     name_field: str,
     fields: Union[list, str, tuple],
     add_supplied_names: bool = False,
-    expand: bool = True
+    expand: bool = True,
 ) -> pd.DataFrame:
     """
     Retrieves values for one or multiple fields from a checklist given
@@ -82,7 +82,7 @@ def get_checklist_fields_multiple(
     expand: bool = True,
     keep_first: bool = True,
     add_source: bool = False,
-    source_name: str = "source"
+    source_name: str = "source",
 ) -> pd.DataFrame:
     """
     Retrieves values for one or multiple fields from multiple checklists
@@ -144,7 +144,7 @@ def is_in_checklist(
     checklist: pd.DataFrame,
     name_field: str,
     add_supplied_names: bool = False,
-    expand: bool = True
+    expand: bool = True,
 ) -> pd.DataFrame:
     """
     Checks whether some species names are found in a given checklist.
@@ -199,7 +199,7 @@ def is_in_checklist_multiple(
     expand: bool = True,
     keep_first: bool = True,
     add_source: bool = False,
-    source_name: str = "source"
+    source_name: str = "source",
 ) -> Union[pd.DataFrame, pd.Series]:
     """
     Checks whether some species names are found in a multiple checklist.

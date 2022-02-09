@@ -77,9 +77,7 @@ def test_geojson(records, data_path):
 
 def test_geopackage(records, data_path):
     result = intersects_layer(
-        records,
-        data_path.joinpath("gpkg/admin0.gpkg"),
-        layer="admin0_2018"
+        records, data_path.joinpath("gpkg/admin0.gpkg"), layer="admin0_2018"
     )
     expected = pd.Series(
         [

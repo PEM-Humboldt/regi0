@@ -111,7 +111,6 @@ def test_direction_forward(records, data_path):
             np.nan,
             np.nan,
         ]
-
     )
     pd.testing.assert_series_equal(result, expected)
 
@@ -122,7 +121,7 @@ def test_source(records, data_path):
         data_path.joinpath("gpkg/admin1.gpkg"),
         date_col="eventDate",
         direction="forward",
-        return_source=True
+        return_source=True,
     )
     expected = pd.Series(
         [

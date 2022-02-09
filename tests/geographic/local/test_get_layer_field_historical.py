@@ -125,7 +125,7 @@ def test_source(records, data_path):
         date_col="eventDate",
         field="dptos",
         direction="forward",
-        return_source=True
+        return_source=True,
     )
     expected = pd.Series(
         [

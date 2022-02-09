@@ -14,5 +14,5 @@ def values():
 
 def test_iqr(values):
     result = _is_iqr_outlier(values)
-    expected = np.array([False, False, False, False, False, False,  True, True])
+    expected = np.array([False, False, False, False, False, False, True, True])
     np.testing.assert_array_equal(result, expected)

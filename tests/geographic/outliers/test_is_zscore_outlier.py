@@ -14,17 +14,17 @@ def values():
 
 def test_zscore(values):
     result = _is_zscore_outlier(values)
-    expected = np.array([False, False, False, False, False, False,  True, False])
+    expected = np.array([False, False, False, False, False, False, True, False])
     np.testing.assert_array_equal(result, expected)
 
 
 def test_zscore_smaller_threshold(values):
     result = _is_zscore_outlier(values, threshold=1.0)
-    expected = np.array([False, False, False, False, False, False,  True, True])
+    expected = np.array([False, False, False, False, False, False, True, True])
     np.testing.assert_array_equal(result, expected)
 
 
 def test_zscore_greater_threshold(values):
     result = _is_zscore_outlier(values, threshold=3.0)
-    expected = np.array([False, False, False, False, False, False,  False, False])
+    expected = np.array([False, False, False, False, False, False, False, False])
     np.testing.assert_array_equal(result, expected)

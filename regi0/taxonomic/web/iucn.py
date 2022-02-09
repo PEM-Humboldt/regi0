@@ -49,7 +49,7 @@ def get_common_names(
     token: str,
     add_supplied_names: bool = False,
     add_source: bool = False,
-    expand: bool = True
+    expand: bool = True,
 ):
     """
     Gets common names for multiple species using the IUCN API.
@@ -108,7 +108,7 @@ def get_country_occurrence(
     token: str,
     add_supplied_names: bool = False,
     add_source: bool = False,
-    expand: bool = True
+    expand: bool = True,
 ) -> pd.DataFrame:
     """
     Gets country occurrence and related information for multiple species
@@ -146,9 +146,12 @@ def get_country_occurrence(
         response = _request(urljoin(endpoint, name), token)
         if response.json().get("result"):
             temp_df = pd.DataFrame(response.json()["result"])
-            result = pd.Series({
-                field: values for field, values in zip(temp_df.columns, temp_df.T.values)
-            })
+            result = pd.Series(
+                {
+                    field: values
+                    for field, values in zip(temp_df.columns, temp_df.T.values)
+                }
+            )
         else:
             result = pd.Series([], dtype="object")
         df = df.append(pd.Series(result), ignore_index=True)
@@ -168,7 +171,7 @@ def get_species_info(
     token: str,
     add_supplied_names: bool = False,
     add_source: bool = False,
-    expand: bool = True
+    expand: bool = True,
 ) -> pd.DataFrame:
     """
     Gets IUCN category and miscellaneous information for multiple species

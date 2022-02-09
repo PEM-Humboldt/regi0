@@ -21,5 +21,5 @@ def records(data_path):
         "decimalLatitude",
         crs="epsg:4326",
         drop_empty_coords=True,
-        reset_index=True
+        reset_index=True,
     )
