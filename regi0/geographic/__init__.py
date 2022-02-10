@@ -6,3 +6,4 @@ from regi0.geographic.local import (
     intersects_layer_historical,
 )
 from regi0.geographic.outliers import find_value_outliers
+from regi0.geographic.web import arcgis
