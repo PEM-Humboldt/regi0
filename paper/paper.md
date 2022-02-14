@@ -22,9 +22,12 @@ bibliography: paper.bib
 # Summary
 `regi0` (pronounced re-hyoh) is a Python library to complement and verify existing geographic and taxonomic
 information from biological records. Relying on user-provided data or third party APIs, it offers functions
-to extract information based on each record's scientific name and coordinates. Furthermore, `regi0` provides 
-a verification function that compares existing values in a dataset with extracted (*i.e.* expected) values, 
-flagging the records that do not match and adding new suggested values.
+to extract information (*e.g.* country of occurrence or higher-level taxonomic classification) based on each
+record's coordinates and scientific name. Furthermore, `regi0` provides a verification function that compares 
+existing values in a dataset with extracted (*i.e.* expected) ones, flagging those records that do not match
+and adding new suggested values. `regi0` aims to give its users the ability to complete datasets and create 
+flexible verification workflows in order to assess their quality before carrying out further analysis or 
+uploading them to biodiversity information repositories.
 
 # Statement of need
 
