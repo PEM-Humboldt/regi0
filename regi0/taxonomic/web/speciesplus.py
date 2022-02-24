@@ -62,7 +62,7 @@ def get_taxon_concepts(
     token : str
         Species+/CITES checklist API authentication token.
     add_supplied_names : bool
-        Add supplied scientific names column to the resulting DataFrame.
+        Add supplied scientific names to the resulting DataFrame.
     add_source : bool
         Add source column to the resulting DataFrame.
     expand : bool
