@@ -114,7 +114,7 @@ def get_classification(
     names : list, Series or str
         Scientific name(s) to get results for.
     add_supplied_names : bool
-        Add supplied scientific names column to the resulting DataFrame.
+        Add supplied scientific names to the resulting DataFrame.
     add_source : bool
         Add source column to the resulting DataFrame.
     expand : bool
@@ -138,25 +138,33 @@ def get_classification(
 
     ranks = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
     df = pd.DataFrame(columns=ranks, index=result.index)
-    rank_indices = result["classification_path_ranks"].str.split("|", expand=True)
-    path_indices = result["classification_path"].str.split("|", expand=True)
 
-    for rank in ranks:
-        # The GNR API result might have duplicated ranks for one or more
-        # items. Thus, duplicated ranks are removed and only the value for
-        # first the appearance is kept.
-        rank_idx = np.nonzero(rank_indices.values == rank)
-        unique_idx = np.unique(rank_idx[0], return_index=True)[1]
-        new_idx = np.column_stack(rank_idx)[unique_idx]
-        rank_idx = tuple(new_idx.T)
-        rank_paths = path_indices.values[rank_idx]
-        df.loc[(rank_indices == rank).any(axis=1), rank] = rank_paths
+    if (
+        "classification_path_ranks" in result.columns
+        and "classification_path" in result.columns
+    ):
+        rank_indices = result["classification_path_ranks"].str.split("|", expand=True)
+        path_indices = result["classification_path"].str.split("|", expand=True)
+
+        for rank in ranks:
+            # The GNR API result might have duplicated ranks for one or more
+            # items. Thus, duplicated ranks are removed and only the value for
+            # first the appearance is kept.
+            rank_idx = np.nonzero(rank_indices.values == rank)
+            unique_idx = np.unique(rank_idx[0], return_index=True)[1]
+            new_idx = np.column_stack(rank_idx)[unique_idx]
+            rank_idx = tuple(new_idx.T)
+            rank_paths = path_indices.values[rank_idx]
+            df.loc[(rank_indices == rank).any(axis=1), rank] = rank_paths
 
     df = df.replace("", np.nan)
     if add_supplied_names:
         df["supplied_name"] = unique_names
     if add_source:
-        df["source"] = result["data_source_title"]
+        if "data_source_title" in result.columns:
+            df["source"] = result["data_source_title"]
+        else:
+            df["source"] = np.nan
     if kwargs.get("best_match_only"):
         if expand:
             df = expand_result(df, names)
