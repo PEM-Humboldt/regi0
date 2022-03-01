@@ -78,6 +78,34 @@ class SuccessResponse(requests.Response):
         }
 
 
+class NoResult(requests.Response):
+    def __init__(self):
+        super().__init__()
+        self.status_code = 200
+
+    def json(self, **kwargs):
+        return {
+            "id": "36k7il84rs0a",
+            "url": "http://resolver.globalnames.org/name_resolvers/36k7il84rs0a.json",
+            "data_sources": [{"id": 5, "title": "Index Fungorum (Species Fungorum)"}],
+            "data": [
+                {"supplied_name_string": "Ceroxylon sasaimae", "is_known_name": False}
+            ],
+            "status": "success",
+            "message": "Success",
+            "parameters": {
+                "with_context": False,
+                "header_only": False,
+                "with_canonical_ranks": False,
+                "with_vernaculars": False,
+                "best_match_only": False,
+                "data_sources": [5],
+                "preferred_data_sources": [],
+                "resolve_once": False,
+            },
+        }
+
+
 class BadRequest(requests.Response):
     def __init__(self):
         super().__init__()
@@ -87,6 +115,11 @@ class BadRequest(requests.Response):
 @pytest.fixture()
 def success(monkeypatch):
     monkeypatch.setattr(requests, "post", lambda *args, **kwargs: SuccessResponse())
+
+
+@pytest.fixture()
+def no_result(monkeypatch):
+    monkeypatch.setattr(requests, "post", lambda *args, **kwargs: NoResult())
 
 
 @pytest.fixture()

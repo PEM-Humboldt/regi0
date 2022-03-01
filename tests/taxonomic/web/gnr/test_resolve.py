@@ -53,6 +53,12 @@ def test_success(success):
     pd.testing.assert_frame_equal(result, expected)
 
 
+def test_no_result(no_result):
+    result = resolve("Ceroxylon sasaimae", data_source_ids=["5"])
+    expected = pd.DataFrame({"supplied_name_string": ["Ceroxylon sasaimae"]})
+    pd.testing.assert_frame_equal(result, expected)
+
+
 def test_bad_request(bad_request):
     with pytest.raises(Exception):
         resolve(["Panthera onca", "Tremarctos ornatus"], data_source_ids=["1"])

@@ -1,6 +1,7 @@
 """
 Test cases for the regi0.taxonomic.web.gnr.get_classification function.
 """
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -65,6 +66,29 @@ def test_add_source(success):
         }
     )
     pd.testing.assert_frame_equal(result, expected)
+
+
+def test_no_result(no_result):
+    result = get_classification(
+        ["Ceroxylon sasaimae"],
+        data_source_ids=["5"],
+        add_supplied_names=True,
+        add_source=True,
+    )
+    expected = pd.DataFrame(
+        {
+            "kingdom": [np.nan],
+            "phylum": [np.nan],
+            "class": [np.nan],
+            "order": [np.nan],
+            "family": [np.nan],
+            "genus": [np.nan],
+            "species": [np.nan],
+            "supplied_name": ["Ceroxylon sasaimae"],
+            "source": [np.nan],
+        }
+    )
+    pd.testing.assert_frame_equal(result, expected, check_dtype=False)
 
 
 def test_bad_request(bad_request):
