@@ -49,7 +49,7 @@ def test_error(records, error):
         )
 
 
-def test_bad_request(records, error):
+def test_bad_request(records, bad_request):
     with pytest.raises(Exception):
         intersects_feature_layer(
             records,
