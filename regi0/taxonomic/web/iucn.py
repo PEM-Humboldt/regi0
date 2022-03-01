@@ -45,10 +45,9 @@ def _request(url: str, token: str) -> requests.Response:
 
 
 def get_common_names(
-    names: pd.Series,
+    names: Union[list, pd.Series, str],
     token: str,
     add_supplied_names: bool = False,
-    add_source: bool = False,
     expand: bool = True,
 ):
     """
@@ -61,9 +60,7 @@ def get_common_names(
     token : str
         IUCN API authentication token.
     add_supplied_names : bool
-        Add supplied scientific names column to the resulting DataFrame.
-    add_source : bool
-        Add source column to the resulting DataFrame.
+        Add supplied scientific names to the resulting DataFrame.
     expand : bool
         Whether to expand result rows to match `names` size. If False,
         the number of rows will correspond to the number of unique names
@@ -88,15 +85,13 @@ def get_common_names(
             result = defaultdict(list)
             for item in response.json().get("result"):
                 result[item["language"]].append(item["taxonname"])
-            result = pd.Series(result)
+            result = pd.Series(result).str.join("|")
         else:
             result = pd.Series([], dtype="object")
         df = df.append(result, ignore_index=True)
 
     if add_supplied_names:
         df["supplied_name"] = unique_names
-    if add_source:
-        df["source"] = "IUCN"
     if expand:
         df = expand_result(df, names)
 
@@ -104,10 +99,9 @@ def get_common_names(
 
 
 def get_country_occurrence(
-    names: pd.Series,
+    names: Union[list, pd.Series, str],
     token: str,
     add_supplied_names: bool = False,
-    add_source: bool = False,
     expand: bool = True,
 ) -> pd.DataFrame:
     """
@@ -121,9 +115,7 @@ def get_country_occurrence(
     token : str
         IUCN API authentication token.
     add_supplied_names : bool
-        Add supplied scientific names column to the resulting DataFrame.
-    add_source : bool
-        Add source column to the resulting DataFrame.
+        Add supplied scientific names to the resulting DataFrame.
     expand : bool
         Whether to expand result rows to match `names` size. If False,
         the number of rows will correspond to the number of unique names
@@ -152,14 +144,13 @@ def get_country_occurrence(
                     for field, values in zip(temp_df.columns, temp_df.T.values)
                 }
             )
+            result = result.str.join("|")
         else:
             result = pd.Series([], dtype="object")
         df = df.append(pd.Series(result), ignore_index=True)
 
     if add_supplied_names:
         df["supplied_name"] = unique_names
-    if add_source:
-        df["source"] = "IUCN"
     if expand:
         df = expand_result(df, names)
 
@@ -170,7 +161,6 @@ def get_species_info(
     names: Union[list, pd.Series, str],
     token: str,
     add_supplied_names: bool = False,
-    add_source: bool = False,
     expand: bool = True,
 ) -> pd.DataFrame:
     """
@@ -184,9 +174,7 @@ def get_species_info(
     token : str
         IUCN API authentication token.
     add_supplied_names : bool
-        Add supplied scientific names column to the resulting DataFrame.
-    add_source : bool
-        Add source column to the resulting DataFrame.
+        Add supplied scientific names to the resulting DataFrame.
     expand : bool
         Whether to expand result rows to match `names` size. If False,
         the number of rows will correspond to the number of unique names
@@ -215,8 +203,6 @@ def get_species_info(
 
     if add_supplied_names:
         df["supplied_name"] = unique_names
-    if add_source:
-        df["source"] = "IUCN"
     if expand:
         df = expand_result(df, names)
 
