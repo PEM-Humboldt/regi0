@@ -107,12 +107,13 @@ def resolve(
     df = pd.json_normalize(data, record_path="results", meta="supplied_name_string")
 
     if expand:
-        if best_match_only or len(data_source_ids) == 1:
+        if best_match_only:
             df = expand_result(df, names)
         else:
             warnings.warn(
-                "Result will not be expanded. Make sure best_match_only is True or that "
-                "only one data source id is passed for the result to be expanded."
+                "Result will not be expanded because there might be multiple results for"
+                " each species. Make sure best_match_only is True for the result to be "
+                "expanded."
             )
 
     return df
