@@ -3,6 +3,7 @@ Wrappers for GNR API calls and derived functions.
 
 API documentation can be found at: http://resolver.globalnames.org/api
 """
+import warnings
 from typing import Union
 
 import numpy as np
@@ -22,6 +23,7 @@ def resolve(
     with_context: bool = False,
     with_vernaculars: bool = False,
     with_canonical_ranks: bool = False,
+    expand: bool = True,
 ) -> pd.DataFrame:
     """
     Receives a list of names and resolves each against the entire resolver
@@ -54,6 +56,11 @@ def resolve(
     with_canonical_ranks : bool
         Returns 'canonical_form' with infraspecific ranks, if they are
         present.
+    expand : bool
+        Whether to expand result rows to match `names` size. If False, the
+        number of rows will correspond to the number of unique names in
+        `names`. Only has effect if best_match_only=True or if only one
+         data source id is passed.
 
     Returns
     -------
@@ -61,15 +68,17 @@ def resolve(
         DataFrame where rows are the result for each match.
 
     """
-    if isinstance(names, str):
-        names = [names]
+    if isinstance(names, (list, str)):
+        names = pd.Series(names)
     if data_source_ids is None:
         data_source_ids = []
+
+    unique_names = names.dropna().unique()
 
     # Apparently, the GNR API does not accept Booleans so they need to be
     # converted to lowercase strings first.
     params = {
-        "data": "\n".join(names),
+        "data": "\n".join(unique_names),
         "data_source_ids": "|".join(data_source_ids),
         "resolve_once": str(resolve_once).lower(),
         "best_match_only": str(best_match_only).lower(),
@@ -95,7 +104,18 @@ def resolve(
         if "results" not in item:
             item["results"] = [{}]
 
-    return pd.json_normalize(data, record_path="results", meta="supplied_name_string")
+    df = pd.json_normalize(data, record_path="results", meta="supplied_name_string")
+
+    if expand:
+        if best_match_only or len(data_source_ids) == 1:
+            df = expand_result(df, names)
+        else:
+            warnings.warn(
+                "Result will not be expanded. Make sure best_match_only is True or that "
+                "only one data source id is passed for the result to be expanded."
+            )
+
+    return df
 
 
 def get_classification(
@@ -120,7 +140,8 @@ def get_classification(
     expand : bool
         Whether to expand result rows to match `names` size. If False, the
         number of rows will correspond to the number of unique names in
-        `names`. Only has effect if best_match_only=True is passed.
+        `names`. Only has effect if best_match_only=True or if only one
+         data source id is passed.
     **kwargs
         Keyword arguments of the resolve function.
 
@@ -133,9 +154,7 @@ def get_classification(
     if isinstance(names, (list, str)):
         names = pd.Series(names)
 
-    unique_names = pd.Series(names.dropna().unique())
-    result = resolve(unique_names, **kwargs)
-
+    result = resolve(names, expand=expand, **kwargs)
     ranks = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
     df = pd.DataFrame(columns=ranks, index=result.index)
 
@@ -157,16 +176,11 @@ def get_classification(
             rank_paths = path_indices.values[rank_idx]
             df.loc[(rank_indices == rank).any(axis=1), rank] = rank_paths
 
-    df = df.replace("", np.nan)
     if add_supplied_names:
-        df["supplied_name"] = unique_names
+        df["supplied_name"] = result.get("supplied_name_string")
     if add_source:
-        if "data_source_title" in result.columns:
-            df["source"] = result["data_source_title"]
-        else:
-            df["source"] = np.nan
-    if kwargs.get("best_match_only"):
-        if expand:
-            df = expand_result(df, names)
+        df["source"] = result.get("data_source_title")
+
+    df = df.replace(["", None], np.nan)
 
     return df
