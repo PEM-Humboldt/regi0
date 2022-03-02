@@ -14,6 +14,7 @@ def test_success(success):
         data_source_ids=["1"],
         add_supplied_names=True,
         add_source=True,
+        expand=False,
     )
     expected = pd.DataFrame(
         {
@@ -37,6 +38,7 @@ def test_no_result(no_result):
         data_source_ids=["5"],
         add_supplied_names=True,
         add_source=True,
+        expand=False,
     )
     expected = pd.DataFrame(
         {
@@ -57,5 +59,5 @@ def test_no_result(no_result):
 def test_bad_request(bad_request):
     with pytest.raises(Exception):
         get_classification(
-            ["Panthera onca", "Tremarctos ornatus"], data_source_ids=["1"]
+            ["Panthera onca", "Tremarctos ornatus"], data_source_ids=["1"], expand=False
         )

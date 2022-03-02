@@ -13,6 +13,7 @@ def test_success(success):
         "Herpailurus yagouaroundi",
         token="bsgkp2kagTzJdQuywXnefAbc",
         add_supplied_names=True,
+        expand=False,
     )
     expected = pd.DataFrame(
         {
@@ -36,8 +37,7 @@ def test_success(success):
 
 def test_no_result(no_result):
     result = get_taxon_concept(
-        "Ceroxylon sasaimae",
-        token="bsgkp2kagTzJdQuywXnefAbc",
+        "Ceroxylon sasaimae", token="bsgkp2kagTzJdQuywXnefAbc", expand=False
     )
     expected = pd.DataFrame(
         {
@@ -53,4 +53,6 @@ def test_no_result(no_result):
 
 def test_unauthorized(unauthorized):
     with pytest.raises(Exception):
-        get_taxon_concept("Herpailurus yagouaroundi", token="csgkp2kagTzJdQuywXnefAbz")
+        get_taxon_concept(
+            "Herpailurus yagouaroundi", token="csgkp2kagTzJdQuywXnefAbz", expand=False
+        )

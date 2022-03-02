@@ -106,7 +106,7 @@ def success(monkeypatch):
 
 def test_success(success):
     result = get_country_occurrence(
-        "Bradypus variegatus", token="221e3t9", add_supplied_names=True
+        "Bradypus variegatus", token="221e3t9", add_supplied_names=True, expand=False
     )
     expected = pd.DataFrame(
         {
@@ -131,11 +131,11 @@ def test_success(success):
 
 def test_no_result(no_result):
     result = get_country_occurrence(
-        "Ceroxylon sasaimae", token="221e3t9", add_supplied_names=True
+        "Ceroxylon sasaimae", token="221e3t9", add_supplied_names=True, expand=False
     )
     expected = pd.DataFrame({"supplied_name": ["Ceroxylon sasaimae"]})
     pd.testing.assert_frame_equal(result, expected)
 
 def test_unauthorized(unauthorized):
     with pytest.raises(Exception):
-        get_country_occurrence("Bradypus variegatus", token="551f4z6")
+        get_country_occurrence("Bradypus variegatus", token="551f4z6", expand=False)
