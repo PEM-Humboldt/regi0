@@ -1,5 +1,5 @@
 regi0
-=========
+=====
 
 .. autofunction:: regi0.match
 .. autofunction:: regi0.read_geographic_table

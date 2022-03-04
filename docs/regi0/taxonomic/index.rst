@@ -1,5 +1,5 @@
 regi0.taxonomic
-====================
+===============
 
 .. autofunction:: regi0.taxonomic.get_canonical_name
 .. autofunction:: regi0.taxonomic.get_checklist_fields
