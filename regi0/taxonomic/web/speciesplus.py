@@ -14,10 +14,9 @@ from .._helpers import expand_result
 API_URL = "https://api.speciesplus.net/api/v1/"
 
 
-def _request(url: str, token: str, params: dict) -> requests.Response:
+def _request(url: str, token: str, params: dict = None) -> requests.Response:
     """
-    Creates a request for the Species+/CITES checklist API and handles
-    HTTP exceptions.
+    Creates a request for the Species+/CITES checklist API.
 
     Parameters
     ----------
@@ -30,7 +29,7 @@ def _request(url: str, token: str, params: dict) -> requests.Response:
 
     Returns
     -------
-    requests.Response
+    Response
         Request response.
 
     """
@@ -47,8 +46,10 @@ def get_distributions(
     language: str = "EN",
     add_supplied_ids: bool = False,
     expand: bool = True,
-):
+) -> pd.DataFrame:
     """
+    Get species distributions (i.e. country occurrences) for multiple
+    taxon concept IDs.
 
     Parameters
     ----------
@@ -85,6 +86,71 @@ def get_distributions(
             response = _request(endpoint, token, {"language": language})
             temp_df = pd.DataFrame(response.json())
             temp_df = temp_df.drop(columns=["tags", "references"])
+            temp_df = temp_df.astype(str)
+            result = pd.Series(
+                {
+                    field: values
+                    for field, values in zip(temp_df.columns, temp_df.T.values)
+                }
+            )
+            result = result.str.join("|")
+        except requests.HTTPError as err:
+            if err.response.status_code == 500:
+                result = pd.Series([], dtype="object")
+            else:
+                raise requests.HTTPError(err)
+
+        df = df.append(pd.Series(result), ignore_index=True)
+
+    if add_supplied_ids:
+        df["supplied_id"] = unique_ids
+    if expand:
+        df = expand_result(df, ids)
+
+    return df
+
+
+def get_references(
+    ids: Union[float, int, list, pd.Series, str],
+    token: str,
+    add_supplied_ids: bool = False,
+    expand: bool = True,
+) -> pd.DataFrame:
+    """
+    Get references for multiple taxon concept IDs.
+
+    Parameters
+    ----------
+    ids : float, int, list, pd.Series, str
+        Taxon concept ID(s) to get results for. A convenient way of
+        retrieving these IDs for one or multiple scientific names is
+        using the get_taxon_concept function, which returns an id column.
+    token : Species+/CITES checklist API authentication token.
+        Species+/CITES checklist API authentication token.
+    add_supplied_ids : bool
+        Add supplied taxon_concept_ids to the resulting DataFrame.
+    expand : bool
+        Whether to expand result rows to match `names` size. If False,
+        the number of rows will correspond to the number of unique names
+        in `names`.
+
+    Returns
+    -------
+    DataFrame
+        DataFrame with references information.
+
+    """
+    if isinstance(ids, (float, int, list, str)):
+        ids = pd.Series(ids)
+
+    df = pd.DataFrame()
+
+    unique_ids = ids.dropna().unique()
+    for _id in unique_ids:
+        endpoint = urljoin(API_URL, f"taxon_concepts/{int(_id)}/references")
+        try:
+            response = _request(endpoint, token)
+            temp_df = pd.DataFrame(response.json())
             temp_df = temp_df.astype(str)
             result = pd.Series(
                 {
