@@ -64,7 +64,7 @@ def test_success(success):
     )
     expected = pd.DataFrame(
         {
-            "taxonid": [198676562.0],
+            "taxonid": [198676562],
             "scientific_name": ["Alouatta seniculus"],
             "kingdom": ["ANIMALIA"],
             "phylum": ["CHORDATA"],
@@ -99,7 +99,7 @@ def test_success(success):
             "supplied_name": ["Alouatta seniculus"],
         }
     )
-    pd.testing.assert_frame_equal(result, expected)
+    pd.testing.assert_frame_equal(result, expected, check_dtype=False)
 
 
 def test_no_result(no_result):
