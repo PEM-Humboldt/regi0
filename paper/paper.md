@@ -27,8 +27,8 @@ record's coordinates and scientific name. Furthermore, `regi0` provides a verifi
 existing values in a dataset with extracted (*i.e.* expected) ones, flagging those records that do not match
 and adding new suggested values. `regi0` aims to give its users the ability to complete datasets and create 
 flexible verification workflows in order to assess their quality before carrying out further analysis or 
-uploading them to biodiversity information repositories. `regi0` is a name composed by the root of the word 
-'record' in spanish (Regi) and the number zero (0) that refers to the initial state of the primary biodiversity data. 
+uploading them to biodiversity information repositories. Regi0's name comes from a wordplay between *registro*
+(record in spanish) and the number zero, which refers to the initial state of the primary biodiversity data.
 
 # Statement of need
 `regi0` arises from the Alexander von Humboldt Biological Resources Research Institute, which is the biodiversity 
