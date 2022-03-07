@@ -16,8 +16,8 @@ Using `conda`:
 conda install -c conda-forge
 ```
 
-## Ejecución
-To check whether the installation of `wiutils` was succesful, execute the following command:
+## Execution
+To check whether the installation of `wiutils` was successful, execute the following command:
 
 ```shell
 python -c "import regi0"
@@ -45,14 +45,14 @@ cd regi0
 pip install --editable .[dev,docs,test]
 ```
 
-Considering `regi0` has dependencies such as `fiona` and `rasterio`, which may require additional installation steps to the ones described above (see [1] and [2]), it is also recommended using a [`conda` virtual environemnent](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to install it and avoid having to manually install other dependencies.
+Considering `regi0` has dependencies such as `fiona` and `rasterio`, which may require additional installation steps to the ones described above (see [1] and [2]), it is also recommended using a [`conda` virtual environment](https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html) to install it and avoid having to manually install other dependencies.
 
 1. Go to the project's root and create the `conda` virtual environment:
 ```shell
 conda env create -f environment.yml
 ```
 
-2. Activate the `conda` virutal environment:
+2. Activate the `conda` virtual environment:
 ```shell
 conda activate regi0-dev
 ```
