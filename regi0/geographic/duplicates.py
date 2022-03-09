@@ -53,7 +53,12 @@ def _create_id_grid(
     height = np.ceil((ymax - ymin) / resolution).astype(int)
     width = np.ceil((xmax - xmin) / resolution).astype(int)
     transform = rasterio.transform.from_origin(xmin, ymax, resolution, resolution)
-    arr = np.arange(height * width, dtype=np.uint32).reshape(height, width)
+
+    # The unique ID values to fill the grid with start from 1 to make sure
+    # the value 0 is reserved for no-data and that the whole numeric range
+    # of a 32-bit unsigned integer is available for IDs (in the very
+    # unlikely case this is needed).
+    arr = np.arange(1, (height * width) + 1, dtype=np.uint32).reshape(height, width)
 
     memfile = rasterio.MemoryFile()
     grid = memfile.open(
@@ -64,6 +69,7 @@ def _create_id_grid(
         crs=crs,
         transform=transform,
         dtype=rasterio.uint32,
+        nodata=0,
     )
     grid.write(arr, 1)
 
@@ -116,7 +122,7 @@ def find_grid_duplicates(
         bounds = gdf.geometry.total_bounds
     grid = _create_id_grid(*bounds, resolution, gdf.crs.srs)
     gdf["__grid_id"] = rasterstats.point_query(
-        gdf, grid.read(1), affine=grid.transform, interpolate="nearest", nodata=-9999
+        gdf, grid.read(1), affine=grid.transform, interpolate="nearest", nodata=0
     )
     result = gdf.duplicated(subset=[species_col, "__grid_id"], keep=keep)
 
