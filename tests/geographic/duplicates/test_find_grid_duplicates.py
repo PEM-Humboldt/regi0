@@ -1,6 +1,7 @@
 """
 Test cases for the regi0.geographic.duplicates.find_grid_duplicates function.
 """
+import numpy as np
 import pandas as pd
 
 from regi0.geographic.duplicates import find_grid_duplicates
@@ -68,10 +69,10 @@ def test_other_bounds_low_res(records):
             True,
             True,
             False,
-            True,
+            np.nan,
             False,
             False,
-            True,
+            np.nan,
         ]
     )
     pd.testing.assert_series_equal(result, expected, check_dtype=False)
