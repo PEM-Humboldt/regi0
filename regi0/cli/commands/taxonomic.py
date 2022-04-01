@@ -132,7 +132,7 @@ def tax(
         mask = records[config.get("flagnames", "species")].astype("boolean")
         accepted_names = records.loc[mask, config.get("suggestednames", "canonical")]
         suggested_names = records.loc[~mask, config.get("suggestednames", "species")]
-        nans = records[config.get("flagnames", "species")].isna()
+        nans = records.loc[records[config.get("flagnames", "species")].isna(), config.get("suggestednames", "species")]
         names = pd.concat([accepted_names, suggested_names, nans]).sort_index()
 
         if "all" in category:
