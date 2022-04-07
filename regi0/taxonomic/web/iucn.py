@@ -7,6 +7,7 @@ from collections import defaultdict
 from typing import Union
 from urllib.parse import urljoin
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -45,7 +46,7 @@ def _request(url: str, token: str) -> requests.Response:
 
 
 def get_common_names(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     token: str,
     add_supplied_names: bool = False,
     expand: bool = True,
@@ -55,7 +56,7 @@ def get_common_names(
 
     Parameters
     ----------
-    names : list, Series or str
+    names : list, array, Series or str
         Scientific name(s) to get results for.
     token : str
         IUCN API authentication token.
@@ -72,7 +73,7 @@ def get_common_names(
         DataFrame with common names.
 
     """
-    if isinstance(names, (list, str)):
+    if isinstance(names, (list, str, np.ndarray)):
         names = pd.Series(names)
 
     endpoint = urljoin(API_URL, "species/common_names/")
@@ -99,7 +100,7 @@ def get_common_names(
 
 
 def get_country_occurrence(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     token: str,
     add_supplied_names: bool = False,
     expand: bool = True,
@@ -110,7 +111,7 @@ def get_country_occurrence(
 
     Parameters
     ----------
-    names : list, Series or str
+    names : list, array, Series or str
         Scientific name(s) to get results for.
     token : str
         IUCN API authentication token.
@@ -127,7 +128,7 @@ def get_country_occurrence(
         DataFrame with information about country occurrence for each name.
 
     """
-    if isinstance(names, (list, str)):
+    if isinstance(names, (list, str, np.ndarray)):
         names = pd.Series(names)
 
     endpoint = urljoin(API_URL, "species/countries/name/")
@@ -158,7 +159,7 @@ def get_country_occurrence(
 
 
 def get_species_info(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     token: str,
     add_supplied_names: bool = False,
     expand: bool = True,
@@ -169,7 +170,7 @@ def get_species_info(
 
     Parameters
     ----------
-    names : list, Series or str
+    names : list, array, Series or str
         Scientific name(s) to get results for.
     token : str
         IUCN API authentication token.
@@ -186,7 +187,7 @@ def get_species_info(
         DataFrame with IUCN species information for each name.
 
     """
-    if isinstance(names, (list, str)):
+    if isinstance(names, (list, str, np.ndarray)):
         names = pd.Series(names)
 
     endpoint = urljoin(API_URL, "species/")

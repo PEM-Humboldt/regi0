@@ -6,6 +6,7 @@ API documentation can be found at: http://api.speciesplus.net/documentation
 from typing import Union
 from urllib.parse import urljoin
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -176,7 +177,7 @@ def get_references(
 
 
 def get_taxon_concept(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     token: str,
     language: Union[str, list] = "EN",
     add_supplied_names: bool = False,
@@ -188,7 +189,7 @@ def get_taxon_concept(
 
     Parameters
     ----------
-    names : list, Series or str
+    names : list, array, Series or str
         Scientific name(s) to get results for.
     token : str
         Species+/CITES checklist API authentication token.
@@ -209,7 +210,7 @@ def get_taxon_concept(
         DataFrame with taxon concept information.
 
     """
-    if isinstance(names, (list, str)):
+    if isinstance(names, (list, str, np.ndarray)):
         names = pd.Series(names)
 
     if isinstance(language, str):
