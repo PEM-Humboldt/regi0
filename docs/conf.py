@@ -18,7 +18,7 @@ copyright = "2020-2022, Programa de Evaluación y Monitoreo de la Biodiversidad 
 author = "Marcelo Villa-Piñeros"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.3"
+release = "0.2.4"
 
 
 # -- General configuration ---------------------------------------------------
