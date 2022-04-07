@@ -16,7 +16,7 @@ API_URL = "http://resolver.globalnames.org/name_resolvers.json"
 
 
 def resolve(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     data_source_ids: list = None,
     resolve_once: bool = False,
     best_match_only: bool = False,
@@ -33,8 +33,8 @@ def resolve(
 
     Parameters
     ----------
-    names : list, Series or str
-        List of species names to resolve.
+    names : list, array, Series or str
+        Scientific name(s) to get results for.
     data_source_ids : list
         List of specific data sources IDs to resolve against. A list of
         all the available data sources and their IDs can be found at:
@@ -68,7 +68,7 @@ def resolve(
         DataFrame where rows are the result for each match.
 
     """
-    if isinstance(names, (list, str)):
+    if isinstance(names, (list, str, np.ndarray)):
         names = pd.Series(names)
     if data_source_ids is None:
         data_source_ids = []
@@ -125,7 +125,7 @@ def resolve(
 
 
 def get_classification(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     add_supplied_names: bool = False,
     add_source: bool = False,
     expand: bool = True,
@@ -137,7 +137,7 @@ def get_classification(
 
     Parameters
     ----------
-    names : list, Series or str
+    names : list, array, Series or str
         Scientific name(s) to get results for.
     add_supplied_names : bool
         Add supplied scientific names to the resulting DataFrame.
@@ -157,7 +157,7 @@ def get_classification(
         DataFrame with the ranks for each match.
 
     """
-    if isinstance(names, (list, str)):
+    if isinstance(names, (list, str, np.ndarray)):
         names = pd.Series(names)
 
     result = resolve(names, expand=expand, **kwargs)

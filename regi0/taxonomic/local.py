@@ -4,6 +4,7 @@ Functions for local taxonomic verifications.
 import pathlib
 from typing import Union
 
+import numpy as np
 import pandas as pd
 
 from ..readers import read_table
@@ -23,8 +24,8 @@ def get_checklist_fields(
 
     Parameters
     ----------
-    names : Series
-        Series with species names.
+    names : list, array, Series or str
+        Scientific name(s) to get results for.
     checklist : str, Path or DataFrame
         Path to table or DataFrame wih checklist information.
     name_field : str
@@ -50,7 +51,7 @@ def get_checklist_fields(
     if not isinstance(checklist, pd.DataFrame):
         checklist = read_table(checklist)
 
-    if isinstance(names, (list, str)):
+    if isinstance(names, (list, str, np.ndarray)):
         names = pd.Series(names)
     names.name = "supplied_name"
     if isinstance(fields, str):
@@ -74,7 +75,7 @@ def get_checklist_fields(
 
 
 def get_checklist_fields_multiple(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     filenames: list,
     name_field: str,
     fields: Union[list, str],
@@ -91,8 +92,8 @@ def get_checklist_fields_multiple(
 
     Parameters
     ----------
-    names
-        Series with species names.
+    names : list, array, Series or str
+        Scientific name(s) to get results for.
     filenames
         List of checklist file names.
     name_field
@@ -140,7 +141,7 @@ def get_checklist_fields_multiple(
 
 
 def is_in_checklist(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     checklist: pd.DataFrame,
     name_field: str,
     add_supplied_names: bool = False,
@@ -151,8 +152,8 @@ def is_in_checklist(
 
     Parameters
     ----------
-    names
-        Series with species names.
+    names : list, array, Series or str
+        Scientific name(s) to get results for.
     checklist
         DataFrame wih checklist information.
     name_field
@@ -171,7 +172,7 @@ def is_in_checklist(
         present in `checklist`. If add_supplied_names=True is passed, the
         result will have an extra column.
     """
-    if isinstance(names, (list, str)):
+    if isinstance(names, (list, str, np.ndarray)):
         names = pd.Series(names)
     names.name = "supplied_name"
 
@@ -192,7 +193,7 @@ def is_in_checklist(
 
 
 def is_in_checklist_multiple(
-    names: Union[list, pd.Series, str],
+    names: Union[list, np.ndarray, pd.Series, str],
     filenames: list,
     name_field: str,
     add_supplied_names: bool = False,
@@ -206,8 +207,8 @@ def is_in_checklist_multiple(
 
     Parameters
     ----------
-    names
-        Series with species names.
+    names : list, array, Series or str
+        Scientific name(s) to get results for.
     filenames
         List of checklist file names.
     name_field
