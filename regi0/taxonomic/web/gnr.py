@@ -99,10 +99,15 @@ def resolve(
     # is not found in every single item inside the list of elements
     # passed. In some cases, the GNR API returns items without this key,
     # so it needs to be added (including an empty dictionary) before
-    # normalizing the result.
+    # normalizing the result. Furthermore, there are some cases where
+    # the GNR API returns items with this key but the list contains just
+    # a None value, which causes pd.json_normalize to fail as well.
     for item in data:
         if "results" not in item:
             item["results"] = [{}]
+        else:
+            if not all(item["results"]):
+                item["results"] = [{}]
 
     df = pd.json_normalize(data, record_path="results", meta="supplied_name_string")
 
