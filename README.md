@@ -1,3 +1,7 @@
+> This repository has been deprecated. Check [data-quality-tools](https://github.com/PEM-Humboldt/data-quality-tools) for similar functionalities
+
+---
+
 # Regi0
 
 Regi0 is a Python package with useful functions to complement and verify biological records. These functions are divided into two main modules (geographic and taxonomic) and rely on both user data and several web APIs (*e.g.* GNR, IUCN and Species+).
